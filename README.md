@@ -1,12 +1,12 @@
 # MIG Flowers
 
-Storefront for MIG Flowers, a family florist. Next.js 15
-(App Router) + TypeScript + React 19.
+Storefront for MIG Flowers, a family florist. Next.js 16
+(App Router, Turbopack) + TypeScript + React 19.
 
 ```bash
 npm install
 npm run dev        # http://localhost:3000
-npm run build
+npm run build       # Turbopack
 npm run typecheck
 ```
 
