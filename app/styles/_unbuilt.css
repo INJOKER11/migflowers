@@ -1,0 +1,124 @@
+/* Unbuilt handoff primitives — NOT IMPORTED.
+   ══════════════════════════════════════════════════════════════════════════
+
+   These classes came across in the Classical design-system port but nothing on
+   the site uses them: the storefront never built a dialog, a radio group, a
+   segmented control, a labelled field, a filled tag or the bundle's bare nav
+   bar, and it uses only the small elevation and the outline tag.
+
+   They are parked here rather than deleted because the handoff bundle
+   (design_handoff_mig_flowers/styles.css) is not checked into this repo and
+   there is no git history to recover them from. Nothing imports this file, so
+   none of it ships — `app/globals.css` deliberately omits it.
+
+   To use one: cut the block back into the sheet it belongs to
+   (forms.css / ui.css / chrome.css, named in each section below) and delete it
+   from here. Do not import this file wholesale; the point is that the shipped
+   stylesheet only contains what the site actually renders.
+
+   Once this project is in git, this file can be deleted outright — history
+   becomes the recovery path. */
+
+/* ── from base.css ─────────────────────────────────────────────────────── */
+
+.text-muted { color: color-mix(in srgb, var(--color-text) 55%, transparent); }
+
+/* ── from layout.css ───────────────────────────────────────────────────── */
+
+.prose {
+  font-size: 15px;
+  line-height: 1.8;
+  color: var(--color-neutral-700);
+  text-align: justify;
+  text-wrap: pretty;
+}
+
+.meta { font-size: 12px; color: var(--color-neutral-600); }
+
+/* ── from forms.css — labelled field, radio, segmented control ─────────── */
+
+.field > label {
+  display: block; font-size: 12px; margin-bottom: 5px;
+  color: color-mix(in srgb, var(--color-text) 70%, transparent);
+}
+
+.radio { display: inline-flex; align-items: center; gap: 8px; cursor: pointer; font-size: 14px; }
+.radio input, .seg-opt input {
+  position: absolute; opacity: 0; width: 0; height: 0; pointer-events: none;
+}
+.radio .dot {
+  width: 16px; height: 16px; flex: none; border-radius: 50%;
+  border: 1.5px solid var(--color-divider);
+}
+.radio:hover .dot { border-color: var(--color-accent); }
+.radio input:checked + .dot {
+  border-color: var(--color-accent); background: var(--color-accent);
+  box-shadow: inset 0 0 0 4px var(--color-bg);
+}
+.radio input:focus-visible + .dot { outline: 2px solid var(--color-accent); outline-offset: 2px; }
+
+.seg {
+  display: inline-flex; overflow: hidden;
+  border: 1px solid var(--color-divider); border-radius: var(--radius-md);
+}
+.seg-opt {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 7px 12px; font-size: 13px; cursor: pointer;
+}
+.seg-opt + .seg-opt { border-left: 1px solid var(--color-divider); }
+.seg-opt:has(input:checked) { color: var(--color-accent); box-shadow: inset 0 0 0 1px var(--color-accent); }
+.seg-opt:not(:has(input:checked)):hover { background: color-mix(in srgb, var(--color-text) 7%, transparent); }
+.seg-opt:has(input:focus-visible) { outline: 2px solid var(--color-accent); outline-offset: -2px; }
+
+/* ── from ui.css — card interior, the two larger elevations, dialog,
+      the filled tags ──────────────────────────────────────────────────── */
+
+.card-kicker { font-size: 10px; letter-spacing: 0.1em; text-transform: uppercase; color: var(--color-accent); }
+.card-title {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 17px; line-height: 1.2;
+}
+.card-body { margin: 0; font-size: 13px; opacity: 0.8; flex: 1; }
+.card-meta {
+  display: flex; align-items: center; gap: 6px; font-size: 11px;
+  color: color-mix(in srgb, var(--color-text) 50%, transparent);
+}
+
+.elev-md { box-shadow: var(--shadow-md); }
+.elev-lg { box-shadow: var(--shadow-lg); }
+
+.tag-accent { background: var(--color-accent-100); color: var(--color-accent-800); }
+.tag-accent-2 { background: var(--color-accent-2-100); color: var(--color-accent-2-800); }
+.tag-neutral { background: var(--color-neutral-100); color: var(--color-neutral-800); }
+
+.dialog-backdrop {
+  position: fixed; inset: 0; display: grid; place-items: center;
+  padding: var(--space-4);
+  background: color-mix(in srgb, var(--color-neutral-900) 50%, transparent);
+}
+.dialog {
+  width: min(440px, 100%); display: flex; flex-direction: column; gap: var(--space-3);
+  padding: var(--space-4); border-radius: var(--radius-lg);
+  background: var(--color-surface); box-shadow: var(--shadow-lg); border: 1px solid var(--color-divider);
+}
+.dialog-title {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 20px;
+}
+.dialog-body { font-size: 14px; opacity: 0.85; }
+.dialog-actions { display: flex; justify-content: flex-end; gap: var(--space-2); margin-top: var(--space-2); }
+
+/* ── from chrome.css — the bundle's bare nav bar (the site ships its own
+      sticky .header instead) ──────────────────────────────────────────── */
+
+.nav {
+  display: flex; align-items: center; gap: var(--space-4);
+  padding: var(--space-3) var(--space-4);
+  border-bottom: 1px solid var(--color-divider);
+}
+.nav-brand {
+  font-family: var(--font-heading); font-weight: var(--font-heading-weight);
+  font-size: 18px; margin-right: auto;
+}
+.nav a { color: inherit; text-decoration: none; font-size: 14px; }
+.nav a:hover, .nav a[aria-current='page'] { color: var(--color-accent); }

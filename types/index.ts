@@ -1,0 +1,101 @@
+export type Occasion =
+  | 'День народження'
+  | 'Річниця'
+  | 'Весілля'
+  | 'Співчуття'
+  | 'Без нагоди';
+
+export type FlowerType = 'Троянди' | 'Півонії' | 'Лілії' | 'Сезонні';
+
+export type FlowerColor = 'Рожевий' | 'Білий' | 'Червоний' | 'Мікс';
+
+export type VariantSize = 'Мала' | 'Стандарт' | 'Велика';
+
+export type ProductTag = 'Хіт продажів' | 'Новинка' | 'Довго стоїть';
+
+export interface Product {
+  id: string;
+  name: string;
+  note: string;
+  price: number;
+  tag?: ProductTag;
+  img: string;
+  occasion: Occasion;
+  type: FlowerType;
+  color: FlowerColor;
+  rank: number;
+  age: number;
+}
+
+export interface CartLine {
+  product: Product;
+  qty: number;
+}
+
+export type SortKey = 'popular' | 'new' | 'low' | 'high';
+
+export type DrawerStep = 'basket' | 'checkout' | 'done';
+
+export interface Post {
+  slug: string;
+  kicker: string;
+  title: string;
+  excerpt: string;
+  meta: string;
+  img: string;
+  body: string[];
+}
+
+export interface Faq {
+  q: string;
+  a: string;
+}
+
+export interface Review {
+  name: string;
+  meta: string;
+  rating: 4 | 5;
+  text: string;
+}
+
+export interface Testimonial {
+  quote: string;
+  name: string;
+}
+
+export interface OccasionEntry {
+  name: Occasion;
+  blurb: string;
+}
+
+export interface TeamMember {
+  name: string;
+  role: string;
+  img: string;
+  bio: string;
+}
+
+export interface Cadence {
+  label: string;
+  per: string;
+  mult: number;
+}
+
+export interface Plan {
+  tier: string;
+  name: string;
+  base: number;
+  features: [string, string, string];
+}
+
+export type LegalDoc = 'privacy' | 'terms';
+
+export interface LegalSection {
+  h: string;
+  p: string;
+}
+
+export interface LegalDocument {
+  title: string;
+  sections: LegalSection[];
+}

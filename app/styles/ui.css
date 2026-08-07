@@ -1,0 +1,92 @@
+/* UI — the small reusable pieces that are not forms and not buttons: rules,
+   the card container, the outline tag, tables, the FAQ accordion and the
+   checkout rail. */
+
+/* ── rules ─────────────────────────────────────────────────────────────── */
+
+.hr {
+  height: 1px; border: 0; margin: var(--space-4) 0;
+  background: var(--color-divider);
+}
+
+.divider-or {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin: 26px 0;
+}
+
+/* ── cards ─────────────────────────────────────────────────────────────── */
+
+/* The card is used bare — as a bordered container for the contact, corporate
+   and gift forms. Its interior classes (kicker, title, body, meta) and the two
+   larger elevations are unused; see _unbuilt.css. */
+.card {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  padding: var(--space-3); border-radius: var(--radius-md);
+  background: transparent; border: 1px solid var(--color-divider);
+}
+.elev-sm { box-shadow: var(--shadow-sm); }
+
+/* ── tags ──────────────────────────────────────────────────────────────── */
+
+/* Only the outline tag ships — it is the "Хіт продажів" badge on a product
+   photo, where a filled ground would fight the image. */
+.tag {
+  display: inline-flex; align-items: center; font-size: 11px;
+  letter-spacing: 0.02em; padding: 3px 10px;
+  border-radius: calc(var(--radius-md) * 0.75);
+}
+.tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+
+/* ── tables ────────────────────────────────────────────────────────────── */
+
+.table { width: 100%; border-collapse: collapse; font-size: 14px; }
+.table th {
+  text-align: left; font-size: 11px; letter-spacing: 0.08em; text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-text) 60%, transparent);
+  padding: var(--space-2); border-bottom: 1px solid var(--color-divider);
+}
+.table td {
+  padding: var(--space-2);
+  border-bottom: 1px solid var(--color-divider);
+}
+.table tbody tr:hover { background: color-mix(in srgb, var(--color-text) 4%, transparent); }
+
+/* The site's only modal is the cart drawer, which has its own geometry in
+   commerce.css; the handoff's centred .dialog is unused (see _unbuilt.css). */
+
+/* ── FAQ accordion ─────────────────────────────────────────────────────── */
+
+.faq-row { border-bottom: 1px solid var(--color-divider); }
+.faq-q {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  padding: 20px 0;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  text-align: left;
+  font-family: var(--font-heading);
+  font-size: 20px;
+  color: var(--color-text);
+}
+.faq-q:hover { color: var(--color-accent-700); }
+.faq-sign { font-size: 20px; color: var(--color-accent); flex: none; }
+.faq-a {
+  margin: 0 0 22px;
+  font-size: 14.5px;
+  line-height: 1.8;
+  color: var(--color-neutral-700);
+  max-width: 64ch;
+}
+
+/* ── checkout progress rail ────────────────────────────────────────────── */
+
+.rail-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--color-neutral-300); }
+.rail-dot[data-done='true'] { background: var(--color-accent); }
+.rail-leg { flex: 1; height: 2px; background: var(--color-neutral-300); }
+.rail-leg[data-done='true'] { background: var(--color-accent); }

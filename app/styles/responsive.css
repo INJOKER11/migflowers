@@ -1,0 +1,39 @@
+/* Responsive — every breakpoint on the site, in one place.
+
+   IMPORTANT: this file must stay the LAST import in globals.css. The rules
+   below override earlier sheets at equal specificity (the touch-target block
+   in particular carries no !important), so moving it earlier silently breaks
+   the mobile layout. */
+
+/* tablet */
+@media (max-width: 1000px) {
+  main .section, .band-inner, .header-row, .footer-grid, .footer-bottom {
+    padding-left: 24px !important;
+    padding-right: 24px !important;
+  }
+  main h1 { font-size: clamp(32px, 6vw, 46px) !important; line-height: 1.08 !important; }
+  main h2 { font-size: clamp(24px, 3.6vw, 32px) !important; }
+  [data-sticky] { position: static !important; top: auto !important; max-width: none !important; }
+  [data-shop-layout] { grid-template-columns: 1fr !important; gap: 32px !important; }
+}
+
+/* mobile */
+@media (max-width: 760px) {
+  .desktop-nav { display: none !important; }
+  .nav-toggle { display: flex !important; }
+  main .section, .band-inner, .header-row, .footer-grid, .footer-bottom {
+    padding-left: 18px !important;
+    padding-right: 18px !important;
+  }
+  main .section, .band-inner { padding-top: 36px !important; padding-bottom: 44px !important; }
+  table.table { display: block; overflow-x: auto; white-space: nowrap; font-size: 13px; }
+  .thumbs { grid-template-columns: repeat(4, 1fr) !important; }
+}
+
+/* Touch targets never go below 44px. */
+@media (hover: none) and (pointer: coarse) {
+  .icon-btn { width: 44px; height: 44px; }
+  .cart-btn { padding: 12px 16px; }
+  .wish-btn { width: 44px; height: 44px; }
+  .stepper button { width: 44px; height: 44px; }
+}

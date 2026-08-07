@@ -1,0 +1,44 @@
+/* Forms — inputs and the chip (which is a toggle, so it belongs with the input
+   controls rather than with the buttons).
+
+   The handoff's labelled field, radio group and segmented control are parked
+   unused in _unbuilt.css — no screen has needed them yet. */
+
+.input {
+  width: 100%; min-height: 36px; padding: 6px 10px; font: inherit;
+  font-size: 14px; color: var(--color-text); caret-color: var(--color-accent);
+  background: transparent;
+  border: 1px solid var(--color-divider); border-radius: var(--radius-md);
+}
+.input:hover { border-color: color-mix(in srgb, var(--color-text) 45%, transparent); }
+.input:focus-visible { border-color: var(--color-accent); outline-offset: 0; }
+textarea.input { min-height: 90px; resize: vertical; }
+
+/* ── chips ─────────────────────────────────────────────────────────────── */
+
+/* One chip, reused for occasions, flower types, colours, delivery slots,
+   payment methods, variants, cadences, gift amounts and review filters.
+   Driven from components/ui/Chip.tsx; the size suffixes are its `size` prop. */
+.chip {
+  padding: 7px 13px;
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  font-family: var(--font-body);
+  font-size: 12.5px;
+  background: transparent;
+  border: 1px solid var(--color-divider);
+  color: var(--color-text);
+  transition: border-color 0.25s, background 0.25s;
+}
+.chip:hover { border-color: var(--color-accent); }
+.chip[aria-pressed='true'] {
+  background: var(--color-accent-100);
+  border-color: var(--color-accent);
+  color: var(--color-accent-700);
+}
+.chip-lg { padding: 10px 15px; }
+.chip-xl { padding: 11px 18px; font-size: 13.5px; }
+.chip-variant { padding: 9px 16px; }
+.chip-cadence { padding: 10px 18px; font-size: 13px; }
+.chip-review { padding: 8px 15px; }
+.chip-row { display: flex; gap: 8px; flex-wrap: wrap; }

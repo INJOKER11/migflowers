@@ -1,0 +1,68 @@
+/* Layout — page scaffolding, the one grid, section headings, and the plate
+   (the mat every content photograph is framed in). */
+
+.section {
+  width: 100%;
+  margin: 0 auto;
+  padding: 44px 32px 90px;
+}
+
+.hairline { flex: 1; height: 1px; background: var(--color-divider); }
+
+.heading-row {
+  display: flex;
+  align-items: baseline;
+  gap: 16px;
+}
+
+.kicker {
+  font-size: 11.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--color-neutral-600);
+}
+
+.breadcrumb {
+  font-size: 12px;
+  color: var(--color-neutral-600);
+  margin-bottom: 18px;
+}
+
+/* Every column grid on the site. `min(100%, …)` is what makes it reflow
+   without breakpoints: a bare minmax() track refuses to shrink below its
+   minimum, so on a 390px phone a 360px track overhangs the padding and clips
+   the copy. Capping the minimum at the container width lets the last track
+   collapse instead. */
+.grid-auto {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, var(--min, 240px)), 1fr));
+  gap: var(--gap, 26px);
+}
+
+/* ── plates ────────────────────────────────────────────────────────────── */
+
+.plate {
+  filter: sepia(0.22) saturate(0.82) contrast(1.05);
+  box-sizing: border-box;
+  border: 6px solid var(--color-surface);
+  outline: 1px solid var(--color-divider);
+}
+
+/* Every content photograph goes through the mat; the frame carries the
+   positioning next/image needs to fill it. */
+.plate-frame {
+  position: relative;
+  overflow: hidden;
+}
+.plate-frame > img { width: 100%; height: 100%; object-fit: cover; }
+
+/* Hover zoom: the wrapper owns the scale so the mat itself never moves. */
+.zoom > img {
+  transition: transform var(--zoom-time, 0.6s) ease;
+}
+.zoom:hover > img { transform: scale(var(--zoom-scale, 1.06)); }
+
+@media (prefers-reduced-motion: reduce) {
+  .zoom:hover > img { transform: none; }
+  * { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; }
+}
