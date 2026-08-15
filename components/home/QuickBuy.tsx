@@ -2,7 +2,7 @@ import Link from 'next/link';
 import { Section } from '@/components/ui/Section';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { quickBuy } from '@/lib/catalog';
+// import { quickBuy } from '@/lib/catalog';
 
 export function QuickBuy() {
   return (
@@ -25,7 +25,9 @@ export function QuickBuy() {
         Один дотик — і букет у кошику. Оформлення на одному екрані.
       </p>
 
-      <ProductGrid products={quickBuy()} variant="home" min="240px" />
+      {/*<ProductGrid */}
+      {/*    products={quickBuy()} */}
+      {/*    variant="home" min="240px" />*/}
     </Section>
   );
 }

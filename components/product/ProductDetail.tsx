@@ -12,7 +12,7 @@ import type { Product, VariantSize } from '@/types';
 const SIZES: VariantSize[] = ['Мала', 'Стандарт', 'Велика'];
 const TABS = [
   { key: 'desc', label: 'Опис' },
-  { key: 'care', label: 'Догляд' },
+  // { key: 'care', label: 'Догляд' },
 ] as const;
 
 type TabKey = (typeof TABS)[number]['key'];
@@ -26,7 +26,7 @@ export function ProductDetail({ product }: { product: Product }) {
 
   const saved = isSaved(product.id);
   const large = productShots(product, 700);
-  const thumbs = productShots(product, 400);
+  // const thumbs = productShots(product, 400);
 
   return (
     <div
@@ -39,7 +39,7 @@ export function ProductDetail({ product }: { product: Product }) {
     >
       <div>
         <Plate
-          src={large[shot]}
+          src={large?.[shot] ?? ""}
           alt={product.name}
           sizes="(max-width: 1000px) 100vw, 560px"
           priority
@@ -57,27 +57,29 @@ export function ProductDetail({ product }: { product: Product }) {
           Наведіть на фото, щоб збільшити
         </div>
 
-        <div className="thumbs" style={{ marginTop: 14 }}>
-          {thumbs.map((src, i) => (
-            <button
-              key={src}
-              type="button"
-              className="thumb-btn"
-              onClick={() => setShot(i)}
-              aria-current={i === shot}
-              aria-label={`Ракурс ${i + 1}`}
-            >
-              <Plate src={src} alt="Інший ракурс" sizes="140px" radius="0" />
-            </button>
-          ))}
-        </div>
+
+          {/* todo: support multiple images on backend */}
+        {/*<div className="thumbs" style={{ marginTop: 14 }}>*/}
+        {/*  {thumbs.map((src, i) => (*/}
+        {/*    <button*/}
+        {/*      key={src}*/}
+        {/*      type="button"*/}
+        {/*      className="thumb-btn"*/}
+        {/*      onClick={() => setShot(i)}*/}
+        {/*      aria-current={i === shot}*/}
+        {/*      aria-label={`Ракурс ${i + 1}`}*/}
+        {/*    >*/}
+        {/*      <Plate src={src} alt="Інший ракурс" sizes="140px" radius="0" />*/}
+        {/*    </button>*/}
+        {/*  ))}*/}
+        {/*</div>*/}
       </div>
 
       <div>
         <h1 style={{ fontSize: 42, margin: '0 0 8px', lineHeight: 1.1 }}>{product.name}</h1>
-        <div style={{ fontSize: 14, color: 'var(--color-neutral-600)', fontStyle: 'italic' }}>
-          {product.note}
-        </div>
+        {/*<div style={{ fontSize: 14, color: 'var(--color-neutral-600)', fontStyle: 'italic' }}>*/}
+        {/*  {product.description}*/}
+        {/*</div>*/}
         <div
           className="tabular"
           style={{ fontFamily: 'var(--font-heading)', fontSize: 32, margin: '20px 0 0' }}
@@ -85,16 +87,18 @@ export function ProductDetail({ product }: { product: Product }) {
           {uah(variantPrice(product.price, variant))}
         </div>
 
-        <div className="kicker" style={{ margin: '26px 0 10px' }}>
-          Розмір
-        </div>
-        <ChipRow>
-          {SIZES.map((label, i) => (
-            <Chip key={label} size="variant" active={i === variant} onClick={() => setVariant(i)}>
-              {label}
-            </Chip>
-          ))}
-        </ChipRow>
+
+          {/* todo: support sizes +/ variants on backend */}
+        {/*<div className="kicker" style={{ margin: '26px 0 10px' }}>*/}
+        {/*  Розмір*/}
+        {/*</div>*/}
+        {/*<ChipRow>*/}
+        {/*  {SIZES.map((label, i) => (*/}
+        {/*    <Chip key={label} size="variant" active={i === variant} onClick={() => setVariant(i)}>*/}
+        {/*      {label}*/}
+        {/*    </Chip>*/}
+        {/*  ))}*/}
+        {/*</ChipRow>*/}
 
         <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
           <Button

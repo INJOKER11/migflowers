@@ -5,26 +5,39 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { CATALOG, getProduct, relatedTo } from '@/lib/catalog';
+// import { CATALOG, relatedTo } from '@/lib/catalog';
 
 interface Params {
-  params: Promise<{ id: string }>;
+  params: Promise<{ slug: string }>;
 }
 
-export function generateStaticParams() {
-  return CATALOG.map((product) => ({ id: product.id }));
+// export function generateStaticParams() {
+//   return CATALOG.map((product) => ({ id: product.id }));
+// }
+
+async function getProduct(slug: string) {
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/${slug}`, {
+        next: {
+            revalidate: 3600,
+        }
+    })
+    if(!res.ok) throw new Error('Product not found');
+    const data = await res.json();
+    return data.data;
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
-  const { id } = await params;
-  const product = getProduct(id);
+  const { slug } = await params;
+  const product = await getProduct(slug);
   if (!product) return {};
   return { title: `${product.name} — MIG Flowers`, description: product.note };
+    return {title: "test", description: "Fsdfsd"}
 }
 
 export default async function ProductPage({ params }: Params) {
-  const { id } = await params;
-  const product = getProduct(id);
+  const { slug } = await params;
+  const product = await getProduct(slug);
+  console.log(product.data);
   if (!product) notFound();
 
   return (
@@ -41,7 +54,7 @@ export default async function ProductPage({ params }: Params) {
 
       <div style={{ marginTop: 80 }}>
         <SectionHeading size={30}>Вам також може сподобатися</SectionHeading>
-        <ProductGrid products={relatedTo(product.id)} variant="related" />
+        {/*<ProductGrid products={relatedTo(product.id)} variant="related" />*/}
       </div>
     </Section>
   );

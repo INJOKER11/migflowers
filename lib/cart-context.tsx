@@ -9,7 +9,7 @@ import {
   useState,
   type ReactNode,
 } from 'react';
-import { CATALOG } from './catalog';
+// import { CATALOG } from './catalog';
 import { PAYMENTS, SLOTS } from './content';
 import {
   DELIVERY_FEE,
@@ -55,7 +55,6 @@ interface CartValue {
   closeDrawer: () => void;
   goToCheckoutStep: () => void;
   goToBasketStep: () => void;
-  /** Empties the cart. In the drawer it lands on 'done'; the page redirects. */
   placeOrder: () => void;
 
   promo: PromoState;
@@ -65,7 +64,6 @@ interface CartValue {
   setSlot: (i: number) => void;
   payment: number;
   setPayment: (i: number) => void;
-  /** 'Сьогодні, 15:00 – 18:00 · Картка.' */
   orderSummary: string;
 }
 
@@ -152,34 +150,34 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setSaved((s) => ({ ...s, [id]: !s[id] }));
   }, []);
 
-  const lines = useMemo<CartLine[]>(
-    () =>
-      CATALOG.filter((p) => quantities[p.id]).map((product) => ({
-        product,
-        qty: quantities[product.id],
-      })),
-    [quantities],
-  );
+  // const lines = useMemo<CartLine[]>(
+  //   () =>
+  //     CATALOG.filter((p) => quantities[p.id]).map((product) => ({
+  //       product,
+  //       qty: quantities[product.id],
+  //     })),
+  //   [quantities],
+  // );
 
-  const subtotal = useMemo(
-    () => lines.reduce((sum, l) => sum + l.product.price * l.qty, 0),
-    [lines],
-  );
+  // const subtotal = useMemo(
+  //   () => lines.reduce((sum, l) => sum + l.product.price * l.qty, 0),
+  //   [lines],
+  // );
 
-  const count = useMemo(() => lines.reduce((sum, l) => sum + l.qty, 0), [lines]);
+  // const count = useMemo(() => lines.reduce((sum, l) => sum + l.qty, 0), [lines]);
 
   /* Free over the threshold — and on an empty cart, so the empty drawer shows
      no fee at all. */
-  const freeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0;
-  const deliveryFee = freeDelivery ? 0 : DELIVERY_FEE;
-  const discount = promo === 'applied' ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
-  const total = subtotal - discount + deliveryFee;
+  // const freeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0;
+  // const deliveryFee = freeDelivery ? 0 : DELIVERY_FEE;
+  // const discount = promo === 'applied' ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
+  // const total = subtotal - discount + deliveryFee;
 
   const savedIds = useMemo(() => Object.keys(saved).filter((id) => saved[id]), [saved]);
-  const savedProducts = useMemo(
-    () => savedIds.map((id) => CATALOG.find((p) => p.id === id)).filter((p): p is Product => !!p),
-    [savedIds],
-  );
+  // const savedProducts = useMemo(
+  //   () => savedIds.map((id) => CATALOG.find((p) => p.id === id)).filter((p): p is Product => !!p),
+  //   [savedIds],
+  // );
 
   const applyPromo = useCallback((code: string) => {
     setPromo(code.trim().toUpperCase() === PROMO_CODE ? 'applied' : 'rejected');
@@ -192,9 +190,9 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
-  const goToCheckoutStep = useCallback(() => {
-    setStep((current) => (lines.length ? 'checkout' : current));
-  }, [lines.length]);
+  // const goToCheckoutStep = useCallback(() => {
+  //   setStep((current) => (lines.length ? 'checkout' : current));
+  // }, [lines.length]);
 
   const goToBasketStep = useCallback(() => setStep('basket'), []);
 
@@ -206,27 +204,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const value: CartValue = {
     ready,
-    lines,
-    count,
-    subtotal,
-    deliveryFee,
-    discount,
-    total,
-    isEmpty: lines.length === 0,
+    // lines,
+    // count,
+    // subtotal,
+    // deliveryFee,
+    // discount,
+    // total,
+    // isEmpty: lines.length === 0,
     add,
     bump,
     remove,
     clear,
     saved,
     savedIds,
-    savedProducts,
+    // savedProducts,
     isSaved: (id) => !!saved[id],
     toggleSaved,
     drawerOpen,
     step,
     openDrawer,
     closeDrawer,
-    goToCheckoutStep,
+    // goToCheckoutStep,
     goToBasketStep,
     placeOrder,
     promo,

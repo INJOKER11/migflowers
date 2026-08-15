@@ -16,15 +16,18 @@ export type ProductTag = 'Хіт продажів' | 'Новинка' | 'Дов�
 export interface Product {
   id: string;
   name: string;
-  note: string;
+  slug: string;
+  description: string;
   price: number;
-  tag?: ProductTag;
-  img: string;
-  occasion: Occasion;
-  type: FlowerType;
-  color: FlowerColor;
-  rank: number;
-  age: number;
+  discount_price?: number;
+  image_url: string | null;
+  is_available: boolean;
+  stock: number;
+  category: {
+    id: string;
+    name: string;
+    slug: string;
+  }
 }
 
 export interface CartLine {

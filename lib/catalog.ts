@@ -4,179 +4,174 @@ import { VARIANT_MULTIPLIERS } from './constants';
 import { roundTo10 } from './format';
 
 /** Twelve arrangements — the whole shop. */
-export const CATALOG: Product[] = [
-  {
-    id: 'p1',
-    name: 'Півонії та ранункулюси',
-    note: 'пудровий, 25 стебел',
-    price: 2450,
-    tag: 'Хіт продажів',
-    img: photo('pinkRoses', 700),
-    occasion: 'Річниця',
-    type: 'Півонії',
-    color: 'Рожевий',
-    rank: 1,
-    age: 3,
-  },
-  {
-    id: 'p2',
-    name: 'Садові троянди',
-    note: 'айворі, 15 стебел',
-    price: 1890,
-    img: photo('beige', 700),
-    occasion: 'Весілля',
-    type: 'Троянди',
-    color: 'Білий',
-    rank: 3,
-    age: 6,
-  },
-  {
-    id: 'p3',
-    name: 'Білі маки у вазі',
-    note: 'бурштинове скло в комплекті',
-    price: 1320,
-    tag: 'Новинка',
-    img: photo('poppies', 700),
-    occasion: 'Без нагоди',
-    type: 'Сезонні',
-    color: 'Білий',
-    rank: 6,
-    age: 1,
-  },
-  {
-    id: 'p4',
-    name: 'Ринкова в’язка',
-    note: 'на вибір флориста',
-    price: 1650,
-    img: photo('table', 700),
-    occasion: 'Без нагоди',
-    type: 'Сезонні',
-    color: 'Мікс',
-    rank: 2,
-    age: 4,
-  },
-  {
-    id: 'p5',
-    name: 'Низька настільна',
-    note: 'для довгого столу',
-    price: 2100,
-    img: photo('centerpiece', 700),
-    occasion: 'Весілля',
-    type: 'Сезонні',
-    color: 'Мікс',
-    rank: 8,
-    age: 7,
-  },
-  {
-    id: 'p6',
-    name: 'Червоні троянди у папері',
-    note: 'двадцять одне стебло',
-    price: 2640,
-    img: photo('redHeld', 700),
-    occasion: 'Річниця',
-    type: 'Троянди',
-    color: 'Червоний',
-    rank: 4,
-    age: 9,
-  },
-  {
-    id: 'p7',
-    name: 'Рожеві пелюстки у вазі',
-    note: 'прозоре скло',
-    price: 980,
-    tag: 'Довго стоїть',
-    img: photo('pinkVase', 700),
-    occasion: 'День народження',
-    type: 'Сезонні',
-    color: 'Рожевий',
-    rank: 7,
-    age: 5,
-  },
-  {
-    id: 'p8',
-    name: 'Троянди у цвіту',
-    note: 'садові, 30 стебел',
-    price: 3200,
-    img: photo('roses', 700),
-    occasion: 'Річниця',
-    type: 'Троянди',
-    color: 'Рожевий',
-    rank: 5,
-    age: 8,
-  },
-  {
-    id: 'p9',
-    name: 'Букет нареченої',
-    note: 'вершковий і зелений',
-    price: 2980,
-    img: photo('bridal', 700),
-    occasion: 'Весілля',
-    type: 'Троянди',
-    color: 'Білий',
-    rank: 9,
-    age: 2,
-  },
-  {
-    id: 'p10',
-    name: 'Осінній стіл',
-    note: 'глибокий червоний, низька',
-    price: 1740,
-    img: photo('redTable', 700),
-    occasion: 'День народження',
-    type: 'Сезонні',
-    color: 'Червоний',
-    rank: 10,
-    age: 10,
-  },
-  {
-    id: 'p11',
-    name: 'Білі для співчуття',
-    note: 'лілії та матіола',
-    price: 2200,
-    img: photo('roseBouquet', 700),
-    occasion: 'Співчуття',
-    type: 'Лілії',
-    color: 'Білий',
-    rank: 11,
-    age: 11,
-  },
-  {
-    id: 'p12',
-    name: 'Ранункулюси у вазі',
-    note: 'пудровий, у воді',
-    price: 1560,
-    img: photo('vaseMix', 700),
-    occasion: 'День народження',
-    type: 'Півонії',
-    color: 'Рожевий',
-    rank: 12,
-    age: 12,
-  },
-];
+// export const CATALOG: Product[] = [
+//   {
+//     id: 'p1',
+//     name: 'Півонії та ранункулюси',
+//     note: 'пудровий, 25 стебел',
+//     price: 2450,
+//     tag: 'Хіт продажів',
+//     img: photo('pinkRoses', 700),
+//     occasion: 'Річниця',
+//     type: 'Півонії',
+//     color: 'Рожевий',
+//     rank: 1,
+//     age: 3,
+//   },
+//   {
+//     id: 'p2',
+//     name: 'Садові троянди',
+//     note: 'айворі, 15 стебел',
+//     price: 1890,
+//     img: photo('beige', 700),
+//     occasion: 'Весілля',
+//     type: 'Троянди',
+//     color: 'Білий',
+//     rank: 3,
+//     age: 6,
+//   },
+//   {
+//     id: 'p3',
+//     name: 'Білі маки у вазі',
+//     note: 'бурштинове скло в комплекті',
+//     price: 1320,
+//     tag: 'Новинка',
+//     img: photo('poppies', 700),
+//     occasion: 'Без нагоди',
+//     type: 'Сезонні',
+//     color: 'Білий',
+//     rank: 6,
+//     age: 1,
+//   },
+//   {
+//     id: 'p4',
+//     name: 'Ринкова в’язка',
+//     note: 'на вибір флориста',
+//     price: 1650,
+//     img: photo('table', 700),
+//     occasion: 'Без нагоди',
+//     type: 'Сезонні',
+//     color: 'Мікс',
+//     rank: 2,
+//     age: 4,
+//   },
+//   {
+//     id: 'p5',
+//     name: 'Низька настільна',
+//     note: 'для довгого столу',
+//     price: 2100,
+//     img: photo('centerpiece', 700),
+//     occasion: 'Весілля',
+//     type: 'Сезонні',
+//     color: 'Мікс',
+//     rank: 8,
+//     age: 7,
+//   },
+//   {
+//     id: 'p6',
+//     name: 'Червоні троянди у папері',
+//     note: 'двадцять одне стебло',
+//     price: 2640,
+//     img: photo('redHeld', 700),
+//     occasion: 'Річниця',
+//     type: 'Троянди',
+//     color: 'Червоний',
+//     rank: 4,
+//     age: 9,
+//   },
+//   {
+//     id: 'p7',
+//     name: 'Рожеві пелюстки у вазі',
+//     note: 'прозоре скло',
+//     price: 980,
+//     tag: 'Довго стоїть',
+//     img: photo('pinkVase', 700),
+//     occasion: 'День народження',
+//     type: 'Сезонні',
+//     color: 'Рожевий',
+//     rank: 7,
+//     age: 5,
+//   },
+//   {
+//     id: 'p8',
+//     name: 'Троянди у цвіту',
+//     note: 'садові, 30 стебел',
+//     price: 3200,
+//     img: photo('roses', 700),
+//     occasion: 'Річниця',
+//     type: 'Троянди',
+//     color: 'Рожевий',
+//     rank: 5,
+//     age: 8,
+//   },
+//   {
+//     id: 'p9',
+//     name: 'Букет нареченої',
+//     note: 'вершковий і зелений',
+//     price: 2980,
+//     img: photo('bridal', 700),
+//     occasion: 'Весілля',
+//     type: 'Троянди',
+//     color: 'Білий',
+//     rank: 9,
+//     age: 2,
+//   },
+//   {
+//     id: 'p10',
+//     name: 'Осінній стіл',
+//     note: 'глибокий червоний, низька',
+//     price: 1740,
+//     img: photo('redTable', 700),
+//     occasion: 'День народження',
+//     type: 'Сезонні',
+//     color: 'Червоний',
+//     rank: 10,
+//     age: 10,
+//   },
+//   {
+//     id: 'p11',
+//     name: 'Білі для співчуття',
+//     note: 'лілії та матіола',
+//     price: 2200,
+//     img: photo('roseBouquet', 700),
+//     occasion: 'Співчуття',
+//     type: 'Лілії',
+//     color: 'Білий',
+//     rank: 11,
+//     age: 11,
+//   },
+//   {
+//     id: 'p12',
+//     name: 'Ранункулюси у вазі',
+//     description: 'пудровий, у воді',
+//     price: 1560,
+//     image_url: photo('vaseMix', 700),
+//   },
+// ];
 
-export function getProduct(id: string): Product | undefined {
-  return CATALOG.find((p) => p.id === id);
-}
+// export function getProduct(id: string): Product | undefined {
+//   return CATALOG.find((p) => p.id === id);
+// }
+//
+// export function relatedTo(id: string, count = 4): Product[] {
+//   return CATALOG.filter((p) => p.id !== id).slice(0, count);
+// }
+//
+// export function byOccasion(occasion: Occasion): Product[] {
+//   return CATALOG.filter((p) => p.occasion === occasion);
+// }
+//
+// /** Ready to send today — the home page's quick-buy row. */
+// export function quickBuy(count = 4): Product[] {
+//   return CATALOG.slice(0, count);
+// }
 
-export function relatedTo(id: string, count = 4): Product[] {
-  return CATALOG.filter((p) => p.id !== id).slice(0, count);
-}
-
-export function byOccasion(occasion: Occasion): Product[] {
-  return CATALOG.filter((p) => p.occasion === occasion);
-}
-
-/** Ready to send today — the home page's quick-buy row. */
-export function quickBuy(count = 4): Product[] {
-  return CATALOG.slice(0, count);
-}
-
-export const SORTERS: Record<SortKey, (a: Product, b: Product) => number> = {
-  popular: (a, b) => a.rank - b.rank,
-  new: (a, b) => a.age - b.age,
-  low: (a, b) => a.price - b.price,
-  high: (a, b) => b.price - a.price,
-};
+// export const SORTERS: Record<SortKey, (a: Product, b: Product) => number> = {
+//   popular: (a, b) => a.rank - b.rank,
+//   new: (a, b) => a.age - b.age,
+//   low: (a, b) => a.price - b.price,
+//   high: (a, b) => b.price - a.price,
+// };
 
 export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'popular', label: 'За популярністю' },
@@ -191,9 +186,10 @@ export function variantPrice(base: number, variantIndex: number): number {
 }
 
 /** The four shots on the product page: the arrangement, then three angles. */
-export function productShots(product: Product, width: number): string[] {
+export function productShots(product: Product, width: number): string[] | null {
+  if(!product.image_url) return null;
   return [
-    product.img,
+    product.image_url,
     photo('bench', width),
     photo('florist', width),
     photo('centerpiece', width),
@@ -201,7 +197,7 @@ export function productShots(product: Product, width: number): string[] {
 }
 
 export function descriptionFor(product: Product): string {
-  const note = product.note.charAt(0).toUpperCase() + product.note.slice(1);
+  const note = product.description.charAt(0).toUpperCase() + product.description.slice(1);
   return (
     'Складено одним флористом від початку до кінця того ранку, коли букет їде до вас. ' +
     note +
@@ -242,12 +238,12 @@ export interface ShopFilters {
   sort: SortKey;
 }
 
-export function filterCatalog(f: ShopFilters): Product[] {
-  return CATALOG.filter(
-    (p) =>
-      (f.occasion === 'Усі' || p.occasion === f.occasion) &&
-      (f.type === 'Усі' || p.type === f.type) &&
-      (f.color === 'Усі' || p.color === f.color) &&
-      p.price <= f.priceCap,
-  ).sort(SORTERS[f.sort]);
-}
+// export function filterCatalog(f: ShopFilters): Product[] {
+//   return CATALOG.filter(
+//     (p) =>
+//       (f.occasion === 'Усі' || p.occasion === f.occasion) &&
+//       (f.type === 'Усі' || p.type === f.type) &&
+//       (f.color === 'Усі' || p.color === f.color) &&
+//       p.price <= f.priceCap,
+//   ).sort(SORTERS[f.sort]);
+// }

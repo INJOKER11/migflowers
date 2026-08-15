@@ -66,8 +66,6 @@ export function Hero() {
         </p>
 
         <div style={{ display: 'flex', gap: 14, marginTop: 34, flexWrap: 'wrap' }}>
-          {/* The hero pair runs half a point larger than the site's other calls
-              to action — it is the first thing on the page. */}
           <Button href="/shop" cta style={{ padding: '13px 30px', fontSize: 12.5 }}>
             Купити зараз
           </Button>

@@ -8,7 +8,7 @@ import {
   PRICE_MAX,
   SORT_OPTIONS,
   TYPE_FILTERS,
-  filterCatalog,
+  // filterCatalog,
 } from '@/lib/catalog';
 import { PAGE_SIZE } from '@/lib/constants';
 import { arrangementCount } from '@/lib/format';
@@ -31,6 +31,18 @@ function pickCap(value: string | null): number {
   return Number.isFinite(n) && n > 0 ? Math.min(n, PRICE_MAX) : PRICE_MAX;
 }
 
+async function getProducts() {
+    console.log(process.env.NEXT_PUBLIC_API_URL);
+    const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/products/`, {
+        next: {
+            revalidate: 3600,
+        }
+    });
+    const data = await res.json();
+    return data.data;
+}
+
+
 export function ShopBrowser() {
   const router = useRouter();
   const pathname = usePathname();
@@ -44,6 +56,8 @@ export function ShopBrowser() {
 
   const [priceCap, setPriceCap] = useState(urlCap);
   const [shown, setShown] = useState(PAGE_SIZE);
+
+  const [products, setProducts] = useState([]);
 
   const setParam = useCallback(
     (key: string, value: string | null) => {
@@ -80,9 +94,18 @@ export function ShopBrowser() {
     router.replace(pathname, { scroll: false });
   };
 
-  const matches = filterCatalog({ occasion, type, color, priceCap, sort });
-  const visible = matches.slice(0, shown);
-  const hasMore = matches.length > shown;
+  // const matches = filterCatalog({ occasion, type, color, priceCap, sort });
+  // const visible = matches.slice(0, shown);
+  // const hasMore = matches.length > shown;
+
+    console.log(products);
+    useEffect(() => {
+        async function get() {
+             const data = await getProducts()
+            setProducts(data);
+        }
+        get();
+    }, []);
 
   return (
     <div
@@ -120,7 +143,7 @@ export function ShopBrowser() {
           }}
         >
           <span className="tabular" style={{ fontSize: 13, color: 'var(--color-neutral-600)' }}>
-            {arrangementCount(matches.length)}
+            {arrangementCount(products.length)}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <label
@@ -150,22 +173,25 @@ export function ShopBrowser() {
           </div>
         </div>
 
-        <ProductGrid products={visible} variant="shop" min="min(100%, 270px)" />
+        <ProductGrid products={products} variant="shop" min="min(100%, 270px)" />
 
-        {hasMore && (
-          <div style={{ textAlign: 'center', marginTop: 44 }}>
-            <Button
-              variant="ghost"
-              cta
-              /* Tracked wider than the standard CTA — it sits alone under the
-                 grid with nothing to line up against. */
-              style={{ padding: '12px 36px', letterSpacing: '.14em' }}
-              onClick={() => setShown((n) => n + PAGE_SIZE)}
-            >
-              Показати ще
-            </Button>
-          </div>
-        )}
+
+          {/* todo: pagination */}
+
+        {/*{hasMore && (*/}
+        {/*  <div style={{ textAlign: 'center', marginTop: 44 }}>*/}
+        {/*    <Button*/}
+        {/*      variant="ghost"*/}
+        {/*      cta*/}
+        {/*      /* Tracked wider than the standard CTA — it sits alone under the*/}
+        {/*         grid with nothing to line up against. */}
+        {/*      style={{ padding: '12px 36px', letterSpacing: '.14em' }}*/}
+        {/*      onClick={() => setShown((n) => n + PAGE_SIZE)}*/}
+        {/*    >*/}
+        {/*      Показати ще*/}
+        {/*    </Button>*/}
+        {/*  </div>*/}
+        {/*)}*/}
       </div>
     </div>
   );

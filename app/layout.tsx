@@ -31,7 +31,7 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="uk" className={`${heading.variable} ${body.variable}`}>
+    <html lang="ua" className={`${heading.variable} ${body.variable}`}>
       <body>
         <CartProvider>
           <PromoBar />

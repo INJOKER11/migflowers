@@ -8,7 +8,14 @@ const nextConfig: NextConfig = {
         hostname: 'images.unsplash.com',
         pathname: '/**',
       },
+      {
+        protocol: 'http',
+        hostname: 'localhost',
+        port: '8080',
+        pathname: '/storage/**'
+      }
     ],
+    dangerouslyAllowLocalIP: true,
   },
 };
 

@@ -44,7 +44,7 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
   const plate = (
     <Link href={href} aria-label={product.name} style={{ display: 'block' }}>
       <Plate
-        src={product.img}
+        src={product.image_url}
         alt={product.name}
         sizes="(max-width: 760px) 100vw, (max-width: 1000px) 50vw, 300px"
         zoom={1.06}
@@ -75,9 +75,12 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
               />
             </button>
           )}
-          {spec.tag && product.tag && (
-            <span className="tag tag-outline product-tag">{product.tag}</span>
-          )}
+
+          {/* todo: add tags? */}
+
+          {/*{spec.tag && product.tag && (*/}
+          {/*  <span className="tag tag-outline product-tag">{product.tag}</span>*/}
+          {/*)}*/}
         </div>
       ) : (
         plate
@@ -92,7 +95,7 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
         </div>
       </div>
 
-      {spec.note && <div className="product-note">{product.note}</div>}
+      {spec.note && <div className="product-note">{product.description}</div>}
 
       {spec.action === 'add' && (
         <Button

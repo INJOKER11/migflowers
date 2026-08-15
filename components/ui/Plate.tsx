@@ -31,7 +31,7 @@ export function Plate({
   const classes = ['plate', 'plate-frame', zoom ? 'zoom' : null, className]
     .filter(Boolean)
     .join(' ');
-
+  console.log(src);
   return (
     <div
       className={classes}
