@@ -5,9 +5,9 @@ import { Facebook, Instagram, STROKE, Send } from '@/components/ui/icons';
 
 const SHOP_LINKS = [
   { href: '/shop', label: 'Усі квіти' },
-  { href: '/category/wedding-flowers', label: 'Весільні квіти' },
-  { href: '/subscription', label: 'Підписки' },
-  { href: '/gift-cards', label: 'Сертифікати' },
+  // { href: '/category/wedding-flowers', label: 'Весільні квіти' },
+  // { href: '/subscription', label: 'Підписки' },
+  // { href: '/gift-cards', label: 'Сертифікати' },
   { href: '/corporate', label: 'Корпоративні замовлення' },
 ];
 

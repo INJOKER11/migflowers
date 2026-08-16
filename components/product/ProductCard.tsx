@@ -38,8 +38,8 @@ interface ProductCardProps {
 export function ProductCard({ product, variant = 'shop', priority = false }: ProductCardProps) {
   const spec = SPECS[variant];
   const { add, isSaved, toggleSaved } = useCart();
-  const saved = isSaved(product.id);
-  const href = `/product/${product.id}`;
+  const saved = isSaved(product.slug);
+  const href = `/product/${product.slug}`;
 
   const plate = (
     <Link href={href} aria-label={product.name} style={{ display: 'block' }}>

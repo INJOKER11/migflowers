@@ -69,10 +69,13 @@ interface CartValue {
 
 const CartContext = createContext<CartValue | null>(null);
 
-function readStore<T>(key: string, fallback: T): T {
+function readStore<T>(key: string, fallback: T, isValid?: (v: unknown) => v is T): T {
   try {
     const raw = window.localStorage.getItem(key);
-    return raw ? (JSON.parse(raw) as T) : fallback;
+    if (!raw) return fallback;
+    const parsed: unknown = JSON.parse(raw);
+    if (isValid && !isValid(parsed)) return fallback;
+    return parsed as T;
   } catch {
     return fallback;
   }
@@ -86,25 +89,47 @@ function writeStore(key: string, value: unknown): void {
   }
 }
 
+type Products = {
+  [id: string]: {
+    product: Product,
+    qty: number,
+  }
+};
+
+/* The cart used to persist as Record<string, number> under the same key, and
+   the stored Product now mirrors an API shape that can drift again — so an
+   old or unrecognised payload has to be rejected rather than cast. Checks
+   only that an entry has a qty and a product with an id: the API types ids as
+   numbers while `Product` declares a string, so testing typeof would reject
+   every real cart. */
+function isProducts(v: unknown): v is Products {
+  if (typeof v !== 'object' || v === null || Array.isArray(v)) return false;
+  return Object.values(v).every(
+    (e) => typeof e === 'object' && e !== null
+      && typeof (e as CartLine).qty === 'number'
+      && (e as CartLine).product?.id != null,
+  );
+}
+
 export function CartProvider({ children }: { children: ReactNode }) {
   const [ready, setReady] = useState(false);
-  const [quantities, setQuantities] = useState<Quantities>({});
   const [saved, setSaved] = useState<Saved>({});
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [step, setStep] = useState<DrawerStep>('basket');
   const [promo, setPromo] = useState<PromoState>('none');
   const [slot, setSlot] = useState(0);
   const [payment, setPayment] = useState(0);
+  const [products, setProducts] = useState<Products>({});
 
   useEffect(() => {
-    setQuantities(readStore<Quantities>(CART_KEY, {}));
+    setProducts(readStore<Products>(CART_KEY, {}, isProducts));
     setSaved(readStore<Saved>(WISH_KEY, {}));
     setReady(true);
   }, []);
 
   useEffect(() => {
-    if (ready) writeStore(CART_KEY, quantities);
-  }, [ready, quantities]);
+    if (ready) writeStore(CART_KEY, products);
+  }, [ready, products]);
 
   useEffect(() => {
     if (ready) writeStore(WISH_KEY, saved);
@@ -121,57 +146,73 @@ export function CartProvider({ children }: { children: ReactNode }) {
   }, [drawerOpen]);
 
   const add = useCallback((product: Product) => {
-    setQuantities((q) => ({ ...q, [product.id]: (q[product.id] ?? 0) + 1 }));
+    setProducts((p) => {
+      return {
+        ...p,
+        [product.id]: {
+          product: product,
+          qty: (p[product.id]?.qty ?? 0) + 1,
+        }
+      };
+    });
     setDrawerOpen(true);
     setStep('basket');
   }, []);
 
   const bump = useCallback((id: string, delta: number) => {
-    setQuantities((q) => {
-      const next = { ...q };
-      const value = (next[id] ?? 0) + delta;
-      if (value <= 0) delete next[id];
-      else next[id] = value;
-      return next;
+    setProducts((p) => {
+      if((p[id]?.qty ?? 0) + delta <= 0) {
+        const {[id]: _, ...restProducts} = p;
+        return restProducts;
+      }
+      return {
+        ...p,
+        [id]: {
+          product: p[id]?.product,
+          qty: (p[id]?.qty ?? 0) + delta,
+        }
+      }
     });
   }, []);
 
   const remove = useCallback((id: string) => {
-    setQuantities((q) => {
-      const next = { ...q };
-      delete next[id];
-      return next;
-    });
+
+    setProducts((p) => {
+      const {[id]: _, ...restProducts} = p;
+      return restProducts;
+    })
   }, []);
 
-  const clear = useCallback(() => setQuantities({}), []);
+  const clear = useCallback(() => setProducts({}), []);
 
   const toggleSaved = useCallback((id: string) => {
     setSaved((s) => ({ ...s, [id]: !s[id] }));
   }, []);
 
-  // const lines = useMemo<CartLine[]>(
-  //   () =>
-  //     CATALOG.filter((p) => quantities[p.id]).map((product) => ({
-  //       product,
-  //       qty: quantities[product.id],
-  //     })),
-  //   [quantities],
-  // );
+  const lines = useMemo<CartLine[]>(
+    () => {
+      return Object.values(products).reduce((acc,  {product, qty}) => {
+          acc.push({product: product, qty: qty});
+          return acc;
+      }, [] as CartLine[]);
+    },
+    [products],
+  );
 
-  // const subtotal = useMemo(
-  //   () => lines.reduce((sum, l) => sum + l.product.price * l.qty, 0),
-  //   [lines],
-  // );
+  const subtotal = useMemo(
+    () => lines.reduce((sum, l) => sum + l.product.price * l.qty, 0),
+    [lines],
+  );
 
-  // const count = useMemo(() => lines.reduce((sum, l) => sum + l.qty, 0), [lines]);
+  const count = useMemo(() => lines.reduce((sum, l) => sum + l.qty, 0), [lines]);
 
   /* Free over the threshold — and on an empty cart, so the empty drawer shows
      no fee at all. */
-  // const freeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0;
-  // const deliveryFee = freeDelivery ? 0 : DELIVERY_FEE;
+
+  const freeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0;
+  const deliveryFee = freeDelivery ? 0 : DELIVERY_FEE;
   // const discount = promo === 'applied' ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
-  // const total = subtotal - discount + deliveryFee;
+  const total = subtotal + deliveryFee;
 
   const savedIds = useMemo(() => Object.keys(saved).filter((id) => saved[id]), [saved]);
   // const savedProducts = useMemo(
@@ -190,27 +231,27 @@ export function CartProvider({ children }: { children: ReactNode }) {
 
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
-  // const goToCheckoutStep = useCallback(() => {
-  //   setStep((current) => (lines.length ? 'checkout' : current));
-  // }, [lines.length]);
+  const goToCheckoutStep = useCallback(() => {
+    setStep((current) => (lines.length ? 'checkout' : current));
+  }, [lines.length]);
 
   const goToBasketStep = useCallback(() => setStep('basket'), []);
 
   const placeOrder = useCallback(() => {
-    setQuantities({});
+    setProducts({});
     setPromo('none');
     setStep('done');
   }, []);
 
   const value: CartValue = {
     ready,
-    // lines,
-    // count,
-    // subtotal,
-    // deliveryFee,
-    // discount,
-    // total,
-    // isEmpty: lines.length === 0,
+    lines,
+    count,
+    subtotal,
+    deliveryFee,
+    discount: 0,
+    total,
+    isEmpty: lines.length === 0,
     add,
     bump,
     remove,
@@ -224,7 +265,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     step,
     openDrawer,
     closeDrawer,
-    // goToCheckoutStep,
+    goToCheckoutStep,
     goToBasketStep,
     placeOrder,
     promo,

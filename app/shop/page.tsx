@@ -3,13 +3,16 @@ import type { Metadata } from 'next';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ShopBrowser } from '@/components/shop/ShopBrowser';
+import { getProducts } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Усі квіти — MIG Flowers',
   description: 'Усе, що майстерня робить цього тижня. Букети, композиції та квіти у вазі.',
 };
 
-export default function ShopPage() {
+export default async function ShopPage() {
+  const products = await getProducts();
+
   return (
     <Section pt={44} pb={80}>
       <Breadcrumb trail={[{ label: 'Головна', href: '/' }, { label: 'Магазин' }]} />
@@ -25,7 +28,7 @@ export default function ShopPage() {
         Усе, що майстерня робить цього тижня. Звузьте пошук або скажіть нагоду — ми виберемо самі.
       </p>
       <Suspense fallback={null}>
-        <ShopBrowser />
+        <ShopBrowser products={products} />
       </Suspense>
     </Section>
   );

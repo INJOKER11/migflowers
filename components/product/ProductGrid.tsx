@@ -18,7 +18,7 @@ export function ProductGrid({
   priorityCount = 0,
 }: ProductGridProps) {
   return (
-    <div className="grid-auto" style={{ '--min': min, '--gap': `${gap}px` } as CSSProperties}>
+    <div className="grid-auto grid-fill" style={{ '--min': min, '--gap': `${gap}px` } as CSSProperties}>
       {products.map((product, i) => (
         <ProductCard
           key={product.id}
