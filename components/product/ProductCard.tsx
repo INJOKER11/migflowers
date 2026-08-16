@@ -38,7 +38,7 @@ interface ProductCardProps {
 export function ProductCard({ product, variant = 'shop', priority = false }: ProductCardProps) {
   const spec = SPECS[variant];
   const { add, isSaved, toggleSaved } = useCart();
-  const saved = isSaved(product.slug);
+  const saved = isSaved(product.id);
   const href = `/product/${product.slug}`;
 
   const plate = (

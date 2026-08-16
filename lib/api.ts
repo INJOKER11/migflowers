@@ -1,4 +1,4 @@
-import type { Product } from '@/types';
+import type {Category, Product} from '@/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -18,6 +18,15 @@ interface ApiProduct {
   is_available: boolean;
   image_url: string | null;
   category: { id: number; name: string; slug: string };
+}
+
+interface ApiCategory {
+  id: number;
+  name: string;
+  slug: string;
+  description: string;
+  image_url: string | null;
+  is_active: boolean;
 }
 
 interface ApiList<T> {
@@ -40,8 +49,17 @@ function toProduct(raw: ApiProduct): Product {
   };
 }
 
-export async function getProducts(): Promise<Product[]> {
-  const res = await fetch(`${BASE}/api/products/`, { next: { revalidate: REVALIDATE } });
+function toCategory(raw: ApiCategory): Category {
+  return { ...raw, id: String(raw.id) };
+}
+
+export async function getProducts(ids?: string[]): Promise<Product[]> {
+  if (ids?.length === 0) return [];
+
+  const params = new URLSearchParams();
+  ids?.forEach((id) => params.append('ids[]', id));
+  const query = params.size ? `?${params}` : '';
+  const res = await fetch(`${BASE}/api/products/${query}`, { next: { revalidate: REVALIDATE } });
   if (!res.ok) throw new Error(`GET /api/products failed: ${res.status}`);
   const json = (await res.json()) as ApiList<ApiProduct>;
   return json.data.map(toProduct);
@@ -53,4 +71,21 @@ export async function getProduct(slug: string): Promise<Product | null> {
   if (!res.ok) throw new Error(`GET /api/products/${slug} failed: ${res.status}`);
   const json = (await res.json()) as ApiItem<ApiProduct>;
   return toProduct(json.data);
+}
+
+
+export async function getCategories(): Promise<Category[] | null> {
+  const res = await fetch(`${BASE}/api/categories/`, {next: {revalidate: REVALIDATE}})
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error(`GET /api/categories/ failed: ${res.status}`);
+  const json = (await res.json()) as ApiList<ApiCategory>;
+  return json.data.map(toCategory);
+}
+
+export async function getCategory(slug: string): Promise<Category | null> {
+  const res = await fetch(`${BASE}/api/categories/${slug}`, {next: {revalidate: REVALIDATE}})
+  if(res.status === 404) return null;
+  if(!res.ok) throw new Error(`GET /api/categories/${slug} failed: ${res.status}`);
+  const json = (await res.json()) as ApiItem<ApiCategory>;
+  return toCategory(json.data);
 }

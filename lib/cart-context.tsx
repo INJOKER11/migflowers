@@ -45,7 +45,6 @@ interface CartValue {
 
   saved: Saved;
   savedIds: string[];
-  savedProducts: Product[];
   isSaved: (id: string) => boolean;
   toggleSaved: (id: string) => void;
 
@@ -215,10 +214,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const total = subtotal + deliveryFee;
 
   const savedIds = useMemo(() => Object.keys(saved).filter((id) => saved[id]), [saved]);
-  // const savedProducts = useMemo(
-  //   () => savedIds.map((id) => CATALOG.find((p) => p.id === id)).filter((p): p is Product => !!p),
-  //   [savedIds],
-  // );
 
   const applyPromo = useCallback((code: string) => {
     setPromo(code.trim().toUpperCase() === PROMO_CODE ? 'applied' : 'rejected');
@@ -258,7 +253,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     clear,
     saved,
     savedIds,
-    // savedProducts,
     isSaved: (id) => !!saved[id],
     toggleSaved,
     drawerOpen,
