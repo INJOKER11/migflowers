@@ -4,33 +4,35 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { CATEGORIES } from '@/lib/content';
-import { byOccasion } from '@/lib/catalog';
+import {getCategories, getCategory, getProducts} from "@/lib/api";
 
 interface Params {
   params: Promise<{ slug: string }>;
 }
 
-export function generateStaticParams() {
-  return Object.keys(CATEGORIES).map((slug) => ({ slug }));
+export async function generateStaticParams() {
+    const categories = await getCategories();
+  return (categories ?? []).map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const category = CATEGORIES[slug];
+  const category = await getCategory(slug);
+
   if (!category) return {};
-  return { title: `${category.name} — MIG Flowers`, description: category.blurb.slice(0, 160) };
+  return { title: `${category.name} — MIG Flowers`, description: category.description.slice(0, 160) };
 }
 
 export default async function CategoryPage({ params }: Params) {
   const { slug } = await params;
-  const category = CATEGORIES[slug];
+  const category = await getCategory(slug);
+  const products = await getProducts();
   if (!category) notFound();
 
   return (
     <section>
       <Plate
-        src={category.banner}
+        src={category.image_url}
         alt={category.name}
         ratio="auto"
         sizes="100vw"
@@ -58,10 +60,10 @@ export default async function CategoryPage({ params }: Params) {
             textAlign: 'justify',
           }}
         >
-          {category.blurb}
+          {category.description}
         </p>
 
-        <ProductGrid products={byOccasion(category.occasion)} variant="category" />
+        <ProductGrid products={products} variant="category" />
       </Section>
     </section>
   );

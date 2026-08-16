@@ -39,7 +39,7 @@ export function ProductDetail({ product }: { product: Product }) {
     >
       <div>
         <Plate
-          src={large?.[shot] ?? ""}
+          src={large?.[shot] ?? null}
           alt={product.name}
           sizes="(max-width: 1000px) 100vw, 560px"
           priority

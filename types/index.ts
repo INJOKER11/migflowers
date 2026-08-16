@@ -30,6 +30,15 @@ export interface Product {
   }
 }
 
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  description: string;
+  image_url: string | null;
+  is_active: boolean;
+}
+
 export interface CartLine {
   product: Product;
   qty: number;
