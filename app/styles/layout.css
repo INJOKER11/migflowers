@@ -39,6 +39,14 @@
   gap: var(--gap, 26px);
 }
 
+/* Same tracks, but empty ones are kept instead of collapsed, so a grid with
+   one or two items sizes its cards exactly as a full row would rather than
+   stretching them across the whole width. Wanted wherever the item count is
+   filtered (shop, category, wishlist), not for fixed-length galleries. */
+.grid-fill {
+  grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--min, 240px)), 1fr));
+}
+
 /* ── plates ────────────────────────────────────────────────────────────── */
 
 .plate {

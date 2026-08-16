@@ -64,13 +64,13 @@ export function FilterRail({
 }: FilterRailProps) {
   return (
     <aside data-sticky style={{ maxWidth: 280, position: 'sticky', top: 100 }}>
-      <Group label="Нагода" options={OCCASION_FILTERS} current={occasion} onPick={onOccasion} />
+      <Group label="Категорія" options={OCCASION_FILTERS} current={occasion} onPick={onOccasion} />
 
       <div className="hr" style={{ margin: '24px 0' }} />
       <Group label="Вид квітів" options={TYPE_FILTERS} current={type} onPick={onType} />
 
-      <div className="hr" style={{ margin: '24px 0' }} />
-      <Group label="Колір" options={COLOR_FILTERS} current={color} onPick={onColor} />
+      {/*<div className="hr" style={{ margin: '24px 0' }} />*/}
+      {/*<Group label="Колір" options={COLOR_FILTERS} current={color} onPick={onColor} />*/}
 
       <div className="hr" style={{ margin: '24px 0' }} />
       <label className="kicker" htmlFor="price-cap" style={{ display: 'block', marginBottom: 12 }}>

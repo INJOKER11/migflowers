@@ -69,14 +69,14 @@ export function Hero() {
           <Button href="/shop" cta style={{ padding: '13px 30px', fontSize: 12.5 }}>
             Купити зараз
           </Button>
-          <Button
-            href="/subscription"
-            variant="ghost"
-            cta
-            style={{ padding: '13px 26px', fontSize: 12.5 }}
-          >
-            Підписка на квіти
-          </Button>
+          {/*<Button*/}
+          {/*  href="/subscription"*/}
+          {/*  variant="ghost"*/}
+          {/*  cta*/}
+          {/*  style={{ padding: '13px 26px', fontSize: 12.5 }}*/}
+          {/*>*/}
+          {/*  Підписка на квіти*/}
+          {/*</Button>*/}
         </div>
 
         <div

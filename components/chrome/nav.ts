@@ -2,7 +2,7 @@
 export const NAV_LINKS = [
   { href: '/', label: 'Головна' },
   { href: '/shop', label: 'Магазин' },
-  { href: '/subscription', label: 'Підписка' },
+  // { href: '/subscription', label: 'Підписка' },
   { href: '/about', label: 'Про нас' },
   { href: '/delivery', label: 'Доставка' },
   { href: '/blog', label: 'Журнал' },

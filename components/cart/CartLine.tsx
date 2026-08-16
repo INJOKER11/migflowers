@@ -29,7 +29,7 @@ export function CartLine({ line, variant = 'drawer' }: CartLineProps) {
       }}
     >
       <Plate
-        src={product.img}
+        src={product.image_url}
         alt={product.name}
         sizes={`${size}px`}
         radius="var(--radius-sm)"

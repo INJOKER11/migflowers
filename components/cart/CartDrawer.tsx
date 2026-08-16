@@ -95,17 +95,17 @@ export function CartDrawer() {
             <div className="drawer-foot">
               <div className="summary-row">
                 <span>Сума</span>
-                <span className="tabular">{uah(cart.subtotal)}</span>
+                <span className="tabular">{uah(cart.subtotal ?? 0)}</span>
               </div>
               <div className="summary-row" style={{ marginTop: 8 }}>
                 <span>Доставка</span>
                 <span className="tabular">
-                  {cart.deliveryFee === 0 ? 'Безкоштовно' : uah(cart.deliveryFee)}
+                  {cart.deliveryFee === 0 ? 'Безкоштовно' : uah(cart.deliveryFee ?? 0)}
                 </span>
               </div>
               <div className="summary-total" style={{ fontSize: 22, marginTop: 14, paddingTop: 14 }}>
                 <span>До сплати</span>
-                <span className="tabular">{uah(cart.total)}</span>
+                <span className="tabular">{uah(cart.total ?? 0)}</span>
               </div>
               <Button
                 block

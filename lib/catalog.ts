@@ -226,9 +226,9 @@ export const TYPE_FILTERS = ['Усі', 'Троянди', 'Півонії', 'Лі
 
 export const COLOR_FILTERS = ['Усі', 'Рожевий', 'Білий', 'Червоний', 'Мікс'] as const;
 
-export const PRICE_MIN = 600;
-export const PRICE_MAX = 3600;
-export const PRICE_STEP = 100;
+export const PRICE_MIN = 0;
+export const PRICE_MAX = 5000;
+export const PRICE_STEP = 50;
 
 export interface ShopFilters {
   occasion: string;
