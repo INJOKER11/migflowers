@@ -15,7 +15,7 @@ import { arrangementCount } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { FilterRail } from './FilterRail';
-import type {Product, SortKey} from '@/types';
+import type { Product, SortKey } from '@/types';
 
 function pick(value: string | null, allowed: readonly string[]): string {
   return value && allowed.includes(value) ? value : 'Усі';
@@ -31,13 +31,10 @@ function pickCap(value: string | null): number {
   return Number.isFinite(n) && n > 0 ? Math.min(n, PRICE_MAX) : PRICE_MAX;
 }
 
-
-
-export function ShopBrowser({products}: {products: Product[]}) {
+export function ShopBrowser({ products }: { products: Product[] }) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-
   const occasion = pick(params.get('occasion'), OCCASION_FILTERS);
   const type = pick(params.get('type'), TYPE_FILTERS);
   const color = pick(params.get('color'), COLOR_FILTERS);
@@ -46,7 +43,6 @@ export function ShopBrowser({products}: {products: Product[]}) {
 
   const [priceCap, setPriceCap] = useState(urlCap);
   const [shown, setShown] = useState(PAGE_SIZE);
-
 
   const setParam = useCallback(
     (key: string, value: string | null) => {
@@ -75,8 +71,7 @@ export function ShopBrowser({products}: {products: Product[]}) {
     setShown(PAGE_SIZE);
   }, [occasion, type, color, priceCap]);
 
-  const setFilter = (key: string, value: string) =>
-    setParam(key, value === 'Усі' ? null : value);
+  const setFilter = (key: string, value: string) => setParam(key, value === 'Усі' ? null : value);
 
   const clearFilters = () => {
     setPriceCap(PRICE_MAX);
@@ -86,8 +81,6 @@ export function ShopBrowser({products}: {products: Product[]}) {
   // const matches = filterCatalog({ occasion, type, color, priceCap, sort });
   // const visible = matches.slice(0, shown);
   // const hasMore = matches.length > shown;
-
-
 
   return (
     <div
@@ -143,7 +136,9 @@ export function ShopBrowser({products}: {products: Product[]}) {
               id="sort"
               className="input"
               value={sort}
-              onChange={(e) => setParam('sort', e.target.value === 'popular' ? null : e.target.value)}
+              onChange={(e) =>
+                setParam('sort', e.target.value === 'popular' ? null : e.target.value)
+              }
               style={{ fontSize: 13, padding: '7px 10px' }}
             >
               {SORT_OPTIONS.map((option) => (
@@ -157,8 +152,7 @@ export function ShopBrowser({products}: {products: Product[]}) {
 
         <ProductGrid products={products} variant="shop" min="min(100%, 270px)" />
 
-
-          {/* todo: pagination */}
+        {/* todo: pagination */}
 
         {/*{hasMore && (*/}
         {/*  <div style={{ textAlign: 'center', marginTop: 44 }}>*/}

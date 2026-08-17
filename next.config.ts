@@ -12,10 +12,15 @@ const nextConfig: NextConfig = {
         protocol: 'http',
         hostname: 'localhost',
         port: '8080',
-        pathname: '/storage/**'
-      }
+        pathname: '/storage/**',
+      },
     ],
     dangerouslyAllowLocalIP: true,
+  },
+  logging: {
+    fetches: {
+      fullUrl: true,
+    },
   },
 };
 

@@ -1,4 +1,4 @@
-import type { Occasion, Product, SortKey } from '@/types';
+import type {Product, SortKey } from '@/types';
 import { photo } from './images';
 import { VARIANT_MULTIPLIERS } from './constants';
 import { roundTo10 } from './format';
@@ -229,21 +229,3 @@ export const COLOR_FILTERS = ['Усі', 'Рожевий', 'Білий', 'Чер�
 export const PRICE_MIN = 0;
 export const PRICE_MAX = 5000;
 export const PRICE_STEP = 50;
-
-export interface ShopFilters {
-  occasion: string;
-  type: string;
-  color: string;
-  priceCap: number;
-  sort: SortKey;
-}
-
-// export function filterCatalog(f: ShopFilters): Product[] {
-//   return CATALOG.filter(
-//     (p) =>
-//       (f.occasion === 'Усі' || p.occasion === f.occasion) &&
-//       (f.type === 'Усі' || p.type === f.type) &&
-//       (f.color === 'Усі' || p.color === f.color) &&
-//       p.price <= f.priceCap,
-//   ).sort(SORTERS[f.sort]);
-// }

@@ -23,7 +23,7 @@ export function WishlistView() {
     let ignore = false;
     setLoading(true);
 
-    getProducts(savedIds)
+    getProducts({ ids: savedIds })
       .then((data) => {
         if (!ignore) setFetched(data);
       })
