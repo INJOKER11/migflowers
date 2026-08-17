@@ -226,6 +226,8 @@ export const TYPE_FILTERS = ['Усі', 'Троянди', 'Півонії', 'Лі
 
 export const COLOR_FILTERS = ['Усі', 'Рожевий', 'Білий', 'Червоний', 'Мікс'] as const;
 
-export const PRICE_MIN = 0;
+/* The slider sets a maximum price, so its floor is one step rather than zero —
+   a cap of 0 ₴ matches nothing and reads as the opposite of what it does. */
+export const PRICE_MIN = 50;
 export const PRICE_MAX = 5000;
 export const PRICE_STEP = 50;
