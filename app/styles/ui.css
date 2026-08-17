@@ -90,3 +90,25 @@
 .rail-dot[data-done='true'] { background: var(--color-accent); }
 .rail-leg { flex: 1; height: 2px; background: var(--color-neutral-300); }
 .rail-leg[data-done='true'] { background: var(--color-accent); }
+
+/* ── loading skeletons ─────────────────────────────────────────────────── */
+
+/* A bar of nothing, for Suspense fallbacks. Both stops come from the neutral
+   ramp so skeletons retune with the palette instead of drifting from it.
+   The reduced-motion block in layout.css already stills the sweep. */
+.skeleton {
+  background: linear-gradient(
+      90deg,
+      var(--color-neutral-200) 0%,
+      var(--color-neutral-100) 50%,
+      var(--color-neutral-200) 100%
+    )
+    0 0 / 200% 100%;
+  border-radius: var(--radius-sm);
+  animation: migShimmer 1.4s ease-in-out infinite;
+}
+
+@keyframes migShimmer {
+  from { background-position: 100% 0 }
+  to   { background-position: -100% 0 }
+}

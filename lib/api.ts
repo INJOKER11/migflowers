@@ -1,11 +1,10 @@
-import type {Category, Product} from '@/types';
+import type { Category, Product } from '@/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL;
 
 /* One hour: the catalogue changes a few times a week, and every page that
    shows products is otherwise fully static. */
 const REVALIDATE = 3600;
-
 
 interface ApiProduct {
   id: number;
@@ -53,39 +52,66 @@ function toCategory(raw: ApiCategory): Category {
   return { ...raw, id: String(raw.id) };
 }
 
-export async function getProducts(ids?: string[]): Promise<Product[]> {
+export interface ProductQuery {
+  ids?: string[];
+  page?: number;
+  perPage?: number;
+}
+
+export interface CategoryQuery {
+  perPage?: number;
+}
+
+export async function getProducts(query: ProductQuery = {}): Promise<Product[]> {
+  const { ids, page, perPage } = query;
   if (ids?.length === 0) return [];
 
   const params = new URLSearchParams();
   ids?.forEach((id) => params.append('ids[]', id));
-  const query = params.size ? `?${params}` : '';
-  const res = await fetch(`${BASE}/api/products/${query}`, { next: { revalidate: REVALIDATE } });
+
+  if (page !== undefined) params.set('page', String(page));
+  if (perPage !== undefined) params.set('per_page', String(perPage));
+
+  const search = params.size ? `?${params}` : '';
+  const res = await fetch(`${BASE}/api/products/${search}`, { next: { revalidate: REVALIDATE } });
+
   if (!res.ok) throw new Error(`GET /api/products failed: ${res.status}`);
+
   const json = (await res.json()) as ApiList<ApiProduct>;
   return json.data.map(toProduct);
 }
 
 export async function getProduct(slug: string): Promise<Product | null> {
   const res = await fetch(`${BASE}/api/products/${slug}`, { next: { revalidate: REVALIDATE } });
+
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`GET /api/products/${slug} failed: ${res.status}`);
+
   const json = (await res.json()) as ApiItem<ApiProduct>;
   return toProduct(json.data);
 }
 
+export async function getCategories(query: CategoryQuery = {}): Promise<Category[]> {
+  const { perPage } = query;
 
-export async function getCategories(): Promise<Category[] | null> {
-  const res = await fetch(`${BASE}/api/categories/`, {next: {revalidate: REVALIDATE}})
-  if(res.status === 404) return null;
-  if(!res.ok) throw new Error(`GET /api/categories/ failed: ${res.status}`);
+  const params = new URLSearchParams();
+
+  if (perPage !== undefined) params.set('per_page', String(perPage));
+  const search = params.size ? `?${params}` : '';
+  const res = await fetch(`${BASE}/api/categories/${search}`, { next: { revalidate: REVALIDATE } });
+
+  if (!res.ok) throw new Error(`GET /api/categories/ failed: ${res.status}`);
+
   const json = (await res.json()) as ApiList<ApiCategory>;
   return json.data.map(toCategory);
 }
 
 export async function getCategory(slug: string): Promise<Category | null> {
-  const res = await fetch(`${BASE}/api/categories/${slug}`, {next: {revalidate: REVALIDATE}})
-  if(res.status === 404) return null;
-  if(!res.ok) throw new Error(`GET /api/categories/${slug} failed: ${res.status}`);
+  const res = await fetch(`${BASE}/api/categories/${slug}`, { next: { revalidate: REVALIDATE } });
+
+  if (res.status === 404) return null;
+  if (!res.ok) throw new Error(`GET /api/categories/${slug} failed: ${res.status}`);
+
   const json = (await res.json()) as ApiItem<ApiCategory>;
   return toCategory(json.data);
 }
