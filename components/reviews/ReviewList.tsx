@@ -1,31 +1,20 @@
-'use client';
+import { shortDate, stars } from '@/lib/format';
+import { Review } from '@/types';
 
-import { useState } from 'react';
-import { REVIEW_FILTERS, filterReviews, stars, type ReviewFilter } from '@/lib/reviews';
-import { Chip } from '@/components/ui/Chip';
-
-export function ReviewList() {
-  const [filter, setFilter] = useState<ReviewFilter>('Усі');
-  const reviews = filterReviews(filter);
+export function ReviewList({ reviews }: { reviews: Review[] }) {
+  if (reviews.length === 0) {
+    return (
+      <p style={{ margin: '40px 0', fontSize: 15, color: 'var(--color-neutral-600)' }}>
+        Ще жодного відгуку. Ваш може стати першим.
+      </p>
+    );
+  }
 
   return (
-    <>
-      <div style={{ display: 'flex', gap: 8, margin: '30px 0 10px', flexWrap: 'wrap' }}>
-        {REVIEW_FILTERS.map((label) => (
-          <Chip
-            key={label}
-            active={label === filter}
-            onClick={() => setFilter(label)}
-            className="chip-review"
-          >
-            {label}
-          </Chip>
-        ))}
-      </div>
-
+    <div style={{ marginTop: 30 }}>
       {reviews.map((review) => (
         <div
-          key={review.name}
+          key={review.id}
           style={{ padding: '26px 0', borderBottom: '1px solid var(--color-divider)' }}
         >
           <div
@@ -35,12 +24,11 @@ export function ReviewList() {
               gap: 16,
               flexWrap: 'wrap',
               alignItems: 'baseline',
-
             }}
           >
             <div style={{ fontFamily: 'var(--font-heading)', fontSize: 19 }}>{review.name}</div>
             <div className="tabular" style={{ fontSize: 12.5, color: 'var(--color-neutral-600)' }}>
-              {review.meta}
+              {[shortDate(review.created_at), review.product_name].filter(Boolean).join(' · ')}
             </div>
           </div>
 
@@ -66,10 +54,10 @@ export function ReviewList() {
               textAlign: 'justify',
             }}
           >
-            {review.text}
+            {review.comment}
           </p>
         </div>
       ))}
-    </>
+    </div>
   );
 }
