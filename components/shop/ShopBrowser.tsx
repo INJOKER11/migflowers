@@ -2,23 +2,21 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import {
-  COLOR_FILTERS,
-  OCCASION_FILTERS,
-  PRICE_MAX,
-  SORT_OPTIONS,
-  TYPE_FILTERS,
-  // filterCatalog,
-} from '@/lib/catalog';
-import { PAGE_SIZE } from '@/lib/constants';
+import { COLOR_FILTERS, PRICE_MAX, PRICE_MIN, SORT_OPTIONS, TYPE_FILTERS } from '@/lib/catalog';
 import { arrangementCount } from '@/lib/format';
-import { Button } from '@/components/ui/Button';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { FilterRail } from './FilterRail';
-import type { Product, SortKey } from '@/types';
+import type { Category, Product, SortKey } from '@/types';
 
-function pick(value: string | null, allowed: readonly string[]): string {
-  return value && allowed.includes(value) ? value : 'Усі';
+function pick(
+  value: string | null,
+  allowed: readonly string[] | { value: string; name: string }[],
+): string {
+  if (Array.isArray(allowed)) {
+    const f = allowed.find((a) => a.value === value);
+    return f?.value ?? 'All';
+  }
+  return value && allowed.includes(value) ? value : 'All';
 }
 
 function pickSort(value: string | null): SortKey {
@@ -26,23 +24,38 @@ function pickSort(value: string | null): SortKey {
   return match ? match.value : 'popular';
 }
 
+/* An absent param means no cap. Checked before Number(), because Number(null)
+   is 0 — reading the two cases together is what made a dragged-to-floor slider
+   snap back to PRICE_MAX. */
 function pickCap(value: string | null): number {
+  if (value === null) return PRICE_MAX;
   const n = Number(value);
-  return Number.isFinite(n) && n > 0 ? Math.min(n, PRICE_MAX) : PRICE_MAX;
+  if (!Number.isFinite(n)) return PRICE_MAX;
+  return Math.min(Math.max(n, PRICE_MIN), PRICE_MAX);
 }
 
-export function ShopBrowser({ products }: { products: Product[] }) {
+export function ShopBrowser({
+  products,
+  categories,
+}: {
+  products: Product[];
+  categories: Category[];
+}) {
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
-  const occasion = pick(params.get('occasion'), OCCASION_FILTERS);
+
+  const mappedCategories = categories.map((c) => ({
+    value: c.slug,
+    name: c.name,
+  }));
+  const category = pick(params.get('category'), mappedCategories);
   const type = pick(params.get('type'), TYPE_FILTERS);
   const color = pick(params.get('color'), COLOR_FILTERS);
   const sort = pickSort(params.get('sort'));
-  const urlCap = pickCap(params.get('max'));
+  const urlCap = pickCap(params.get('maxPrice'));
 
   const [priceCap, setPriceCap] = useState(urlCap);
-  const [shown, setShown] = useState(PAGE_SIZE);
 
   const setParam = useCallback(
     (key: string, value: string | null) => {
@@ -60,27 +73,18 @@ export function ShopBrowser({ products }: { products: Product[] }) {
   useEffect(() => {
     if (priceCap === urlCap) return;
     const timer = setTimeout(
-      () => setParam('max', priceCap === PRICE_MAX ? null : String(priceCap)),
+      () => setParam('maxPrice', priceCap === PRICE_MAX ? null : String(priceCap)),
       250,
     );
     return () => clearTimeout(timer);
   }, [priceCap, urlCap, setParam]);
 
-  /* Changing any filter puts the page back to the first nine. */
-  useEffect(() => {
-    setShown(PAGE_SIZE);
-  }, [occasion, type, color, priceCap]);
-
-  const setFilter = (key: string, value: string) => setParam(key, value === 'Усі' ? null : value);
+  const setFilter = (key: string, value: string) => setParam(key, value === 'All' ? null : value);
 
   const clearFilters = () => {
     setPriceCap(PRICE_MAX);
     router.replace(pathname, { scroll: false });
   };
-
-  // const matches = filterCatalog({ occasion, type, color, priceCap, sort });
-  // const visible = matches.slice(0, shown);
-  // const hasMore = matches.length > shown;
 
   return (
     <div
@@ -93,15 +97,16 @@ export function ShopBrowser({ products }: { products: Product[] }) {
       }}
     >
       <FilterRail
-        occasion={occasion}
         type={type}
         color={color}
         priceCap={priceCap}
-        onOccasion={(v) => setFilter('occasion', v)}
+        onCategory={(v) => setFilter('category', v)}
         onType={(v) => setFilter('type', v)}
         onColor={(v) => setFilter('color', v)}
         onPriceCap={setPriceCap}
         onClear={clearFilters}
+        categories={mappedCategories}
+        selectedCategory={category}
       />
 
       <div>

@@ -11,17 +11,19 @@ import {
   PRICE_STEP,
   TYPE_FILTERS,
 } from '@/lib/catalog';
+import { Category } from '@/types';
 
 interface FilterRailProps {
-  occasion: string;
   type: string;
   color: string;
   priceCap: number;
-  onOccasion: (value: string) => void;
+  onCategory: (value: string) => void;
   onType: (value: string) => void;
   onColor: (value: string) => void;
   onPriceCap: (value: number) => void;
   onClear: () => void;
+  categories: { value: string; name: string }[];
+  selectedCategory: string;
 }
 
 function Group({
@@ -31,8 +33,8 @@ function Group({
   onPick,
 }: {
   label: string;
-  options: readonly string[];
-  current: string;
+  options: readonly { value: string; name: string }[];
+  current?: string;
   onPick: (value: string) => void;
 }) {
   return (
@@ -42,8 +44,12 @@ function Group({
       </div>
       <ChipRow>
         {options.map((option) => (
-          <Chip key={option} active={option === current} onClick={() => onPick(option)}>
-            {option}
+          <Chip
+            key={option.value}
+            active={option.value === current}
+            onClick={() => onPick(option.value)}
+          >
+            {option.name}
           </Chip>
         ))}
       </ChipRow>
@@ -52,22 +58,32 @@ function Group({
 }
 
 export function FilterRail({
-  occasion,
   type,
   color,
   priceCap,
-  onOccasion,
+  onCategory,
   onType,
   onColor,
   onPriceCap,
   onClear,
+  categories,
+  selectedCategory,
 }: FilterRailProps) {
   return (
     <aside data-sticky style={{ maxWidth: 280, position: 'sticky', top: 100 }}>
-      <Group label="Категорія" options={OCCASION_FILTERS} current={occasion} onPick={onOccasion} />
+      <Group
+        label="Категорія"
+        options={categories}
+        current={selectedCategory}
+        onPick={onCategory}
+      />
 
-      <div className="hr" style={{ margin: '24px 0' }} />
-      <Group label="Вид квітів" options={TYPE_FILTERS} current={type} onPick={onType} />
+      {/*todo: think about type of flowers*/}
+
+      {/*<div className="hr" style={{ margin: '24px 0' }} />*/}
+      {/*<Group label="Вид квітів" options={TYPE_FILTERS} current={type} onPick={onType} />*/}
+
+      {/*todo: think about color of flowers*/}
 
       {/*<div className="hr" style={{ margin: '24px 0' }} />*/}
       {/*<Group label="Колір" options={COLOR_FILTERS} current={color} onPick={onColor} />*/}

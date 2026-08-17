@@ -56,6 +56,9 @@ export interface ProductQuery {
   ids?: string[];
   page?: number;
   perPage?: number;
+  maxPrice?: number;
+  category?: string;
+  sort?: string;
 }
 
 export interface CategoryQuery {
@@ -63,12 +66,15 @@ export interface CategoryQuery {
 }
 
 export async function getProducts(query: ProductQuery = {}): Promise<Product[]> {
-  const { ids, page, perPage } = query;
+  const { ids, page, perPage, category, maxPrice, sort } = query;
   if (ids?.length === 0) return [];
 
   const params = new URLSearchParams();
   ids?.forEach((id) => params.append('ids[]', id));
 
+  if (maxPrice !== undefined) params.set('max_price', String(maxPrice));
+  if (category !== undefined) params.set('category', String(category));
+  if (sort !== undefined) params.set('sort', String(sort));
   if (page !== undefined) params.set('page', String(page));
   if (perPage !== undefined) params.set('per_page', String(perPage));
 
