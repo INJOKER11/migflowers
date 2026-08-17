@@ -20,7 +20,7 @@ export async function OccasionGrid() {
           {categories.map((category) => (
             <Link
               key={category.name}
-              href={`/shop?occasion=${encodeURIComponent(category.name)}`}
+              href={{ pathname: '/shop', query: { category: category.slug } }}
               className="occasion-cell"
             >
               <div style={{ fontFamily: 'var(--font-heading)', fontSize: 26 }}>{category.name}</div>

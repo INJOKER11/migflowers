@@ -1,4 +1,4 @@
-import type { Cadence, OccasionEntry, Plan, TeamMember, Testimonial } from '@/types';
+import type { Cadence, OccasionEntry, Plan, TeamMember } from '@/types';
 import { photo, type PhotoKey } from './images';
 
 /** Home — the dark occasions band. Each cell links to /shop pre-filtered. */
@@ -30,21 +30,6 @@ export const WHY_US = [
     n: '04',
     title: 'Прості повернення',
     body: 'Не той день, не та адреса, змінилися плани. Напишіть протягом доби — усе владнаємо.',
-  },
-];
-
-export const TESTIMONIALS: Testimonial[] = [
-  {
-    quote: 'Вони відтворили весільний букет моєї мами зі старої фотографії. Вона плакала ще в коридорі.',
-    name: 'Оксана М. · Львів',
-  },
-  {
-    quote: 'Замовив опівдні з іншої країни. Тато отримав квіти о пʼятій, разом із моєю запискою.',
-    name: 'Андрій К. · Варшава',
-  },
-  {
-    quote: 'Одинадцять днів, а ранункулюси досі стоять. Я перестала купувати квіти будь-де інде.',
-    name: 'Галина П. · Львів',
   },
 ];
 

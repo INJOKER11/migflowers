@@ -1,10 +1,8 @@
-import type { Category, Product } from '@/types';
+import type { Category, Product, Review } from '@/types';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL;
 
-/* One hour: the catalogue changes a few times a week, and every page that
-   shows products is otherwise fully static. */
-const REVALIDATE = 3600;
+const REVALIDATE = 1800;
 
 interface ApiProduct {
   id: number;
@@ -26,6 +24,15 @@ interface ApiCategory {
   description: string;
   image_url: string | null;
   is_active: boolean;
+}
+
+interface ApiReview {
+  id: number;
+  name: string;
+  comment: string;
+  product_name: string | null;
+  rating: number;
+  created_at: string;
 }
 
 interface ApiList<T> {
@@ -52,6 +59,10 @@ function toCategory(raw: ApiCategory): Category {
   return { ...raw, id: String(raw.id) };
 }
 
+function toReview(raw: ApiReview): Review {
+  return { ...raw, id: String(raw.id) };
+}
+
 export interface ProductQuery {
   ids?: string[];
   page?: number;
@@ -62,6 +73,11 @@ export interface ProductQuery {
 }
 
 export interface CategoryQuery {
+  perPage?: number;
+}
+
+export interface ReviewQuery {
+  page?: number;
   perPage?: number;
 }
 
@@ -120,4 +136,51 @@ export async function getCategory(slug: string): Promise<Category | null> {
 
   const json = (await res.json()) as ApiItem<ApiCategory>;
   return toCategory(json.data);
+}
+
+async function fetchReviewPage(query: ReviewQuery = {}): Promise<ApiList<ApiReview>> {
+  const { page, perPage } = query;
+
+  const params = new URLSearchParams();
+
+  if (page !== undefined) params.set('page', String(page));
+  if (perPage !== undefined) params.set('per_page', String(perPage));
+  const search = params.size ? `?${params}` : '';
+  const res = await fetch(`${BASE}/api/reviews/${search}`, { next: { revalidate: REVALIDATE } });
+  if (!res.ok) throw new Error(`GET /api/reviews/${search} failed: ${res.status}`);
+
+  return (await res.json()) as ApiList<ApiReview>;
+}
+
+export async function getReviews(query: ReviewQuery = {}): Promise<Review[]> {
+  const json = await fetchReviewPage(query);
+  return json.data.map(toReview);
+}
+
+const REVIEW_BATCH = 100;
+
+export interface ReviewCollection {
+  reviews: Review[];
+  total: number;
+  /** Mean rating over every review, or 0 when there are none. */
+  average: number;
+}
+
+export async function getAllReviews(): Promise<ReviewCollection> {
+  const first = await fetchReviewPage({ perPage: REVIEW_BATCH });
+
+  const rest = await Promise.all(
+    Array.from({ length: Math.max(0, first.meta.last_page - 1) }, (_, i) =>
+      fetchReviewPage({ page: i + 2, perPage: REVIEW_BATCH }),
+    ),
+  );
+
+  const reviews = [first, ...rest].flatMap((json) => json.data.map(toReview));
+  const sum = reviews.reduce((acc, review) => acc + review.rating, 0);
+
+  return {
+    reviews,
+    total: first.meta.total,
+    average: reviews.length ? sum / reviews.length : 0,
+  };
 }

@@ -2,15 +2,17 @@
 
 import Link from 'next/link';
 import { useState } from 'react';
-import { TESTIMONIALS } from '@/lib/content';
 import { Button } from '@/components/ui/Button';
 import { ChevronLeft, ChevronRight, Quote, STROKE_HEAVY } from '@/components/ui/icons';
+import { Review } from '@/types';
 
-export function TestimonialCarousel() {
+export function TestimonialCarousel({ reviews }: { reviews: Review[] }) {
   const [index, setIndex] = useState(0);
-  const current = TESTIMONIALS[index];
-  const step = (delta: number) =>
-    setIndex((i) => (i + delta + TESTIMONIALS.length) % TESTIMONIALS.length);
+
+  const current = reviews.length ? reviews[index % reviews.length] : null;
+  const step = (delta: number) => setIndex((i) => (i + delta + reviews.length) % reviews.length);
+
+  if (!current) return null;
 
   return (
     <section
@@ -41,7 +43,7 @@ export function TestimonialCarousel() {
             textWrap: 'pretty',
           }}
         >
-          {current.quote}
+          {current.comment}
         </p>
 
         <div
@@ -76,7 +78,7 @@ export function TestimonialCarousel() {
             <ChevronLeft size={15} strokeWidth={STROKE_HEAVY} />
           </Button>
           <span className="tabular" style={{ fontSize: 12, color: 'var(--color-neutral-600)' }}>
-            {index + 1} / {TESTIMONIALS.length}
+            {index + 1} / {reviews.length}
           </span>
           <Button
             variant="ghost"

@@ -1,9 +1,4 @@
-export type Occasion =
-  | 'День народження'
-  | 'Річниця'
-  | 'Весілля'
-  | 'Співчуття'
-  | 'Без нагоди';
+export type Occasion = 'День народження' | 'Річниця' | 'Весілля' | 'Співчуття' | 'Без нагоди';
 
 export type FlowerType = 'Троянди' | 'Півонії' | 'Лілії' | 'Сезонні';
 
@@ -27,7 +22,7 @@ export interface Product {
     id: string;
     name: string;
     slug: string;
-  }
+  };
 }
 
 export interface Category {
@@ -37,6 +32,15 @@ export interface Category {
   description: string;
   image_url: string | null;
   is_active: boolean;
+}
+
+export interface Review {
+  id: string;
+  name: string;
+  comment: string;
+  rating: number;
+  product_name: string | null;
+  created_at: string;
 }
 
 export interface CartLine {
@@ -61,18 +65,6 @@ export interface Post {
 export interface Faq {
   q: string;
   a: string;
-}
-
-export interface Review {
-  name: string;
-  meta: string;
-  rating: 4 | 5;
-  text: string;
-}
-
-export interface Testimonial {
-  quote: string;
-  name: string;
 }
 
 export interface OccasionEntry {
