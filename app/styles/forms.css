@@ -42,3 +42,15 @@ textarea.input { min-height: 90px; resize: vertical; }
 .chip-cadence { padding: 10px 18px; font-size: 13px; }
 .chip-review { padding: 8px 15px; }
 .chip-row { display: flex; gap: 8px; flex-wrap: wrap; }
+
+/* ── validation ────────────────────────────────────────────────────────── */
+
+/* The API validates, not the client: these render whatever Laravel returned
+   for a field, under the input it belongs to. */
+.field-error {
+  margin: 5px 0 0;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--color-danger);
+}
+.input-invalid, .input-invalid:hover { border-color: var(--color-danger); }
