@@ -1,4 +1,4 @@
-import type {Product, SortKey } from '@/types';
+import type { Product, SortKey } from '@/types';
 import { photo } from './images';
 import { VARIANT_MULTIPLIERS } from './constants';
 import { roundTo10 } from './format';
@@ -175,9 +175,9 @@ import { roundTo10 } from './format';
 
 export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'popular', label: 'За популярністю' },
-  { value: 'new', label: 'Найновіші' },
-  { value: 'low', label: 'Ціна: від найнижчої' },
-  { value: 'high', label: 'Ціна: від найвищої' },
+  { value: 'newest', label: 'Найновіші' },
+  { value: 'price_asc', label: 'Ціна: від найнижчої' },
+  { value: 'price_desc', label: 'Ціна: від найвищої' },
 ];
 
 /** Мала / Стандарт / Велика against the Signature price. */
@@ -187,7 +187,7 @@ export function variantPrice(base: number, variantIndex: number): number {
 
 /** The four shots on the product page: the arrangement, then three angles. */
 export function productShots(product: Product, width: number): string[] | null {
-  if(!product.image_url) return null;
+  if (!product.image_url) return null;
   return [
     product.image_url,
     photo('bench', width),

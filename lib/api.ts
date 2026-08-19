@@ -162,7 +162,6 @@ const REVIEW_BATCH = 100;
 export interface ReviewCollection {
   reviews: Review[];
   total: number;
-  /** Mean rating over every review, or 0 when there are none. */
   average: number;
 }
 

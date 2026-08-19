@@ -48,7 +48,7 @@ export interface CartLine {
   qty: number;
 }
 
-export type SortKey = 'popular' | 'new' | 'low' | 'high';
+export type SortKey = 'popular' | 'newest' | 'price_desc' | 'price_asc';
 
 export type DrawerStep = 'basket' | 'checkout' | 'done';
 
