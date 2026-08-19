@@ -61,12 +61,7 @@ export function OrderSummary() {
           onChange={(e) => setDraft(e.target.value)}
           style={{ flex: 1, fontSize: 13 }}
         />
-        <Button
-          type="submit"
-          variant="ghost"
-          cta="sm"
-          style={{ padding: '0 16px' }}
-        >
+        <Button type="submit" variant="ghost" cta="sm" style={{ padding: '0 16px' }}>
           Застосувати
         </Button>
       </form>

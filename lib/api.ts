@@ -183,3 +183,51 @@ export async function getAllReviews(): Promise<ReviewCollection> {
     average: reviews.length ? sum / reviews.length : 0,
   };
 }
+
+/** Laravel's validation envelope: one or more messages per field. Keys are
+    field names, or dotted paths for array members — `items.0.product_id`. */
+export type FieldErrors = Record<string, string[]>;
+
+/** A 422 from the API. Carries the per-field messages so the form can show
+    them where they belong; every other failure stays a plain Error. */
+export class OrderValidationError extends Error {
+  constructor(readonly fields: FieldErrors) {
+    super('Order validation failed');
+    this.name = 'OrderValidationError';
+  }
+}
+
+export interface OrderItem {
+  product_id: number;
+  quantity: number;
+}
+
+export interface Order {
+  customer_name: string;
+  customer_email: string;
+  customer_phone: string;
+  delivery_address: string;
+  /** ISO `YYYY-MM-DD`; the API rejects anything before today. */
+  delivery_date: string;
+  recipient_name?: string;
+  card_message?: string;
+  /** `online` or `cash_on_delivery` — see PAYMENT_METHOD in CheckoutForm. */
+  payment_method: string;
+  items: OrderItem[];
+}
+
+export async function createOrder(values: Order): Promise<unknown> {
+  const res = await fetch(`${BASE}/api/orders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
+    body: JSON.stringify(values),
+  });
+
+  if (res.status === 422) {
+    const json = (await res.json()) as { errors?: FieldErrors };
+    throw new OrderValidationError(json.errors ?? {});
+  }
+  if (!res.ok) throw new Error(`POST /api/orders failed: ${res.status}`);
+
+  return res.json();
+}

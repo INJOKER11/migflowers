@@ -166,12 +166,6 @@ import { roundTo10 } from './format';
 //   return CATALOG.slice(0, count);
 // }
 
-// export const SORTERS: Record<SortKey, (a: Product, b: Product) => number> = {
-//   popular: (a, b) => a.rank - b.rank,
-//   new: (a, b) => a.age - b.age,
-//   low: (a, b) => a.price - b.price,
-//   high: (a, b) => b.price - a.price,
-// };
 
 export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
   { value: 'popular', label: 'За популярністю' },

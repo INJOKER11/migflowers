@@ -5,8 +5,15 @@
 
 /* ── product card ──────────────────────────────────────────────────────── */
 
-.product-card { display: flex; flex-direction: column; }
-.product-media { position: relative; overflow: hidden; border-radius: var(--radius-md); }
+.product-card {
+  display: flex;
+  flex-direction: column;
+}
+.product-media {
+  position: relative;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+}
 .product-tag {
   position: absolute;
   top: 12px;
@@ -29,7 +36,9 @@
   line-height: 1.2;
   color: var(--color-text);
 }
-.product-name:hover { color: var(--color-accent-700); }
+.product-name:hover {
+  color: var(--color-accent-700);
+}
 .product-note {
   font-size: 12.5px;
   color: var(--color-neutral-600);
@@ -39,7 +48,10 @@
 
 /* ── occasions band ────────────────────────────────────────────────────── */
 
-.occasion-band { background: var(--color-neutral-900); color: var(--color-neutral-100); }
+.occasion-band {
+  background: var(--color-neutral-900);
+  color: var(--color-neutral-100);
+}
 .occasion-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 230px), 1fr));
@@ -54,7 +66,10 @@
   transition: background 0.3s;
   box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.14);
 }
-.occasion-cell:hover { background: #3a3735; color: var(--color-neutral-100); }
+.occasion-cell:hover {
+  background: #3a3735;
+  color: var(--color-neutral-100);
+}
 
 /* ── cart / drawer ─────────────────────────────────────────────────────── */
 
@@ -87,8 +102,15 @@
   padding: 20px 26px;
   border-bottom: 1px solid var(--color-divider);
 }
-.drawer-body { flex: 1; overflow-y: auto; padding: 4px 26px; }
-.drawer-foot { padding: 20px 26px; border-top: 1px solid var(--color-divider); }
+.drawer-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 4px 26px;
+}
+.drawer-foot {
+  padding: 20px 26px;
+  border-top: 1px solid var(--color-divider);
+}
 
 .stepper {
   display: flex;
@@ -107,7 +129,11 @@
   font-size: 16px;
   font-family: var(--font-body);
 }
-.stepper span { min-width: 20px; text-align: center; font-size: 13px; }
+.stepper span {
+  min-width: 20px;
+  text-align: center;
+  font-size: 13px;
+}
 
 .summary-row {
   display: flex;
@@ -120,11 +146,12 @@
   justify-content: space-between;
   font-family: var(--font-heading);
   font-size: 24px;
-  margin-top: 16px;
-  padding-top: 16px;
-  border-top: 1px solid var(--color-divider);
 }
 
 /* ── product detail ────────────────────────────────────────────────────── */
 
-.thumbs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+.thumbs {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}

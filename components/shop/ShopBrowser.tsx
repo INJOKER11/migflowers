@@ -141,9 +141,7 @@ export function ShopBrowser({
               id="sort"
               className="input"
               value={sort}
-              onChange={(e) =>
-                setParam('sort', e.target.value === 'popular' ? null : e.target.value)
-              }
+              onChange={(e) => setParam('sort', e.target.value)}
               style={{ fontSize: 13, padding: '7px 10px' }}
             >
               {SORT_OPTIONS.map((option) => (

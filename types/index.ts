@@ -50,8 +50,6 @@ export interface CartLine {
 
 export type SortKey = 'popular' | 'newest' | 'price_desc' | 'price_asc';
 
-export type DrawerStep = 'basket' | 'checkout' | 'done';
-
 export interface Post {
   slug: string;
   kicker: string;
