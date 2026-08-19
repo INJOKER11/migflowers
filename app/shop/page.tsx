@@ -4,7 +4,8 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ShopBrowser } from '@/components/shop/ShopBrowser';
 import { getCategories, getProducts } from '@/lib/api';
-import { PRICE_MAX, PRICE_MIN } from '@/lib/catalog';
+import { PRICE_MAX, PRICE_MIN, SORT_OPTIONS } from '@/lib/catalog';
+import { SortKey } from '@/types';
 
 export const metadata: Metadata = {
   title: 'Усі квіти — MIG Flowers',
@@ -25,6 +26,11 @@ function toPrice(value: Param): number | undefined {
   return Math.min(Math.max(n, PRICE_MIN), PRICE_MAX);
 }
 
+function toSort(value: Param): string | undefined {
+  const raw = one(value);
+  return SORT_OPTIONS.some((o) => o.value === raw) ? (raw as SortKey) : 'popular';
+}
+
 export default async function ShopPage({
   searchParams,
 }: {
@@ -32,9 +38,12 @@ export default async function ShopPage({
 }) {
   const sp = await searchParams;
 
-  /* Independent requests — awaiting them in sequence cost two round trips. */
   const [products, categories] = await Promise.all([
-    getProducts({ category: one(sp.category), maxPrice: toPrice(sp.maxPrice) }),
+    getProducts({
+      category: one(sp.category),
+      maxPrice: toPrice(sp.maxPrice),
+      sort: toSort(sp.sort),
+    }),
     getCategories(),
   ]);
 

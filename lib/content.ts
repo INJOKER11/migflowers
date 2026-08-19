@@ -1,14 +1,6 @@
 import type { Cadence, OccasionEntry, Plan, TeamMember } from '@/types';
 import { photo, type PhotoKey } from './images';
 
-/** Home — the dark occasions band. Each cell links to /shop pre-filtered. */
-export const OCCASIONS: OccasionEntry[] = [
-  { name: 'День народження', blurb: 'Яскраво, щедро, трохи гучно' },
-  { name: 'Річниця', blurb: 'Садові троянди і спокійна зелень' },
-  { name: 'Співчуття', blurb: 'Біле, стримане, у руки' },
-  { name: 'Без нагоди', blurb: 'Те, що дав ринок сьогодні' },
-];
-
 /** Home — why us, four numbered columns. */
 export const WHY_US = [
   {
