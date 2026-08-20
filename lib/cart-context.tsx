@@ -35,6 +35,7 @@ interface CartValue {
 
   add: (product: Product) => void;
   bump: (id: string, delta: number) => void;
+  qtyOf: (id: string) => number;
   remove: (id: string) => void;
   clear: () => void;
 
@@ -121,13 +122,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (ready) writeStore(WISH_KEY, saved);
   }, [ready, saved]);
 
-  /* The drawer is modal: the page behind it must not scroll. */
   useEffect(() => {
     if (!drawerOpen) return;
-    const previous = document.body.style.overflow;
-    document.body.style.overflow = 'hidden';
+    const root = document.documentElement;
+    const gutter = window.innerWidth - root.clientWidth;
+    const previous = { overflow: root.style.overflow, paddingRight: root.style.paddingRight };
+    root.style.overflow = 'hidden';
+    if (gutter > 0) root.style.paddingRight = `${gutter}px`;
     return () => {
-      document.body.style.overflow = previous;
+      root.style.overflow = previous.overflow;
+      root.style.paddingRight = previous.paddingRight;
     };
   }, [drawerOpen]);
 
@@ -141,7 +145,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
         },
       };
     });
-    setDrawerOpen(true);
   }, []);
 
   const bump = useCallback((id: string, delta: number) => {
@@ -218,6 +221,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isEmpty: lines.length === 0,
     add,
     bump,
+    qtyOf: (id) => products[id]?.qty ?? 0,
     remove,
     clear,
     saved,

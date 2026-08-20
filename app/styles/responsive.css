@@ -36,4 +36,5 @@
   .cart-btn { padding: 12px 16px; }
   .wish-btn { width: 44px; height: 44px; }
   .stepper button { width: 44px; height: 44px; }
+  .stepper-block button { width: 52px; height: auto; }
 }

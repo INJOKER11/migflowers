@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, type CSSProperties } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
 import { CARE_TEXT, descriptionFor, productShots, variantPrice } from '@/lib/catalog';
 import { Button } from '@/components/ui/Button';
 import { Plate } from '@/components/ui/Plate';
 import { Chip, ChipRow } from '@/components/ui/Chip';
+import { QuantityStepper } from '@/components/cart/QuantityStepper';
 import type { Product, VariantSize } from '@/types';
 
 const SIZES: VariantSize[] = ['Мала', 'Стандарт', 'Велика'];
@@ -18,13 +19,15 @@ const TABS = [
 type TabKey = (typeof TABS)[number]['key'];
 
 export function ProductDetail({ product }: { product: Product }) {
-  const { add, isSaved, toggleSaved } = useCart();
+  const { add, bump, qtyOf, isSaved, toggleSaved, ready } = useCart();
   const [shot, setShot] = useState(0);
   /* 'Стандарт' is the quoted price. */
   const [variant, setVariant] = useState(1);
   const [tab, setTab] = useState<TabKey>('desc');
 
   const saved = isSaved(product.id);
+  /* Held back until `ready` so the first client render still matches the server. */
+  const qty = ready ? qtyOf(product.id) : 0;
   const large = productShots(product, 700);
   // const thumbs = productShots(product, 400);
 
@@ -101,13 +104,26 @@ export function ProductDetail({ product }: { product: Product }) {
         {/*</ChipRow>*/}
 
         <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
-          <Button
-            cta
-            style={{ flex: 1, minWidth: 180, padding: '14px 0' }}
-            onClick={() => add(product)}
-          >
-            Додати в кошик
-          </Button>
+          {qty > 0 ? (
+            /* Sized, not stretched: at full width the middle segment is a void. */
+            <div style={{ width: 200, '--stepper-h': '44px' } as CSSProperties}>
+              <QuantityStepper
+                block
+                qty={qty}
+                label={product.name}
+                onDecrease={() => bump(product.id, -1)}
+                onIncrease={() => bump(product.id, 1)}
+              />
+            </div>
+          ) : (
+            <Button
+              cta
+              style={{ flex: 1, minWidth: 180, padding: '14px 0' }}
+              onClick={() => add(product)}
+            >
+              Додати в кошик
+            </Button>
+          )}
           <Button
             variant="ghost"
             cta
