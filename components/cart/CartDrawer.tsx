@@ -77,9 +77,11 @@ export function CartDrawer() {
               Цього тижня дуже гарні півонії.
             </p>
           )}
-          {cart.lines.map((line) => (
-            <CartLine key={line.product.id} line={line} />
-          ))}
+          <div className="cart-lines">
+            {cart.lines.map((line) => (
+              <CartLine key={line.product.id} line={line} />
+            ))}
+          </div>
         </div>
 
         <div className="drawer-foot">

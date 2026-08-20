@@ -112,6 +112,105 @@
   border-top: 1px solid var(--color-divider);
 }
 
+/* Cart lines render at three widths — the drawer, the full cart page, and the
+   narrow checkout summary sitting beside a wide form — so the reflow is driven
+   by the list's own width rather than the viewport's. */
+.cart-lines {
+  container-type: inline-size;
+}
+/* The checkout summary keeps the total and the confirm button in view, so past
+   roughly two lines the list scrolls inside the card instead of growing. The
+   cap is a height rather than a count — a line is 1–2 rows tall depending on
+   the name — and lands mid-line on purpose, which is what shows there is more. */
+.cart-lines-scroll {
+  max-height: var(--cart-lines-max, 320px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scrollbar-gutter: stable;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-divider) transparent;
+}
+
+.cart-line {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 14px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--color-divider);
+}
+.cart-line-page {
+  gap: 18px;
+  padding: 20px 0;
+}
+
+.cart-line-media {
+  flex: none;
+  width: 62px;
+  height: 62px;
+}
+.cart-line-page .cart-line-media {
+  width: 84px;
+  height: 84px;
+}
+
+.cart-line-text {
+  flex: 1 1 130px;
+  min-width: 0;
+}
+/* Page lines carry a line total as well, so they claim more room for the name
+   before the controls give up and wrap to their own row. */
+.cart-line-page .cart-line-text {
+  flex: 1 1 200px;
+}
+.cart-line-name {
+  font-family: var(--font-heading);
+  font-size: 17px;
+  line-height: 1.3;
+  /* Names come from the API and can be long — a single unbroken word must
+     wrap rather than widen the row past its column. */
+  overflow-wrap: anywhere;
+}
+.cart-line-page .cart-line-name {
+  font-size: 19px;
+}
+.cart-line-unit {
+  margin-top: 2px;
+  font-size: 12.5px;
+  color: var(--color-neutral-600);
+}
+
+/* Kept together so they wrap as one block, and stay right once they do. */
+.cart-line-controls {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-left: auto;
+}
+/* The width is reserved rather than fitted: the controls are right-aligned as a
+   group, so a total that resized with its digits would slide the stepper out
+   from under the cursor on every tap. */
+.cart-line-total {
+  min-width: 78px;
+  text-align: right;
+  font-size: 14.5px;
+}
+
+/* Below this the controls no longer fit beside a name of any length and wrap to
+   their own row; the photo drops to the drawer's size to match that shape. */
+@container (max-width: 480px) {
+  .cart-line-page {
+    gap: 14px;
+  }
+  .cart-line-page .cart-line-media {
+    width: 62px;
+    height: 62px;
+  }
+  .cart-line-page .cart-line-name {
+    font-size: 17px;
+  }
+}
+
 .stepper {
   display: flex;
   align-items: center;
@@ -133,6 +232,54 @@
   min-width: 20px;
   text-align: center;
   font-size: 13px;
+}
+
+/* Takes the place of the "add to cart" button once the product is in the cart,
+   so it borrows that button's height (via --stepper-h, set by the caller) and
+   its accent treatment rather than the compact grey stepper used inside the
+   cart itself. */
+.stepper-block {
+  display: flex;
+  align-items: stretch;
+  gap: 0;
+  width: 100%;
+  height: var(--stepper-h, 36px);
+  border-color: var(--color-accent);
+  border-radius: var(--radius-md);
+  overflow: hidden;
+}
+.stepper-block button {
+  flex: none;
+  width: 46px;
+  height: auto;
+  color: var(--color-accent);
+  font-size: 17px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.25s;
+}
+.stepper-block button:hover {
+  background: color-mix(in srgb, var(--color-accent) 12%, transparent);
+}
+.stepper-block button:active {
+  background: color-mix(in srgb, var(--color-accent) 22%, transparent);
+}
+.stepper-block > span {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  font-size: 14px;
+  line-height: 1;
+  border-inline: 1px solid color-mix(in srgb, var(--color-accent) 28%, transparent);
+}
+.stepper-unit {
+  font-size: 11px;
+  letter-spacing: 0.04em;
+  color: var(--color-neutral-600);
 }
 
 .summary-row {

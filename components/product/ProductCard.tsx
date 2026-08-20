@@ -1,11 +1,13 @@
 'use client';
 
 import Link from 'next/link';
+import type { CSSProperties } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
 import { Plate } from '@/components/ui/Plate';
 import { Heart, STROKE_HEAVY } from '@/components/ui/icons';
+import { QuantityStepper } from '@/components/cart/QuantityStepper';
 import type { Product } from '@/types';
 
 export type CardVariant = 'home' | 'shop' | 'category' | 'related' | 'wishlist';
@@ -19,14 +21,17 @@ interface Spec {
   action: 'add' | 'move' | 'none';
   buttonGap: number;
   buttonPad: string;
+  /* Height of the add-to-cart button at this spec's padding — the in-cart
+     stepper takes it so the two never change the card's height. */
+  buttonHeight: number;
 }
 
 const SPECS: Record<CardVariant, Spec> = {
-  home: { nameSize: 20, priceSize: 15, note: true, wish: true, tag: true, action: 'add', buttonGap: 14, buttonPad: '11px 0' },
-  shop: { nameSize: 19, priceSize: 14.5, note: true, wish: true, tag: true, action: 'add', buttonGap: 12, buttonPad: '10px 0' },
-  category: { nameSize: 19, priceSize: 14.5, note: false, wish: false, tag: false, action: 'add', buttonGap: 12, buttonPad: '10px 0' },
-  related: { nameSize: 18, priceSize: 14, note: false, wish: false, tag: false, action: 'none', buttonGap: 12, buttonPad: '10px 0' },
-  wishlist: { nameSize: 19, priceSize: 14.5, note: false, wish: false, tag: false, action: 'move', buttonGap: 12, buttonPad: '10px 0' },
+  home: { nameSize: 20, priceSize: 15, note: true, wish: true, tag: true, action: 'add', buttonGap: 14, buttonPad: '11px 0', buttonHeight: 38 },
+  shop: { nameSize: 19, priceSize: 14.5, note: true, wish: true, tag: true, action: 'add', buttonGap: 12, buttonPad: '10px 0', buttonHeight: 36 },
+  category: { nameSize: 19, priceSize: 14.5, note: false, wish: false, tag: false, action: 'add', buttonGap: 12, buttonPad: '10px 0', buttonHeight: 36 },
+  related: { nameSize: 18, priceSize: 14, note: false, wish: false, tag: false, action: 'none', buttonGap: 12, buttonPad: '10px 0', buttonHeight: 36 },
+  wishlist: { nameSize: 19, priceSize: 14.5, note: false, wish: false, tag: false, action: 'move', buttonGap: 12, buttonPad: '10px 0', buttonHeight: 36 },
 };
 
 interface ProductCardProps {
@@ -37,8 +42,10 @@ interface ProductCardProps {
 
 export function ProductCard({ product, variant = 'shop', priority = false }: ProductCardProps) {
   const spec = SPECS[variant];
-  const { add, isSaved, toggleSaved } = useCart();
+  const { add, bump, qtyOf, isSaved, toggleSaved, ready } = useCart();
   const saved = isSaved(product.id);
+
+  const qty = ready ? qtyOf(product.id) : 0;
   const href = `/product/${product.slug}`;
 
   const plate = (
@@ -97,15 +104,33 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
 
       {spec.note && <div className="product-note">{product.description}</div>}
 
-      {spec.action === 'add' && (
-        <Button
-          cta="sm"
-          style={{ marginTop: spec.buttonGap, width: '100%', padding: spec.buttonPad }}
-          onClick={() => add(product)}
-        >
-          Додати в кошик
-        </Button>
-      )}
+      {spec.action === 'add' &&
+        (qty > 0 ? (
+          <div
+            style={
+              {
+                marginTop: spec.buttonGap,
+                '--stepper-h': `${spec.buttonHeight}px`,
+              } as CSSProperties
+            }
+          >
+            <QuantityStepper
+              block
+              qty={qty}
+              label={product.name}
+              onDecrease={() => bump(product.id, -1)}
+              onIncrease={() => bump(product.id, 1)}
+            />
+          </div>
+        ) : (
+          <Button
+            cta="sm"
+            style={{ marginTop: spec.buttonGap, width: '100%', padding: spec.buttonPad }}
+            onClick={() => add(product)}
+          >
+            Додати в кошик
+          </Button>
+        ))}
 
       {spec.action === 'move' && (
         <>

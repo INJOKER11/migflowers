@@ -29,7 +29,7 @@ export function CartView() {
         alignItems: 'start',
       }}
     >
-      <div>
+      <div className="cart-lines">
         {lines.map((line) => (
           <CartLine key={line.product.id} line={line} variant="page" />
         ))}

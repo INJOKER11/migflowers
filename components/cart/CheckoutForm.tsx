@@ -217,22 +217,32 @@ export function CheckoutForm() {
 
         {cart.ready && (
           <>
-            {cart.isEmpty
-              ? !submitting && (
-                  <p
-                    style={{
-                      fontSize: 14,
-                      color: 'var(--color-neutral-600)',
-                      padding: '28px 0',
-                      textAlign: 'center',
-                    }}
-                  >
-                    Тут поки що порожньо.
-                  </p>
-                )
-              : cart.lines.map((line) => (
+            {cart.isEmpty ? (
+              !submitting && (
+                <p
+                  style={{
+                    fontSize: 14,
+                    color: 'var(--color-neutral-600)',
+                    padding: '28px 0',
+                    textAlign: 'center',
+                  }}
+                >
+                  Тут поки що порожньо.
+                </p>
+              )
+            ) : (
+              <div
+                className="cart-lines cart-lines-scroll"
+                style={{
+                  paddingLeft: '1px',
+                  paddingRight: '5px',
+                }}
+              >
+                {cart.lines.map((line) => (
                   <CartLine key={line.product.id} line={line} variant="page" />
                 ))}
+              </div>
+            )}
 
             <div className="summary-row" style={{ marginTop: 14 }}>
               <span>Доставка</span>
