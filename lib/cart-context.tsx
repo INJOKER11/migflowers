@@ -37,6 +37,7 @@ interface CartValue {
   bump: (id: string, delta: number) => void;
   qtyOf: (id: string) => number;
   remove: (id: string) => void;
+  syncProduct: (id: string, fresh: Product | null) => void;
   clear: () => void;
 
   saved: Saved;
@@ -170,6 +171,17 @@ export function CartProvider({ children }: { children: ReactNode }) {
     });
   }, []);
 
+  const syncProduct = useCallback((id: string, fresh: Product | null) => {
+    setProducts((p) => {
+      if (!p[id]) return p;
+      if (!fresh || !fresh.is_available) {
+        const { [id]: _, ...restProducts } = p;
+        return restProducts;
+      }
+      return { ...p, [id]: { product: fresh, qty: p[id].qty } };
+    });
+  }, []);
+
   const clear = useCallback(() => setProducts({}), []);
 
   const toggleSaved = useCallback((id: string) => {
@@ -223,6 +235,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     bump,
     qtyOf: (id) => products[id]?.qty ?? 0,
     remove,
+    syncProduct,
     clear,
     saved,
     savedIds,

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, type ComponentProps, type FormEvent } from 'react';
+import { useEffect, useState, type ComponentProps, type FormEvent } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
@@ -8,7 +8,7 @@ import { PAYMENTS, SLOTS } from '@/lib/content';
 import { Button } from '@/components/ui/Button';
 import { Chip, ChipRow } from '@/components/ui/Chip';
 import { CartLine } from './CartLine';
-import { createOrder, OrderValidationError, type FieldErrors } from '@/lib/api';
+import { createOrder, getProduct, OrderValidationError, type FieldErrors } from '@/lib/api';
 
 const PAYMENT_METHOD = ['online', 'online', 'cash_on_delivery'];
 
@@ -67,6 +67,39 @@ export function CheckoutForm() {
   const cart = useCart();
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
+  const [checkingStock, setCheckingStock] = useState(false);
+  const [droppedNames, setDroppedNames] = useState<string[]>([]);
+
+  useEffect(() => {
+    if (!cart.ready || cart.isEmpty) return;
+
+    const lines = cart.lines;
+    let cancelled = false;
+    setCheckingStock(true);
+
+    Promise.all(lines.map((line) => getProduct(line.product.slug)))
+      .then((fresh) => {
+        if (cancelled) return;
+
+        const dropped: string[] = [];
+        lines.forEach((line, i) => {
+          const product = fresh[i];
+          if (!product || !product.is_available) dropped.push(line.product.name);
+          cart.syncProduct(line.product.id, product);
+        });
+        setDroppedNames(dropped);
+      })
+      .catch(() => {
+
+      })
+      .finally(() => {
+        if (!cancelled) setCheckingStock(false);
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [cart.ready]);
 
   const placeOrder = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -244,6 +277,14 @@ export function CheckoutForm() {
               </div>
             )}
 
+            {droppedNames.length > 0 && (
+              <p className="field-error" role="alert" style={{ marginTop: 12 }}>
+                {droppedNames.length === 1
+                  ? `«${droppedNames[0]}» більше немає в наявності — товар прибрано з кошика.`
+                  : `Немає в наявності — прибрано з кошика: ${droppedNames.join(', ')}.`}
+              </p>
+            )}
+
             <div className="summary-row" style={{ marginTop: 14 }}>
               <span>Доставка</span>
               <span className="tabular">
@@ -272,7 +313,7 @@ export function CheckoutForm() {
           block
           cta
           style={{ marginTop: 18, padding: '14px 0' }}
-          disabled={!cart.ready || cart.isEmpty || submitting}
+          disabled={!cart.ready || cart.isEmpty || submitting || checkingStock}
         >
           {submitting ? 'Надсилаємо…' : 'Підтвердити замовлення'}
         </Button>
