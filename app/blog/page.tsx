@@ -4,14 +4,18 @@ import Link from 'next/link';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
-import { POSTS } from '@/lib/posts';
+import { getBlogPosts } from '@/lib/api';
+import { shortDate } from '@/lib/format';
 
 export const metadata: Metadata = {
   title: 'Журнал — MIG Flowers',
-  description: 'Що зараз у сезоні, як зберегти квіти живими і час від часу — суперечки про стрічку.',
+  description:
+    'Що зараз у сезоні, як зберегти квіти живими і час від часу — суперечки про стрічку.',
 };
 
-export default function BlogPage() {
+export default async function BlogPage() {
+  const posts = await getBlogPosts();
+
   return (
     <Section pt={44} pb={90}>
       <Breadcrumb trail={[{ label: 'Головна', href: '/' }, { label: 'Журнал' }]} />
@@ -27,15 +31,18 @@ export default function BlogPage() {
         Що зараз у сезоні, як зберегти квіти живими і час від часу — суперечки про стрічку.
       </p>
 
-      <div className="grid-auto" style={{ '--min': '280px', '--gap': '36px' } as CSSProperties}>
-        {POSTS.map((post) => (
+      <div
+        className="grid-auto grid-fill"
+        style={{ '--min': '280px', '--gap': '36px' } as CSSProperties}
+      >
+        {(posts || []).map((post) => (
           <Link
             key={post.slug}
             href={`/blog/${post.slug}`}
             style={{ display: 'flex', flexDirection: 'column', color: 'inherit' }}
           >
             <Plate
-              src={post.img}
+              src={post.image_url ?? null}
               alt={post.title}
               ratio="3/2"
               sizes="(max-width: 760px) 100vw, 380px"
@@ -50,7 +57,7 @@ export default function BlogPage() {
                 marginTop: 16,
               }}
             >
-              {post.kicker}
+              {post.title}
             </div>
             <div
               style={{
@@ -71,10 +78,10 @@ export default function BlogPage() {
                 color: 'var(--color-neutral-700)',
               }}
             >
-              {post.excerpt}
+              {post.content}
             </p>
             <div style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 12 }}>
-              {post.meta}
+              {shortDate(post.created_at)}
             </div>
           </Link>
         ))}
