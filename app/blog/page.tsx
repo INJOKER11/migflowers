@@ -5,7 +5,7 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { getBlogPosts } from '@/lib/api';
-import { shortDate } from '@/lib/format';
+import { excerpt, shortDate } from '@/lib/format';
 
 export const metadata: Metadata = {
   title: 'Журнал — MIG Flowers',
@@ -35,14 +35,14 @@ export default async function BlogPage() {
         className="grid-auto grid-fill"
         style={{ '--min': '280px', '--gap': '36px' } as CSSProperties}
       >
-        {(posts || []).map((post) => (
+        {posts.map((post) => (
           <Link
             key={post.slug}
             href={`/blog/${post.slug}`}
             style={{ display: 'flex', flexDirection: 'column', color: 'inherit' }}
           >
             <Plate
-              src={post.image_url ?? null}
+              src={post.image_url}
               alt={post.title}
               ratio="3/2"
               sizes="(max-width: 760px) 100vw, 380px"
@@ -57,7 +57,7 @@ export default async function BlogPage() {
                 marginTop: 16,
               }}
             >
-              {post.title}
+              {post.subject}
             </div>
             <div
               style={{
@@ -78,7 +78,7 @@ export default async function BlogPage() {
                 color: 'var(--color-neutral-700)',
               }}
             >
-              {post.content}
+              {excerpt(post.content)}
             </p>
             <div style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 12 }}>
               {shortDate(post.created_at)}

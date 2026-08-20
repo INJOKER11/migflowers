@@ -80,3 +80,11 @@ export function ratingSummary(average: number, total: number): string {
 export function stars(rating: number): string {
   return '★'.repeat(rating);
 }
+
+/** First `maxLength` characters of a post body, cut at a word boundary — for blog cards and `<meta description>`. */
+export function excerpt(text: string, maxLength = 160): string {
+  if (text.length <= maxLength) return text;
+  const cut = text.slice(0, maxLength);
+  const lastSpace = cut.lastIndexOf(' ');
+  return `${cut.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`;
+}

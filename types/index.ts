@@ -50,16 +50,6 @@ export interface CartLine {
 
 export type SortKey = 'popular' | 'newest' | 'price_desc' | 'price_asc';
 
-export interface Post {
-  slug: string;
-  kicker: string;
-  title: string;
-  excerpt: string;
-  meta: string;
-  img: string;
-  body: string[];
-}
-
 export interface Faq {
   q: string;
   a: string;
