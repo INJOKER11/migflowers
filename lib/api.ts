@@ -184,12 +184,8 @@ export async function getAllReviews(): Promise<ReviewCollection> {
   };
 }
 
-/** Laravel's validation envelope: one or more messages per field. Keys are
-    field names, or dotted paths for array members — `items.0.product_id`. */
 export type FieldErrors = Record<string, string[]>;
 
-/** A 422 from the API. Carries the per-field messages so the form can show
-    them where they belong; every other failure stays a plain Error. */
 export class OrderValidationError extends Error {
   constructor(readonly fields: FieldErrors) {
     super('Order validation failed');
@@ -207,11 +203,9 @@ export interface Order {
   customer_email: string;
   customer_phone: string;
   delivery_address: string;
-  /** ISO `YYYY-MM-DD`; the API rejects anything before today. */
   delivery_date: string;
   recipient_name?: string;
   card_message?: string;
-  /** `online` or `cash_on_delivery` — see PAYMENT_METHOD in CheckoutForm. */
   payment_method: string;
   items: OrderItem[];
 }
@@ -230,4 +224,31 @@ export async function createOrder(values: Order): Promise<unknown> {
   if (!res.ok) throw new Error(`POST /api/orders failed: ${res.status}`);
 
   return res.json();
+}
+
+export interface Post {
+  id: string;
+  title: string;
+  slug: string;
+  content: string;
+  image_url?: string;
+  subject: string;
+  created_at: string;
+}
+
+export async function getBlogPosts(): Promise<Post[]> {
+  const res = await fetch(`${BASE}/api/posts`, { next: { revalidate: REVALIDATE } });
+
+  if (!res.ok) throw new Error(`POST /api/posts failed: ${res.status}`);
+
+  const json = (await res.json()) as ApiList<Post>;
+  return json.data;
+}
+
+export async function getBlogPost(slug: string): Promise<Post | null> {
+  const res = await fetch(`${BASE}/api/posts/${slug}`, { next: { revalidate: REVALIDATE } });
+
+  if (!res.ok) if (!res.ok) throw new Error(`POST /api/posts/${slug} failed: ${res.status}`);
+  const json = (await res.json()) as ApiItem<Post>;
+  return json.data;
 }

@@ -5,6 +5,8 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { POSTS, getPost } from '@/lib/posts';
+import { getBlogPost } from '@/lib/api';
+import { shortDate } from '@/lib/format';
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -16,14 +18,15 @@ export function generateStaticParams() {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const post = getPost(slug);
+
+  const post = await getBlogPost(slug);
   if (!post) return {};
-  return { title: `${post.title} — MIG Flowers`, description: post.excerpt };
+  return { title: `${post.title} — MIG Flowers`, description: post.content };
 }
 
 export default async function PostPage({ params }: Params) {
   const { slug } = await params;
-  const post = getPost(slug);
+  const post = await getBlogPost(slug);
   if (!post) notFound();
 
   return (
@@ -32,7 +35,7 @@ export default async function PostPage({ params }: Params) {
         trail={[
           { label: 'Головна', href: '/' },
           { label: 'Журнал', href: '/blog' },
-          { label: post.kicker },
+          { label: post.title },
         ]}
       />
 
@@ -44,7 +47,7 @@ export default async function PostPage({ params }: Params) {
           color: 'var(--color-accent-700)',
         }}
       >
-        {post.kicker}
+        {post.subject}
       </div>
 
       <h1
@@ -65,11 +68,11 @@ export default async function PostPage({ params }: Params) {
           borderBottom: '1px solid var(--color-divider)',
         }}
       >
-        {post.meta}
+        {shortDate(post.created_at)}
       </div>
 
       <Plate
-        src={post.img}
+        src={post.image_url ?? null}
         alt={post.title}
         ratio="3/2"
         sizes="(max-width: 760px) 100vw, 760px"
@@ -77,20 +80,20 @@ export default async function PostPage({ params }: Params) {
         style={{ margin: '28px 0' }}
       />
 
-      {post.body.map((paragraph, i) => (
-        <p
-          key={i}
-          style={{
-            margin: '0 0 20px',
-            fontSize: 16,
-            lineHeight: 1.9,
-            color: 'var(--color-neutral-800)',
-            textAlign: 'justify',
-          }}
-        >
-          {paragraph}
-        </p>
-      ))}
+      {/*{post.content.map((paragraph, i) => (*/}
+      <p
+        // key={i}
+        style={{
+          margin: '0 0 20px',
+          fontSize: 16,
+          lineHeight: 1.9,
+          color: 'var(--color-neutral-800)',
+          textAlign: 'justify',
+        }}
+      >
+        {post.content}
+      </p>
+      {/*))}*/}
 
       <div style={{ marginTop: 40, paddingTop: 26, borderTop: '1px solid var(--color-divider)' }}>
         <Link
