@@ -35,19 +35,7 @@ export function Confirmation() {
           flexWrap: 'wrap',
         }}
       >
-        <Button
-          href="/account"
-          cta
-          style={{ padding: '12px 28px' }}
-        >
-          Відстежити замовлення
-        </Button>
-        <Button
-          href="/shop"
-          variant="ghost"
-          cta
-          style={{ padding: '12px 28px' }}
-        >
+        <Button href="/shop" cta style={{ padding: '12px 28px' }}>
           Дивитися далі
         </Button>
       </div>

@@ -15,7 +15,7 @@ const HELP_LINKS = [
   { href: '/delivery', label: 'Доставка та оплата' },
   { href: '/faq', label: 'Питання' },
   { href: '/reviews', label: 'Відгуки' },
-  { href: '/account', label: 'Мій кабінет' },
+  // { href: '/account', label: 'Мій кабінет' },
   { href: '/contact', label: 'Контакти' },
 ];
 
@@ -111,7 +111,6 @@ export function Footer() {
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
           <Link href="/legal/privacy">Політика приватності</Link>
           <Link href="/legal/terms">Умови користування</Link>
-          <span>Ціни у гривнях</span>
         </div>
       </div>
     </footer>
