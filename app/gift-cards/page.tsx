@@ -1,14 +1,13 @@
-import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { GiftCardBuilder } from '@/components/gift/GiftCardBuilder';
 
-export const metadata: Metadata = {
-  title: 'Подарункові сертифікати — MIG Flowers',
-  description: 'Надходить на пошту за хвилину або друкується на бавовняному картоні. Без терміну дії.',
-};
-
+/* Retired, kept on disk rather than deleted. No metadata export, so the tab
+   title falls back to the root layout's. */
 export default function GiftCardsPage() {
+  notFound();
+
   return (
     <Section width={1000} pt={44} pb={90}>
       <Breadcrumb

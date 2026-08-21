@@ -1,14 +1,13 @@
-import type { Metadata } from 'next';
+import { notFound } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { PlanPicker } from '@/components/subscription/PlanPicker';
 
-export const metadata: Metadata = {
-  title: 'Підписка — MIG Flowers',
-  description: 'Квіти в домі, про які не треба згадувати. Три плани, будь-яка періодичність.',
-};
-
+/* Retired, kept on disk rather than deleted. No metadata export, so the tab
+   title falls back to the root layout's. */
 export default function SubscriptionPage() {
+  notFound();
+
   return (
     <Section width={1100} pt={44} pb={90}>
       <Breadcrumb trail={[{ label: 'Головна', href: '/' }, { label: 'Підписка' }]} />

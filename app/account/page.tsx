@@ -1,14 +1,16 @@
-import type { Metadata } from 'next';
 import Link from 'next/link';
+import { notFound } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { SavedSummary } from '@/components/account/SavedSummary';
 import { ORDER_HISTORY, SAVED_ADDRESSES, TRACKING_DONE, TRACKING_STAGES } from '@/lib/content';
 
-export const metadata: Metadata = { title: 'Кабінет — MIG Flowers' };
-
+/* Retired, kept on disk rather than deleted — no metadata export, so the tab
+   title falls back to the root layout's instead of claiming a live page. */
 export default function AccountPage() {
+  notFound();
+
   return (
     <Section width={1100} pt={44} pb={90}>
       <Breadcrumb trail={[{ label: 'Головна', href: '/' }, { label: 'Кабінет' }]} />

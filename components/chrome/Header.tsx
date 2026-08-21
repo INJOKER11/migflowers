@@ -64,9 +64,9 @@ export function Header() {
             <Heart size={16} strokeWidth={STROKE} />
           </Link>
 
-          <Link href="/account" className="icon-btn" title="Кабінет" aria-label="Кабінет">
-            <User size={16} strokeWidth={STROKE} />
-          </Link>
+          {/*<Link href="/account" className="icon-btn" title="Кабінет" aria-label="Кабінет">*/}
+          {/*  <User size={16} strokeWidth={STROKE} />*/}
+          {/*</Link>*/}
 
           <button type="button" className="cart-btn" onClick={openDrawer} aria-label="Кошик">
             <ShoppingCart size={16} strokeWidth={STROKE} />
