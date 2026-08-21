@@ -127,6 +127,18 @@ export async function getProduct(slug: string): Promise<Product | null> {
   return toProduct(json.data);
 }
 
+export async function getRelatedProducts(product: Product, count = 4): Promise<Product[]> {
+  const sameCategory = await getProducts({ category: product.category.slug, perPage: count + 1 });
+  const related = sameCategory.filter((p) => p.id !== product.id).slice(0, count);
+  if (related.length >= count) return related;
+
+  const seen = new Set([product.id, ...related.map((p) => p.id)]);
+  const popular = await getProducts({ sort: 'popular', perPage: count + seen.size });
+  const backfill = popular.filter((p) => !seen.has(p.id)).slice(0, count - related.length);
+
+  return [...related, ...backfill];
+}
+
 export async function getCategories(query: CategoryQuery = {}): Promise<Category[]> {
   const { perPage } = query;
 

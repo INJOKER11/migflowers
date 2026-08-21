@@ -105,8 +105,9 @@ export function ProductDetail({ product }: { product: Product }) {
 
         <div style={{ display: 'flex', gap: 12, marginTop: 28, flexWrap: 'wrap' }}>
           {qty > 0 ? (
-            /* Sized, not stretched: at full width the middle segment is a void. */
-            <div style={{ width: 200, '--stepper-h': '44px' } as CSSProperties}>
+            /* Same flex-basis as the button it replaces, so it takes the exact
+               same width and the "Зберегти" button next to it doesn't shift. */
+            <div style={{ flex: 1, minWidth: 180, '--stepper-h': '44px' } as CSSProperties}>
               <QuantityStepper
                 block
                 qty={qty}
@@ -128,7 +129,9 @@ export function ProductDetail({ product }: { product: Product }) {
             variant="ghost"
             cta
             aria-pressed={saved}
-            style={{ padding: '14px 22px' }}
+            /* Fixed to the width "Збережено ♥" needs, so toggling the label
+               doesn't resize the button and shove it sideways. */
+            style={{ padding: '14px 22px', width: 144 }}
             onClick={() => toggleSaved(product.id)}
           >
             {saved ? 'Збережено ♥' : 'Зберегти'}
