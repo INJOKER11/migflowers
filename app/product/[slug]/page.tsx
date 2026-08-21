@@ -5,8 +5,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { getProduct } from '@/lib/api';
-// import { CATALOG, relatedTo } from '@/lib/catalog';
+import { getProduct, getRelatedProducts } from '@/lib/api';
 
 interface Params {
   params: Promise<{ slug: string }>;
@@ -28,6 +27,8 @@ export default async function ProductPage({ params }: Params) {
   const product = await getProduct(slug);
   if (!product) notFound();
 
+  const related = await getRelatedProducts(product);
+
   return (
     <Section pt={36} pb={80}>
       <Breadcrumb
@@ -40,10 +41,12 @@ export default async function ProductPage({ params }: Params) {
 
       <ProductDetail product={product} />
 
-      <div style={{ marginTop: 80 }}>
-        <SectionHeading size={30}>Вам також може сподобатися</SectionHeading>
-        {/*<ProductGrid products={relatedTo(product.id)} variant="related" />*/}
-      </div>
+      {related.length > 0 && (
+        <div style={{ marginTop: 80 }}>
+          <SectionHeading size={30}>Вам також може сподобатися</SectionHeading>
+          <ProductGrid products={related} variant="related" />
+        </div>
+      )}
     </Section>
   );
 }

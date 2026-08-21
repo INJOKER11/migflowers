@@ -24,9 +24,9 @@ const body = Lora({
 });
 
 export const metadata: Metadata = {
-  title: 'MIG Flowers — свіжі квіти з доставкою у Львові',
+  title: 'MIG Flowers — свіжі квіти з доставкою в Одесі',
   description:
-    'Родинна майстерня на площі Ринок з 1998 року. Букети, зрізані зранку і доставлені того ж дня.',
+    'Родинна майстерня на Соборній площі з 1998 року. Букети, зрізані зранку і доставлені того ж дня.',
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {

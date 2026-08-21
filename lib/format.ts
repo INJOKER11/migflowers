@@ -31,7 +31,7 @@ export function savedCount(n: number): string {
 /**
  * The zone is pinned because these dates are baked in at build time on a server
  * whose own zone is arbitrary — without it the day flips for any review posted
- * near midnight. The shop is in Lviv, so Kyiv is the calendar to quote.
+ * near midnight. The shop is in Odesa, so Kyiv is the calendar to quote.
  */
 const DAY_MONTH_YEAR = new Intl.DateTimeFormat('uk-UA', {
   day: 'numeric',

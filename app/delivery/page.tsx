@@ -8,7 +8,7 @@ import { uah } from '@/lib/format';
 
 export const metadata: Metadata = {
   title: 'Доставка та оплата — MIG Flowers',
-  description: 'Чотири зони по Львову, доставка того ж дня і безкоштовна доставка від 2 500 ₴.',
+  description: 'Чотири зони по Одесі, доставка того ж дня і безкоштовна доставка від 2 500 ₴.',
 };
 
 export default function DeliveryPage() {
@@ -26,7 +26,7 @@ export default function DeliveryPage() {
           textAlign: 'justify',
         }}
       >
-        Ми доставляємо по Львову щодня, включно з неділями та святами. Замовлення до{' '}
+        Ми доставляємо по Одесі щодня, включно з неділями та святами. Замовлення до{' '}
         {SAME_DAY_CUTOFF} виїжджають того ж дня по обіді.
       </p>
 
