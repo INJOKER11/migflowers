@@ -1,4 +1,5 @@
 import type { Category, Product, Review } from '@/types';
+import { DeliveryEnum } from '@/lib/content';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -239,6 +240,9 @@ export interface Order {
   card_message?: string;
   /** `online` or `cash_on_delivery` — see PAYMENT_METHOD in CheckoutForm. */
   payment_method: string;
+  delivery_method: DeliveryEnum;
+  with_card: boolean;
+  district_id: number | null;
   items: OrderItem[];
 }
 
