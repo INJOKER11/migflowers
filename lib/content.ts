@@ -1,4 +1,4 @@
-import type { Cadence, OccasionEntry, Plan, TeamMember } from '@/types';
+import type { Cadence, Plan, TeamMember } from '@/types';
 import { photo, type PhotoKey } from './images';
 
 /** Home — why us, four numbered columns. */
@@ -59,8 +59,40 @@ export const TEAM: TeamMember[] = [
 
 /** Checkout — shared by the drawer and the full page. */
 export const SLOTS = ['Сьогодні, 15:00 – 18:00', 'Завтра зранку', 'Вибрати дату'] as const;
+export enum DeliveryEnum {
+  delivery = 'delivery',
+  takeaway = 'takeaway',
+}
+export const DELIVERY = [
+  {
+    value: DeliveryEnum.delivery,
+    name: 'Доставка',
+  },
+  {
+    value: DeliveryEnum.takeaway,
+    name: 'Самовивіз',
+  },
+];
 
-export const PAYMENTS = ['Картка', 'Apple Pay', 'Готівка курʼєру'] as const;
+export enum PaymentEnum {
+  card = 'card',
+  online = 'online',
+  on_site = 'on_site',
+}
+export const PAYMENTS = [
+  {
+    value: PaymentEnum.card,
+    name: 'Переказ на карту',
+  },
+  {
+    value: PaymentEnum.online,
+    name: 'Онлайн оплата',
+  },
+  {
+    value: PaymentEnum.on_site,
+    name: 'Оплата на мiсцi',
+  },
+];
 
 export const CADENCES: Cadence[] = [
   { label: 'Щотижня', per: 'щотижня', mult: 1 },
@@ -107,19 +139,6 @@ export const RECOMMENDED_PLAN_INDEX = 1;
 export const GIFT_AMOUNTS = [500, 1000, 2000, 3500];
 export const GIFT_DELIVERY = ['Ел. поштою', 'Друком і поштою'] as const;
 
-/** Delivery & payment. */
-export const DELIVERY_ZONES = [
-  { zone: '1', area: 'Центр, Приморський', price: '₴100', time: 'До 3 годин' },
-  { zone: '2', area: 'Київський, Молдаванка, Пересип', price: '₴150', time: 'До 4 годин' },
-  {
-    zone: '3',
-    area: 'Малиновський, Суворовський',
-    price: '₴200',
-    time: 'Того ж дня, у вибраний інтервал',
-  },
-  { zone: '4', area: 'Таїрове, Чорноморськ, Крижанівка', price: '₴300', time: 'Наступного ранку' },
-];
-
 export const PAYMENT_METHODS = [
   {
     title: 'Картка',
@@ -131,7 +150,7 @@ export const PAYMENT_METHODS = [
   },
   {
     title: 'Готівка курʼєру',
-    body: 'Оплата курʼєру на порозі. Доступно лише в зонах 1 і 2.',
+    body: 'Оплата курʼєру на порозі. Доступно лише в Таїрово і Черемушках.',
   },
   {
     title: 'Банківський переказ',
@@ -197,17 +216,3 @@ export const SHOP_DETAILS = {
   email: 'hello@migflowers.ua',
   hours: 'Щодня, 08:00 – 21:00',
 };
-
-/** Category landings. Only one is written so far. */
-// export const CATEGORIES: Record<
-//   string,
-//   { name: string; occasion: OccasionEntry['name']; blurb: string; banner: string }
-// > = {
-//   'wedding-flowers': {
-//     name: 'Весільні квіти',
-//     occasion: 'Весілля',
-//     blurb:
-//       'Букети нареченої, оформлення столів і церковні композиції — усе робимо по одному замовленню за раз. Кожне весілля починається з безкоштовної консультації в майстерні, де ми переглядаємо фотографії, обговорюємо сезон і бюджет, перш ніж називати ціну. Ми оформлюємо близько тридцяти весіль на рік і ніколи не беремо двох на один день.',
-//     banner: photo('bridal', 2000),
-//   },
-// };

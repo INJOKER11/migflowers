@@ -91,15 +91,9 @@ export function Hero() {
         >
           <div>
             <div className="tabular" style={{ fontFamily: 'var(--font-heading)', fontSize: 30 }}>
-              3 години
+              Від 3 годин
             </div>
             <div style={STAT_LABEL}>Доставка містом того ж дня</div>
-          </div>
-          <div>
-            <div className="tabular" style={{ fontFamily: 'var(--font-heading)', fontSize: 30 }}>
-              7 днів
-            </div>
-            <div style={STAT_LABEL}>Гарантія свіжості</div>
           </div>
         </div>
       </div>

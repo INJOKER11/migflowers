@@ -93,7 +93,13 @@ export function Footer() {
             <span>{SHOP_DETAILS.hours}</span>
           </div>
           <div style={{ display: 'flex', gap: 12, marginTop: 18 }}>
-            <Link href="/contact" className="social-btn" title="Instagram" aria-label="Instagram">
+            <Link
+              href="https://www.instagram.com/migflowers__/"
+              target="_blank"
+              className="social-btn"
+              title="Instagram"
+              aria-label="Instagram"
+            >
               <Instagram size={15} strokeWidth={STROKE} />
             </Link>
             <Link href="/contact" className="social-btn" title="Facebook" aria-label="Facebook">

@@ -3,9 +3,6 @@
 /** Delivery is free at or above this subtotal, in every zone. */
 export const FREE_DELIVERY_THRESHOLD = 2500;
 
-/** Standard city delivery fee. */
-export const DELIVERY_FEE = 150;
-
 /** The one promo code the storefront knows. */
 export const PROMO_CODE = 'BLOOM10';
 
@@ -17,6 +14,9 @@ export const SAME_DAY_CUTOFF = '14:00';
 
 /** Freshness guarantee, in days. */
 export const FRESHNESS_DAYS = 7;
+
+/** Flat fee for writing a message on the card, added to the order total. */
+export const CARD_MESSAGE_FEE = 30;
 
 /** Мала / Стандарт / Велика, against the Signature price. */
 export const VARIANT_MULTIPLIERS = [0.75, 1, 1.4] as const;

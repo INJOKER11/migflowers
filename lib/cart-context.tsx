@@ -10,9 +10,10 @@ import {
   type ReactNode,
 } from 'react';
 // import { CATALOG } from './catalog';
-import { PAYMENTS, SLOTS } from './content';
-import { DELIVERY_FEE, FREE_DELIVERY_THRESHOLD, PROMO_CODE, PROMO_DISCOUNT } from './constants';
+import { DeliveryEnum, PaymentEnum, PAYMENTS, SLOTS } from './content';
+import { CARD_MESSAGE_FEE, FREE_DELIVERY_THRESHOLD, PROMO_CODE, PROMO_DISCOUNT } from './constants';
 import type { CartLine, Product } from '@/types';
+import { uah } from '@/lib/format';
 
 type Quantities = Record<string, number>;
 type Saved = Record<string, boolean>;
@@ -54,9 +55,17 @@ interface CartValue {
   applyPromo: (code: string) => void;
 
   slot: number;
-  setSlot: (i: number) => void;
-  payment: number;
-  setPayment: (i: number) => void;
+  setSlot: (v: number) => void;
+  payment: PaymentEnum;
+  setPayment: (v: PaymentEnum) => void;
+  delivery: DeliveryEnum;
+  setDelivery: (v: DeliveryEnum) => void;
+  district: number | null;
+  setDistrict: (v: number | null) => void;
+  zoneFee: number;
+  setZoneFee: (v: number) => void;
+  hasCardMessage: boolean;
+  setHasCardMessage: (v: boolean) => void;
   orderSummary: string;
 }
 
@@ -106,8 +115,12 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [promo, setPromo] = useState<PromoState>('none');
   const [slot, setSlot] = useState(0);
-  const [payment, setPayment] = useState(0);
+  const [delivery, setDelivery] = useState(DeliveryEnum.delivery);
+  const [district, setDistrict] = useState<number | null>(null);
+  const [payment, setPayment] = useState(PaymentEnum.card);
   const [products, setProducts] = useState<Products>({});
+  const [zoneFee, setZoneFee] = useState(0);
+  const [hasCardMessage, setHasCardMessage] = useState(false);
 
   useEffect(() => {
     setProducts(readStore<Products>(CART_KEY, {}, isProducts));
@@ -203,9 +216,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const count = useMemo(() => lines.reduce((sum, l) => sum + l.qty, 0), [lines]);
 
   const freeDelivery = subtotal >= FREE_DELIVERY_THRESHOLD || subtotal === 0;
-  const deliveryFee = freeDelivery ? 0 : DELIVERY_FEE;
+  const deliveryFee = delivery === DeliveryEnum.takeaway || freeDelivery ? 0 : zoneFee;
+  const cardMessageFee = hasCardMessage ? CARD_MESSAGE_FEE : 0;
+
   // const discount = promo === 'applied' ? Math.round(subtotal * PROMO_DISCOUNT) : 0;
-  const total = subtotal + deliveryFee;
+  const total = subtotal + deliveryFee + cardMessageFee;
 
   const savedIds = useMemo(() => Object.keys(saved).filter((id) => saved[id]), [saved]);
 
@@ -220,6 +235,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const placeOrder = useCallback(() => {
     setProducts({});
     setPromo('none');
+    setHasCardMessage(false);
   }, []);
 
   const value: CartValue = {
@@ -249,9 +265,20 @@ export function CartProvider({ children }: { children: ReactNode }) {
     applyPromo,
     slot,
     setSlot,
+    delivery,
+    setDelivery,
+    district,
+    setDistrict,
     payment,
     setPayment,
-    orderSummary: `${SLOTS[slot]} · ${PAYMENTS[payment]}.`,
+    zoneFee,
+    setZoneFee,
+    hasCardMessage,
+    setHasCardMessage,
+    orderSummary:
+      delivery === DeliveryEnum.delivery
+        ? `${SLOTS[slot]}${zoneFee ? ` · ${uah(zoneFee)}` : ''} · ${PAYMENTS.find((p) => p.value === payment)?.name ?? ''}.`
+        : `Самовивіз · ${PAYMENTS.find((p) => p.value === payment)?.name ?? ''}.`,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

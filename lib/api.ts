@@ -286,3 +286,20 @@ export async function getBlogPost(slug: string): Promise<Post | null> {
   const json = (await res.json()) as ApiItem<ApiPost>;
   return toPost(json.data);
 }
+
+export interface District {
+  id: number;
+  name: string;
+  description?: string;
+  /** `null` when the area isn't priced — quote comes from the manager. */
+  price_for_delivery: string | null;
+}
+
+export async function getDistricts(): Promise<District[]> {
+  const res = await fetch(`${BASE}/api/districts/`, { next: { revalidate: REVALIDATE } });
+
+  if (!res.ok) throw new Error(`GET /api/districts failed: ${res.status}`);
+
+  const json = (await res.json()) as ApiList<District>;
+  return json.data;
+}
