@@ -2,16 +2,18 @@ import type { Metadata } from 'next';
 import Link from 'next/link';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import { DELIVERY_ZONES, PAYMENT_METHODS } from '@/lib/content';
+import { PAYMENT_METHODS } from '@/lib/content';
 import { FREE_DELIVERY_THRESHOLD, SAME_DAY_CUTOFF } from '@/lib/constants';
 import { uah } from '@/lib/format';
+import { getDistricts } from '@/lib/api';
 
 export const metadata: Metadata = {
   title: 'Доставка та оплата — MIG Flowers',
-  description: 'Чотири зони по Одесі, доставка того ж дня і безкоштовна доставка від 2 500 ₴.',
+  description: 'Вартість за районом, доставка того ж дня і безкоштовна доставка від 2 500 ₴.',
 };
 
-export default function DeliveryPage() {
+export default async function DeliveryPage() {
+  const districts = await getDistricts();
   return (
     <Section width={1000} pt={44} pb={90}>
       <Breadcrumb trail={[{ label: 'Головна', href: '/' }, { label: 'Доставка та оплата' }]} />
@@ -33,19 +35,19 @@ export default function DeliveryPage() {
       <table className="table">
         <thead>
           <tr>
-            <th>Зона</th>
             <th>Район</th>
             <th>Вартість</th>
             <th>Час</th>
           </tr>
         </thead>
         <tbody>
-          {DELIVERY_ZONES.map((zone) => (
-            <tr key={zone.zone}>
-              <td>{zone.zone}</td>
-              <td>{zone.area}</td>
-              <td className="tabular">{zone.price}</td>
-              <td>{zone.time}</td>
+          {districts.map((d) => (
+            <tr key={d.id}>
+              <td>{d.name}</td>
+              <td className="tabular">
+                {d.price_for_delivery ? uah(Number(d.price_for_delivery)) : 'Уточніть у менеджера'}
+              </td>
+              {/*<td>{d.time}</td>*/}
             </tr>
           ))}
         </tbody>

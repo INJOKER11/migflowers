@@ -1,16 +1,23 @@
 'use client';
 
-import { useEffect, useState, type ComponentProps, type FormEvent } from 'react';
+import { type ComponentProps, type FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
-import { PAYMENTS, SLOTS } from '@/lib/content';
+import { DELIVERY, DeliveryEnum, PaymentEnum, PAYMENTS, SHOP_DETAILS, SLOTS } from '@/lib/content';
+import { CARD_MESSAGE_FEE } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
 import { Chip, ChipRow } from '@/components/ui/Chip';
+import { Checkbox } from '@/components/ui/Checkbox';
 import { CartLine } from './CartLine';
-import { createOrder, getProduct, OrderValidationError, type FieldErrors } from '@/lib/api';
-
-const PAYMENT_METHOD = ['online', 'online', 'cash_on_delivery'];
+import {
+  createOrder,
+  District,
+  type FieldErrors,
+  getDistricts,
+  getProduct,
+  OrderValidationError,
+} from '@/lib/api';
 
 const NAMED_FIELDS = [
   'customer_name',
@@ -69,43 +76,58 @@ export function CheckoutForm() {
   const [submitting, setSubmitting] = useState(false);
   const [checkingStock, setCheckingStock] = useState(false);
   const [droppedNames, setDroppedNames] = useState<string[]>([]);
+  const [districts, setDistricts] = useState<District[]>([]);
+  const [isForMe, setIsForMe] = useState(false);
 
   useEffect(() => {
-    if (!cart.ready || cart.isEmpty) return;
-
-    const lines = cart.lines;
+    if (!cart.ready) return;
     let cancelled = false;
-    setCheckingStock(true);
 
-    Promise.all(lines.map((line) => getProduct(line.product.slug)))
-      .then((fresh) => {
-        if (cancelled) return;
+    getDistricts()
+      .then((fetched) => {
+        if (!cancelled) setDistricts(fetched);
+      })
+      .catch(() => {});
 
-        const dropped: string[] = [];
-        lines.forEach((line, i) => {
-          const product = fresh[i];
-          if (!product || !product.is_available) dropped.push(line.product.name);
-          cart.syncProduct(line.product.id, product);
+    if (!cart.isEmpty) {
+      const lines = cart.lines;
+      setCheckingStock(true);
+      Promise.all(lines.map((line) => getProduct(line.product.slug)))
+        .then((fresh) => {
+          if (cancelled) return;
+
+          const dropped: string[] = [];
+          lines.forEach((line, i) => {
+            const product = fresh[i];
+            if (!product || !product.is_available) dropped.push(line.product.name);
+            cart.syncProduct(line.product.id, product);
+          });
+          setDroppedNames(dropped);
+        })
+        .catch(() => {})
+        .finally(() => {
+          if (!cancelled) setCheckingStock(false);
         });
-        setDroppedNames(dropped);
-      })
-      .catch(() => {
-
-      })
-      .finally(() => {
-        if (!cancelled) setCheckingStock(false);
-      });
+    }
 
     return () => {
       cancelled = true;
     };
   }, [cart.ready]);
 
+  useEffect(() => {
+    if (cart.district != null || districts.length === 0) return;
+    const first = districts.find((d) => d.price_for_delivery) ?? districts[0];
+    cart.setDistrict(first.id);
+    cart.setZoneFee(first.price_for_delivery ? Number(first.price_for_delivery) : 0);
+  }, [districts]);
+
   const placeOrder = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (submitting) return;
 
-    const date = deliveryDate(cart.slot);
+    const isTakeaway = cart.delivery === DeliveryEnum.takeaway;
+    const date = isTakeaway ? isoDate(0) : deliveryDate(cart.slot);
     if (!date) {
       setErrors({ delivery_date: ['Оберіть дату доставки.'] });
       return;
@@ -113,6 +135,11 @@ export function CheckoutForm() {
 
     const data = new FormData(e.currentTarget);
     const text = (name: string) => String(data.get(name) ?? '').trim();
+
+    const districtName = districts.find((z) => z.id === cart.district)?.name;
+    const address = isTakeaway
+      ? SHOP_DETAILS.address
+      : [districtName, text('delivery_address')].filter(Boolean).join(', ');
 
     setErrors({});
     setSubmitting(true);
@@ -122,11 +149,11 @@ export function CheckoutForm() {
         customer_name: text('customer_name'),
         customer_email: text('customer_email'),
         customer_phone: text('customer_phone'),
-        delivery_address: text('delivery_address'),
+        delivery_address: address,
         recipient_name: text('recipient_name') || undefined,
         card_message: text('card_message') || undefined,
         delivery_date: date,
-        payment_method: PAYMENT_METHOD[cart.payment],
+        payment_method: cart.payment,
         items: cart.lines.map((line) => ({
           product_id: Number(line.product.id),
           quantity: line.qty,
@@ -148,6 +175,15 @@ export function CheckoutForm() {
 
   const generalError = Object.entries(errors).find(([key]) => !NAMED_FIELDS.includes(key))?.[1][0];
 
+  const paymentMethods =
+    cart.delivery !== DeliveryEnum.delivery
+      ? PAYMENTS
+      : PAYMENTS.filter((p) => p.value !== PaymentEnum.on_site);
+
+  const selectedDistrict = districts.find((d) => d.id === cart.district);
+  const quoteRequired =
+    cart.delivery === DeliveryEnum.delivery && !!selectedDistrict && !selectedDistrict.price_for_delivery;
+
   return (
     <form
       onSubmit={placeOrder}
@@ -161,33 +197,79 @@ export function CheckoutForm() {
     >
       <div>
         <div className="kicker" style={{ marginBottom: 12 }}>
-          Коли доставити
+          Спосіб отримання
         </div>
         <ChipRow>
-          {SLOTS.map((label, i) => (
-            <Chip key={label} size="lg" active={i === cart.slot} onClick={() => cart.setSlot(i)}>
-              {label}
+          {DELIVERY.map((d) => (
+            <Chip
+              key={d.value}
+              size="lg"
+              active={d.value === cart.delivery}
+              onClick={() => cart.setDelivery(d.value)}
+            >
+              {d.name}
             </Chip>
           ))}
         </ChipRow>
-        {errors.delivery_date && <p className="field-error">{errors.delivery_date[0]}</p>}
+
+        {cart.delivery === DeliveryEnum.delivery ? (
+          <>
+            <div className="kicker" style={{ margin: '28px 0 12px' }}>
+              Коли доставити
+            </div>
+            <ChipRow>
+              {SLOTS.map((label, i) => (
+                <Chip
+                  key={label}
+                  size="lg"
+                  active={i === cart.slot}
+                  onClick={() => cart.setSlot(i)}
+                >
+                  {label}
+                </Chip>
+              ))}
+            </ChipRow>
+            {errors.delivery_date && <p className="field-error">{errors.delivery_date[0]}</p>}
+          </>
+        ) : (
+          <div style={{ marginTop: '12px', fontSize: 14.5, color: 'var(--color-neutral-600)' }}>
+            Заберете самі з майстерні: {SHOP_DETAILS.address}
+          </div>
+        )}
 
         <div className="kicker" style={{ margin: '28px 0 12px' }}>
           Куди доставити
         </div>
+
+        {cart.delivery === DeliveryEnum.delivery && (
+          <div style={{ margin: '20px 0' }}>
+            <ChipRow>
+              {districts.map((d) => (
+                <Chip
+                  key={d.id}
+                  size="lg"
+                  active={d.id === cart.district}
+                  onClick={() => {
+                    cart.setDistrict(d.id);
+                    cart.setZoneFee(d.price_for_delivery ? Number(d.price_for_delivery) : 0);
+                  }}
+                >
+                  {d.name} · {d.price_for_delivery ? uah(Number(d.price_for_delivery)) : 'Уточніть у менеджера'}
+                </Chip>
+              ))}
+            </ChipRow>
+          </div>
+        )}
+
         <div
           style={{
             display: 'grid',
+            marginTop: cart.delivery === DeliveryEnum.delivery ? 12 : 0,
             gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 200px), 1fr))',
             gap: 10,
           }}
         >
-          <Field
-            name="customer_name"
-            errors={errors}
-            placeholder="Імʼя отримувача"
-            aria-label="Імʼя отримувача"
-          />
+          <Field name="customer_name" errors={errors} placeholder="Імʼя" aria-label="Імʼя" />
           <Field
             name="customer_phone"
             errors={errors}
@@ -203,41 +285,65 @@ export function CheckoutForm() {
             placeholder="Ел. пошта"
             aria-label="Ел. пошта"
           />
-          <Field
-            name="delivery_address"
-            errors={errors}
-            full
-            placeholder="Вулиця і будинок"
-            aria-label="Вулиця і будинок"
-          />
-          <Field
-            name="recipient_name"
-            errors={errors}
-            full
-            placeholder="Кому доставити (за бажанням)"
-            aria-label="Кому доставити"
-          />
-          <Field
-            name="card_message"
-            errors={errors}
-            full
-            placeholder="Текст листівки (за бажанням)"
-            aria-label="Текст листівки"
-          />
+          {cart.delivery === DeliveryEnum.delivery && (
+            <Field
+              name="delivery_address"
+              errors={errors}
+              full
+              placeholder="Вулиця і будинок"
+              aria-label="Вулиця і будинок"
+            />
+          )}
+        </div>
+
+        {cart.delivery === DeliveryEnum.delivery && (
+          <div style={{ marginTop: 12 }}>
+            <Checkbox checked={isForMe} onChange={setIsForMe}>
+              Це для мене
+            </Checkbox>
+            {!isForMe && (
+              <div style={{ marginTop: 10 }}>
+                <Field
+                  name="recipient_name"
+                  errors={errors}
+                  full
+                  placeholder="Кому доставити (за бажанням)"
+                  aria-label="Кому доставити"
+                />
+              </div>
+            )}
+          </div>
+        )}
+
+        <div style={{ marginTop: 12 }}>
+          <Checkbox checked={cart.hasCardMessage} onChange={cart.setHasCardMessage}>
+            Додати листівку (+{uah(CARD_MESSAGE_FEE)})
+          </Checkbox>
+          {cart.hasCardMessage && (
+            <div style={{ marginTop: 10 }}>
+              <Field
+                name="card_message"
+                errors={errors}
+                full
+                placeholder="Текст листівки"
+                aria-label="Текст листівки"
+              />
+            </div>
+          )}
         </div>
 
         <div className="kicker" style={{ margin: '28px 0 12px' }}>
           Оплата
         </div>
         <ChipRow>
-          {PAYMENTS.map((label, i) => (
+          {paymentMethods.map((p) => (
             <Chip
-              key={label}
+              key={p.value}
               size="lg"
-              active={i === cart.payment}
-              onClick={() => cart.setPayment(i)}
+              active={p.value === cart.payment}
+              onClick={() => cart.setPayment(p.value)}
             >
-              {label}
+              {p.name}
             </Chip>
           ))}
         </ChipRow>
@@ -285,12 +391,24 @@ export function CheckoutForm() {
               </p>
             )}
 
-            <div className="summary-row" style={{ marginTop: 14 }}>
-              <span>Доставка</span>
-              <span className="tabular">
-                {cart.deliveryFee === 0 ? 'Безкоштовно' : uah(cart.deliveryFee)}
-              </span>
-            </div>
+            {cart.delivery === DeliveryEnum.delivery && (
+              <div className="summary-row" style={{ marginTop: 14 }}>
+                <span>Доставка</span>
+                <span className="tabular">
+                  {quoteRequired
+                    ? 'Уточніть у менеджера'
+                    : cart.deliveryFee === 0
+                      ? 'Безкоштовно'
+                      : uah(cart.deliveryFee)}
+                </span>
+              </div>
+            )}
+            {cart.hasCardMessage && (
+              <div className="summary-row" style={{ marginTop: 8 }}>
+                <span>Листівка</span>
+                <span className="tabular">{uah(CARD_MESSAGE_FEE)}</span>
+              </div>
+            )}
             <div className="summary-total" style={{ marginTop: 14, paddingTop: 14 }}>
               <span>До сплати</span>
               <span className="tabular">{uah(cart.total)}</span>
