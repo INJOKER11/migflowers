@@ -38,7 +38,6 @@ interface CartValue {
   bump: (id: string, delta: number) => void;
   qtyOf: (id: string) => number;
   remove: (id: string) => void;
-  syncProduct: (id: string, fresh: Product | null) => void;
   clear: () => void;
 
   saved: Saved;
@@ -115,7 +114,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [promo, setPromo] = useState<PromoState>('none');
   const [slot, setSlot] = useState(0);
-  const [delivery, setDelivery] = useState(DeliveryEnum.delivery);
+  const [delivery, setDeliveryState] = useState(DeliveryEnum.delivery);
   const [district, setDistrict] = useState<number | null>(null);
   const [payment, setPayment] = useState(PaymentEnum.card);
   const [products, setProducts] = useState<Products>({});
@@ -149,6 +148,13 @@ export function CartProvider({ children }: { children: ReactNode }) {
     };
   }, [drawerOpen]);
 
+  const setDelivery = useCallback((v: DeliveryEnum) => {
+    setDeliveryState(v);
+    if (v === DeliveryEnum.delivery) {
+      setPayment((p) => (p === PaymentEnum.on_site ? PaymentEnum.card : p));
+    }
+  }, []);
+
   const add = useCallback((product: Product) => {
     setProducts((p) => {
       return {
@@ -181,17 +187,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setProducts((p) => {
       const { [id]: _, ...restProducts } = p;
       return restProducts;
-    });
-  }, []);
-
-  const syncProduct = useCallback((id: string, fresh: Product | null) => {
-    setProducts((p) => {
-      if (!p[id]) return p;
-      if (!fresh || !fresh.is_available) {
-        const { [id]: _, ...restProducts } = p;
-        return restProducts;
-      }
-      return { ...p, [id]: { product: fresh, qty: p[id].qty } };
     });
   }, []);
 
@@ -251,7 +246,6 @@ export function CartProvider({ children }: { children: ReactNode }) {
     bump,
     qtyOf: (id) => products[id]?.qty ?? 0,
     remove,
-    syncProduct,
     clear,
     saved,
     savedIds,

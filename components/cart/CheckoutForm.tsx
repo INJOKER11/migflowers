@@ -10,14 +10,7 @@ import { Button } from '@/components/ui/Button';
 import { Chip, ChipRow } from '@/components/ui/Chip';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { CartLine } from './CartLine';
-import {
-  createOrder,
-  District,
-  type FieldErrors,
-  getDistricts,
-  getProduct,
-  OrderValidationError,
-} from '@/lib/api';
+import { createOrder, District, type FieldErrors, getDistricts, OrderValidationError } from '@/lib/api';
 
 const NAMED_FIELDS = [
   'customer_name',
@@ -37,10 +30,10 @@ function isoDate(addDays: number): string {
   return `${d.getFullYear()}-${month}-${day}`;
 }
 
-function deliveryDate(slot: number): string | null {
+function deliveryDate(slot: number, custom: string): string | null {
   if (slot === 0) return isoDate(0);
   if (slot === 1) return isoDate(1);
-  return null;
+  return custom || null;
 }
 
 type FieldProps = ComponentProps<'input'> & {
@@ -74,8 +67,6 @@ export function CheckoutForm() {
   const cart = useCart();
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
-  const [checkingStock, setCheckingStock] = useState(false);
-  const [droppedNames, setDroppedNames] = useState<string[]>([]);
   const [districts, setDistricts] = useState<District[]>([]);
   const [isForMe, setIsForMe] = useState(false);
 
@@ -88,27 +79,6 @@ export function CheckoutForm() {
         if (!cancelled) setDistricts(fetched);
       })
       .catch(() => {});
-
-    if (!cart.isEmpty) {
-      const lines = cart.lines;
-      setCheckingStock(true);
-      Promise.all(lines.map((line) => getProduct(line.product.slug)))
-        .then((fresh) => {
-          if (cancelled) return;
-
-          const dropped: string[] = [];
-          lines.forEach((line, i) => {
-            const product = fresh[i];
-            if (!product || !product.is_available) dropped.push(line.product.name);
-            cart.syncProduct(line.product.id, product);
-          });
-          setDroppedNames(dropped);
-        })
-        .catch(() => {})
-        .finally(() => {
-          if (!cancelled) setCheckingStock(false);
-        });
-    }
 
     return () => {
       cancelled = true;
@@ -126,15 +96,15 @@ export function CheckoutForm() {
     e.preventDefault();
     if (submitting) return;
 
+    const data = new FormData(e.currentTarget);
+    const text = (name: string) => String(data.get(name) ?? '').trim();
+
     const isTakeaway = cart.delivery === DeliveryEnum.takeaway;
-    const date = isTakeaway ? isoDate(0) : deliveryDate(cart.slot);
+    const date = isTakeaway ? isoDate(0) : deliveryDate(cart.slot, text('custom_date'));
     if (!date) {
       setErrors({ delivery_date: ['Оберіть дату доставки.'] });
       return;
     }
-
-    const data = new FormData(e.currentTarget);
-    const text = (name: string) => String(data.get(name) ?? '').trim();
 
     const districtName = districts.find((z) => z.id === cart.district)?.name;
     const address = isTakeaway
@@ -146,10 +116,13 @@ export function CheckoutForm() {
 
     try {
       await createOrder({
+        delivery_method: cart.delivery,
+        district_id: cart.district,
         customer_name: text('customer_name'),
         customer_email: text('customer_email'),
         customer_phone: text('customer_phone'),
         delivery_address: address,
+        with_card: cart.hasCardMessage,
         recipient_name: text('recipient_name') || undefined,
         card_message: text('card_message') || undefined,
         delivery_date: date,
@@ -182,7 +155,9 @@ export function CheckoutForm() {
 
   const selectedDistrict = districts.find((d) => d.id === cart.district);
   const quoteRequired =
-    cart.delivery === DeliveryEnum.delivery && !!selectedDistrict && !selectedDistrict.price_for_delivery;
+    cart.delivery === DeliveryEnum.delivery &&
+    !!selectedDistrict &&
+    !selectedDistrict.price_for_delivery;
 
   return (
     <form
@@ -229,6 +204,17 @@ export function CheckoutForm() {
                 </Chip>
               ))}
             </ChipRow>
+            {cart.slot === 2 && (
+              <input
+                type="date"
+                name="custom_date"
+                className="input"
+                style={{ marginTop: 10, maxWidth: 220 }}
+                min={isoDate(0)}
+                defaultValue={isoDate(0)}
+                aria-label="Дата доставки"
+              />
+            )}
             {errors.delivery_date && <p className="field-error">{errors.delivery_date[0]}</p>}
           </>
         ) : (
@@ -254,7 +240,10 @@ export function CheckoutForm() {
                     cart.setZoneFee(d.price_for_delivery ? Number(d.price_for_delivery) : 0);
                   }}
                 >
-                  {d.name} · {d.price_for_delivery ? uah(Number(d.price_for_delivery)) : 'Уточніть у менеджера'}
+                  {d.name} ·{' '}
+                  {d.price_for_delivery
+                    ? uah(Number(d.price_for_delivery))
+                    : 'Уточніть у менеджера'}
                 </Chip>
               ))}
             </ChipRow>
@@ -383,14 +372,6 @@ export function CheckoutForm() {
               </div>
             )}
 
-            {droppedNames.length > 0 && (
-              <p className="field-error" role="alert" style={{ marginTop: 12 }}>
-                {droppedNames.length === 1
-                  ? `«${droppedNames[0]}» більше немає в наявності — товар прибрано з кошика.`
-                  : `Немає в наявності — прибрано з кошика: ${droppedNames.join(', ')}.`}
-              </p>
-            )}
-
             {cart.delivery === DeliveryEnum.delivery && (
               <div className="summary-row" style={{ marginTop: 14 }}>
                 <span>Доставка</span>
@@ -431,7 +412,7 @@ export function CheckoutForm() {
           block
           cta
           style={{ marginTop: 18, padding: '14px 0' }}
-          disabled={!cart.ready || cart.isEmpty || submitting || checkingStock}
+          disabled={!cart.ready || cart.isEmpty || submitting}
         >
           {submitting ? 'Надсилаємо…' : 'Підтвердити замовлення'}
         </Button>
