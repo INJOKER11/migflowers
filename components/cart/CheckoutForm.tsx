@@ -2,6 +2,7 @@
 
 import { type ComponentProps, type FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocalePath } from '@/lib/use-locale';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
 import { DELIVERY, DeliveryEnum, PaymentEnum, PAYMENTS, SHOP_DETAILS, SLOTS } from '@/lib/content';
@@ -64,6 +65,7 @@ function Field({ name, errors, full, ...input }: FieldProps) {
 
 export function CheckoutForm() {
   const router = useRouter();
+  const withLocale = useLocalePath();
   const cart = useCart();
   const [errors, setErrors] = useState<FieldErrors>({});
   const [submitting, setSubmitting] = useState(false);
@@ -143,7 +145,7 @@ export function CheckoutForm() {
     }
 
     cart.placeOrder();
-    router.push('/checkout/confirmed');
+    router.push(withLocale('/checkout/confirmed'));
   };
 
   const generalError = Object.entries(errors).find(([key]) => !NAMED_FIELDS.includes(key))?.[1][0];

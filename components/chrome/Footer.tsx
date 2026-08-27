@@ -1,25 +1,27 @@
 import Image from 'next/image';
-import Link from 'next/link';
+import { Link } from '@/components/ui/Link';
 import { SHOP_DETAILS } from '@/lib/content';
+import type { Dictionary } from '@/lib/dictionaries';
 import { Facebook, Instagram, STROKE, Send } from '@/components/ui/icons';
 
-const SHOP_LINKS = [
-  { href: '/shop', label: 'Усі квіти' },
-  // { href: '/category/wedding-flowers', label: 'Весільні квіти' },
-  // { href: '/subscription', label: 'Підписки' },
-  // { href: '/gift-cards', label: 'Сертифікати' },
-  { href: '/corporate', label: 'Корпоративні замовлення' },
-];
+export function Footer({ dict: t }: { dict: Dictionary['footer'] }) {
 
-const HELP_LINKS = [
-  { href: '/delivery', label: 'Доставка та оплата' },
-  { href: '/faq', label: 'Питання' },
-  { href: '/reviews', label: 'Відгуки' },
-  // { href: '/account', label: 'Мій кабінет' },
-  { href: '/contact', label: 'Контакти' },
-];
+  const shopLinks = [
+    { href: '/shop', label: t.allFlowers },
+    // { href: '/category/wedding-flowers', label: … },
+    // { href: '/subscription', label: … },
+    // { href: '/gift-cards', label: … },
+    { href: '/corporate', label: t.corporate },
+  ];
 
-export function Footer() {
+  const helpLinks = [
+    { href: '/delivery', label: t.delivery },
+    { href: '/faq', label: t.faq },
+    { href: '/reviews', label: t.reviews },
+    // { href: '/account', label: … },
+    { href: '/contact', label: t.contact },
+  ];
+
   return (
     <footer className="footer">
       <div className="footer-grid">
@@ -53,15 +55,14 @@ export function Footer() {
               maxWidth: '34ch',
             }}
           >
-            Родинна майстерня в Таїрово. Зрізано зранку, звʼязано руками, доставлено до ваших
-            дверей того ж дня.
+            {t.blurb}
           </p>
         </div>
 
         <div>
-          <div className="footer-heading">Магазин</div>
+          <div className="footer-heading">{t.shop}</div>
           <div className="footer-col">
-            {SHOP_LINKS.map((link) => (
+            {shopLinks.map((link) => (
               <Link key={link.href} href={link.href} className="footer-link">
                 {link.label}
               </Link>
@@ -70,9 +71,9 @@ export function Footer() {
         </div>
 
         <div>
-          <div className="footer-heading">Допомога</div>
+          <div className="footer-heading">{t.help}</div>
           <div className="footer-col">
-            {HELP_LINKS.map((link) => (
+            {helpLinks.map((link) => (
               <Link key={link.href} href={link.href} className="footer-link">
                 {link.label}
               </Link>
@@ -81,7 +82,7 @@ export function Footer() {
         </div>
 
         <div>
-          <div className="footer-heading">Де ми</div>
+          <div className="footer-heading">{t.where}</div>
           <div className="footer-col">
             <span>{SHOP_DETAILS.addressShort}</span>
             <a href={SHOP_DETAILS.phoneHref} className="footer-link">
@@ -113,10 +114,10 @@ export function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span>© 2026 MIG Flowers. Родинна справа, понад 10 років.</span>
+        <span>{t.rights}</span>
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
-          <Link href="/legal/privacy">Політика приватності</Link>
-          <Link href="/legal/terms">Умови користування</Link>
+          <Link href="/legal/privacy">{t.privacy}</Link>
+          <Link href="/legal/terms">{t.terms}</Link>
         </div>
       </div>
     </footer>

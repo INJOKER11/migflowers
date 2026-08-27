@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocalePath } from '@/lib/use-locale';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
 import { PROMO_CODE } from '@/lib/constants';
@@ -15,6 +16,7 @@ const PROMO_NOTE = {
 
 export function OrderSummary() {
   const router = useRouter();
+  const withLocale = useLocalePath();
   const cart = useCart();
   const [draft, setDraft] = useState('');
 
@@ -76,7 +78,7 @@ export function OrderSummary() {
         block
         cta
         style={{ marginTop: 22, padding: '14px 0' }}
-        onClick={() => router.push('/checkout')}
+        onClick={() => router.push(withLocale('/checkout'))}
       >
         Перейти до оформлення
       </Button>

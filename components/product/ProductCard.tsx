@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/components/ui/Link';
 import type { CSSProperties } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
@@ -52,7 +52,7 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
     <Link href={href} aria-label={product.name} style={{ display: 'block' }}>
       <Plate
         src={product.image_url}
-        alt={product.name}
+        alt={`${product.name} — ${product.category.name}`}
         sizes="(max-width: 760px) 100vw, (max-width: 1000px) 50vw, 300px"
         zoom={1.06}
         priority={priority}

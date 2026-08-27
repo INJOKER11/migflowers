@@ -42,7 +42,7 @@ export function ProductDetail({ product }: { product: Product }) {
       <div>
         <Plate
           src={large?.[shot] ?? null}
-          alt={product.name}
+          alt={`${product.name} — ${product.category.name}`}
           sizes="(max-width: 1000px) 100vw, 560px"
           priority
           zoom={1.35}

@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLocalePath } from '@/lib/use-locale';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
@@ -12,6 +13,7 @@ const TITLE = 'Ваш кошик';
 
 export function CartDrawer() {
   const router = useRouter();
+  const withLocale = useLocalePath();
   const cart = useCart();
   const panel = useRef<HTMLElement>(null);
 
@@ -32,7 +34,7 @@ export function CartDrawer() {
   /* The drawer is a preview, not a checkout: both actions leave it. */
   const goTo = (href: string) => {
     closeDrawer();
-    router.push(href);
+    router.push(withLocale(href));
   };
 
   return (

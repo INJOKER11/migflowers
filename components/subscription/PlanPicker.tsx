@@ -1,6 +1,7 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
+import { useLocalePath } from '@/lib/use-locale';
 import { useState } from 'react';
 import { CADENCES, PLANS, RECOMMENDED_PLAN_INDEX } from '@/lib/content';
 import { roundTo10, uah } from '@/lib/format';
@@ -9,6 +10,7 @@ import { Chip, ChipRow } from '@/components/ui/Chip';
 
 export function PlanPicker() {
   const router = useRouter();
+  const withLocale = useLocalePath();
   const [cadenceIndex, setCadenceIndex] = useState(0);
   const cadence = CADENCES[cadenceIndex];
 
@@ -82,7 +84,7 @@ export function PlanPicker() {
               block
               cta="sm"
               style={{ marginTop: 24, padding: '12px 0' }}
-              onClick={() => router.push('/checkout')}
+              onClick={() => router.push(withLocale('/checkout'))}
             >
               Обрати цей план
             </Button>
