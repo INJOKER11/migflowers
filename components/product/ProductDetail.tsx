@@ -28,8 +28,7 @@ export function ProductDetail({ product }: { product: Product }) {
   const saved = isSaved(product.id);
   /* Held back until `ready` so the first client render still matches the server. */
   const qty = ready ? qtyOf(product.id) : 0;
-  const large = productShots(product, 700);
-  // const thumbs = productShots(product, 400);
+  const large = productShots(product);
 
   return (
     <div

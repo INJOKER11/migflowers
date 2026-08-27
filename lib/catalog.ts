@@ -16,14 +16,9 @@ export function variantPrice(base: number, variantIndex: number): number {
 }
 
 /** The four shots on the product page: the arrangement, then three angles. */
-export function productShots(product: Product, width: number): string[] | null {
+export function productShots(product: Product): string[] | null {
   if (!product.image_url) return null;
-  return [
-    product.image_url,
-    photo('bench', width),
-    photo('florist', width),
-    photo('centerpiece', width),
-  ];
+  return [product.image_url, photo('bench'), photo('florist'), photo('centerpiece')];
 }
 
 export function descriptionFor(product: Product): string {

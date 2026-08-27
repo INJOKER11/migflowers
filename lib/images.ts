@@ -1,10 +1,17 @@
 /**
  * Photography is currently Unsplash — free for commercial use, but a
  * placeholder for the client's own work. Every arrangement should eventually
- * be shot in the workshop; when that happens only this file changes.
+ * be shot in the workshop; when that happens only the files in
+ * `public/photos/` change.
  *
- * Widths are per use: 500 gallery tiles, 700 cards, 900–1100 hero and posts,
- * 2000 full-bleed banners.
+ * The originals were downloaded once at 2000px wide and now live in the repo,
+ * so nothing here hits the network. `next/image` does the resizing per use —
+ * pass the right `sizes` at the call site instead of picking a width here.
+ *
+ * The ids below no longer build a URL — they're kept as provenance, so each
+ * photograph can be traced back to its Unsplash original. A new photo needs
+ * both a key here and a matching `public/photos/<key>.jpg`; add only the key
+ * and the tag 404s at request time, which no build will catch.
  */
 export const PHOTO_IDS = {
   pinkRoses: '1582794543139-8ac9cb0f7b11',
@@ -25,6 +32,6 @@ export const PHOTO_IDS = {
 
 export type PhotoKey = keyof typeof PHOTO_IDS;
 
-export function photo(key: PhotoKey, width: number): string {
-  return `https://images.unsplash.com/photo-${PHOTO_IDS[key]}?auto=format&fit=crop&w=${width}&q=70`;
+export function photo(key: PhotoKey): string {
+  return `/photos/${key}.jpg`;
 }

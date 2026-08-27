@@ -99,7 +99,7 @@ export function Hero() {
       </div>
 
       <Plate
-        src={photo('roseBouquet', 1100)}
+        src={photo('roseBouquet')}
         alt="Букет рожевих і білих троянд"
         ratio="4/5"
         sizes="(max-width: 1000px) 100vw, 560px"

@@ -34,19 +34,19 @@ const GALLERY_KEYS: PhotoKey[] = [
   'beige',
   'table',
 ];
-export const GALLERY = GALLERY_KEYS.map((key) => photo(key, 500));
+export const GALLERY = GALLERY_KEYS.map((key) => photo(key));
 
 export const TEAM: TeamMember[] = [
   {
     name: 'Олена',
     role: 'Співвласниця',
-    img: photo('florist', 700),
+    img: photo('florist'),
     bio: 'Разом із Сергієм вирощує квіти в наших теплицях і збирає з них букети вже понад десять років.',
   },
   {
     name: 'Сергій',
     role: 'Співвласник',
-    img: photo('bench', 700),
+    img: photo('bench'),
     bio: 'Доглядає за теплицями і докуповує квіти, яких сезон ще не дав, для кожної композиції.',
   },
 ];

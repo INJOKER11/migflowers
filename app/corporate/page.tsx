@@ -71,7 +71,7 @@ export default function CorporatePage() {
           </table>
 
           <Plate
-            src={photo('centerpiece', 1000)}
+            src={photo('centerpiece')}
             alt="Настільні композиції, підготовлені до події"
             ratio="3/2"
             sizes="(max-width: 1000px) 100vw, 500px"
