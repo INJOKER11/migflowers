@@ -7,7 +7,7 @@ import { SHOP_DETAILS } from '@/lib/content';
 
 export const metadata: Metadata = {
   title: 'Контакти — MIG Flowers',
-  description: 'Зелені двері з північного боку Соборної площі. Щодня, 08:00 – 21:00.',
+  description: 'Люстдорфська дор. 125/4, Таїрово. Щодня, 08:00 – 21:00.',
 };
 
 function Detail({ label, children }: { label: string; children: React.ReactNode }) {
@@ -34,8 +34,7 @@ export default function ContactPage() {
           textAlign: 'justify',
         }}
       >
-        Крамниця — зелені двері з північного боку Соборної площі, між аптекою і палітурнею. Майстерня —
-        позаду, і ви можете заглянути.
+        Крамниця й майстерня — в одному місці, на Люстдорфській дорозі. Заходьте просто з вулиці.
       </p>
 
       <div
