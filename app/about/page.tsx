@@ -58,7 +58,7 @@ export default function AboutPage() {
 
       <Section pt={0} pb={60}>
         <Plate
-          src={photo('bench', 2000)}
+          src={photo('bench')}
           alt="Робочий стіл у майстерні"
           ratio="21/9"
           sizes="(max-width: 1240px) 100vw, 1240px"

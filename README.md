@@ -99,13 +99,16 @@ multipliers, page size.
 
 ## Assets
 
-Photography is Unsplash, wired through `next/image` with a remote pattern for
-`images.unsplash.com`. All of it is placeholder for the client's own work —
-`lib/images.ts` is the only file that changes when the real photographs arrive.
-Every content photograph goes through `<Plate>`; there are no bare `<img>` tags.
+Decorative photography is Unsplash, downloaded once at 2000px and committed to
+`public/photos/`; `photo(key)` in `lib/images.ts` points at it and `next/image`
+resizes per use. All of it is placeholder for the client's own work — replacing
+the files in `public/photos/` is all it takes when the real photographs arrive.
+Product photographs come from the API and stay remote. Every content photograph
+goes through `<Plate>`; there are no bare `<img>` tags.
 
-The logo is `public/logo.png`, the client's own raster mark. **Ask the client for
-a vector original.**
+The logo is `public/logo.png`, the client's own raster mark, copied to
+`app/icon.png` / `app/apple-icon.png` for the favicon. **Ask the client for a
+vector original** — it's only 150×150, which is small for an apple-touch icon.
 
 Icons are `lucide-react`.
 

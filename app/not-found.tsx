@@ -7,7 +7,7 @@ export default function NotFound() {
   return (
     <Section width={760} pt={90} pb={130} style={{ textAlign: 'center' }}>
       <Plate
-        src={photo('poppies', 600)}
+        src={photo('poppies')}
         alt="Одна квітка у вазі"
         sizes="210px"
         radius="50%"

@@ -78,7 +78,7 @@ export function GiftCardBuilder() {
       {/* Live preview of the card the recipient gets. */}
       <div className="card elev-sm" style={{ padding: 0, overflow: 'hidden', gap: 0 }}>
         <Plate
-          src={photo('beige', 900)}
+          src={photo('beige')}
           alt="Фото подарункового сертифіката"
           ratio="8/5"
           sizes="(max-width: 1000px) 100vw, 480px"
