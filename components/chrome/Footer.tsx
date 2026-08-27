@@ -53,8 +53,8 @@ export function Footer() {
               maxWidth: '34ch',
             }}
           >
-            Родинна майстерня на Соборній площі. Зрізано зранку, звʼязано руками, доставлено до
-            ваших дверей того ж дня.
+            Родинна майстерня в Таїрово. Зрізано зранку, звʼязано руками, доставлено до ваших
+            дверей того ж дня.
           </p>
         </div>
 
@@ -113,7 +113,7 @@ export function Footer() {
       </div>
 
       <div className="footer-bottom">
-        <span>© 2026 MIG Flowers. Родинна справа з 1998 року.</span>
+        <span>© 2026 MIG Flowers. Родинна справа, понад 10 років.</span>
         <div style={{ display: 'flex', gap: 20, flexWrap: 'wrap' }}>
           <Link href="/legal/privacy">Політика приватності</Link>
           <Link href="/legal/terms">Умови користування</Link>
