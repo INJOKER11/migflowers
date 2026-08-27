@@ -36,6 +36,19 @@ export const HTML_LANG: Record<Locale, string> = {
   ru: 'ru-UA',
 };
 
+/** Endonyms — a language is named in its own language, so the switch reads
+    the same from either side and these need no dictionary entry. */
+export const LOCALE_NAME: Record<Locale, string> = {
+  uk: 'Українська',
+  ru: 'Русский',
+};
+
+/** The short form the header switch is sized for. */
+export const LOCALE_SHORT: Record<Locale, string> = {
+  uk: 'Укр',
+  ru: 'Рус',
+};
+
 export function isLocale(value: string): value is Locale {
   return (LOCALES as readonly string[]).includes(value);
 }
