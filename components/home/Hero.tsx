@@ -3,6 +3,7 @@ import { Section } from '@/components/ui/Section';
 import { Plate } from '@/components/ui/Plate';
 import { photo } from '@/lib/images';
 import type { CSSProperties } from 'react';
+import type { Dictionary } from '@/lib/dictionaries';
 
 const STAT_LABEL: CSSProperties = {
   fontSize: 12,
@@ -12,7 +13,7 @@ const STAT_LABEL: CSSProperties = {
   marginTop: 4,
 };
 
-export function Hero() {
+export function Hero({ dict }: { dict: Dictionary['home'] }) {
   return (
     <Section
       pt={64}
@@ -33,7 +34,7 @@ export function Hero() {
             color: 'var(--color-accent-700)',
           }}
         >
-          Родинна майстерня, понад 10 років
+          {dict.kicker}
         </div>
 
         <h1
@@ -44,9 +45,9 @@ export function Hero() {
             letterSpacing: '-.01em',
           }}
         >
-          Свіжі квіти,
+          {dict.h1a}
           <br />
-          <em>доставлені з любовʼю</em>
+          <em>{dict.h1b}</em>
         </h1>
 
         <p

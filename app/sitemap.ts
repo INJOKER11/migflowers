@@ -1,0 +1,71 @@
+import type { MetadataRoute } from 'next';
+import { getBlogPosts, getCategories, getProducts } from '@/lib/api';
+import { LOCALES, RU_INDEXABLE, localeUrl, type Locale } from '@/lib/i18n';
+
+/**
+ * The public pages, by hand. Everything under `app/[lang]` that is *not* here
+ * is deliberately absent: `/cart`, `/account`, `/login`, `/subscription` and
+ * `/gift-cards` are retired routes that answer `notFound()`, and `/checkout`,
+ * `/checkout/confirmed` and `/wishlist` are steps in a purchase, not
+ * destinations from a search result.
+ */
+const STATIC_PATHS: { path: string; priority: number; changeFrequency: Frequency }[] = [
+  { path: '/', priority: 1, changeFrequency: 'daily' },
+  { path: '/shop', priority: 0.9, changeFrequency: 'daily' },
+  { path: '/delivery', priority: 0.8, changeFrequency: 'monthly' },
+  { path: '/contact', priority: 0.8, changeFrequency: 'monthly' },
+  { path: '/about', priority: 0.6, changeFrequency: 'monthly' },
+  { path: '/corporate', priority: 0.6, changeFrequency: 'monthly' },
+  { path: '/faq', priority: 0.5, changeFrequency: 'monthly' },
+  { path: '/reviews', priority: 0.5, changeFrequency: 'weekly' },
+  { path: '/blog', priority: 0.5, changeFrequency: 'weekly' },
+  { path: '/legal/privacy', priority: 0.2, changeFrequency: 'yearly' },
+  { path: '/legal/terms', priority: 0.2, changeFrequency: 'yearly' },
+];
+
+type Frequency = NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>;
+
+/** Locales whose URLs belong in the sitemap. Russian joins once it is actually
+    written — listing `noindex` pages here only earns a Search Console warning. */
+const indexable: Locale[] = RU_INDEXABLE ? [...LOCALES] : ['uk'];
+
+function entries(
+  path: string,
+  priority: number,
+  changeFrequency: Frequency,
+  lastModified?: Date,
+): MetadataRoute.Sitemap {
+  return indexable.map((locale) => ({
+    url: localeUrl(locale, path),
+    lastModified: lastModified ?? new Date(),
+    changeFrequency,
+    priority,
+  }));
+}
+
+/* The sitemap is generated at build time. A backend hiccup should cost us the
+   catalogue URLs, not the whole build — the static pages still ship. */
+async function safely<T>(load: () => Promise<T[]>): Promise<T[]> {
+  try {
+    return await load();
+  } catch {
+    return [];
+  }
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const [categories, products, posts] = await Promise.all([
+    safely(() => getCategories()),
+    safely(() => getProducts()),
+    safely(() => getBlogPosts()),
+  ]);
+
+  return [
+    ...STATIC_PATHS.flatMap((page) => entries(page.path, page.priority, page.changeFrequency)),
+    ...categories.flatMap((category) => entries(`/category/${category.slug}`, 0.7, 'weekly')),
+    ...products.flatMap((product) => entries(`/product/${product.slug}`, 0.8, 'weekly')),
+    ...posts.flatMap((post) =>
+      entries(`/blog/${post.slug}`, 0.4, 'monthly', new Date(post.created_at)),
+    ),
+  ];
+}

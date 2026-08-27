@@ -1,15 +1,17 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/components/ui/Link';
 import { useRouter } from 'next/navigation';
+import { useLocalePath } from '@/lib/use-locale';
 import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 
 export function LoginForm() {
   const router = useRouter();
+  const withLocale = useLocalePath();
   const [registering, setRegistering] = useState(false);
 
-  const signIn = () => router.push('/account');
+  const signIn = () => router.push(withLocale('/account'));
 
   return (
     <>

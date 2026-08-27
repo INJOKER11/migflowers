@@ -1,17 +1,22 @@
 'use client';
 
-import Link from 'next/link';
-import { NAV_LINKS, isCurrent } from './nav';
+import { Link } from '@/components/ui/Link';
+import type { Dictionary } from '@/lib/dictionaries';
+import { LanguageSwitcher } from './LanguageSwitcher';
+import { isCurrent } from './nav';
 
 interface MobileNavProps {
+  /** Already stripped of the locale prefix by `Header`. */
   pathname: string;
+  links: { href: string; label: string }[];
+  dict: Dictionary['chrome'];
   onNavigate: () => void;
 }
 
-export function MobileNav({ pathname, onNavigate }: MobileNavProps) {
+export function MobileNav({ pathname, links, dict, onNavigate }: MobileNavProps) {
   return (
     <div className="mobile-nav">
-      {NAV_LINKS.map((link) => (
+      {links.map((link) => (
         <Link
           key={link.href}
           href={link.href}
@@ -21,6 +26,7 @@ export function MobileNav({ pathname, onNavigate }: MobileNavProps) {
           {link.label}
         </Link>
       ))}
+      <LanguageSwitcher label={dict.switchLabel} switchTo={dict.switchTo} />
     </div>
   );
 }

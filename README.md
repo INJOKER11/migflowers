@@ -97,6 +97,20 @@ Figures used in more than one place are in `lib/constants.ts` — free-delivery
 threshold, delivery fee, promo discount, cut-off, freshness guarantee, variant
 multipliers, page size.
 
+## Locales
+
+Ukrainian on the bare URLs (`/shop`), Russian under `/ru` (`/ru/shop`) — two
+separately indexable sets of pages, switched by a real link in the header, not
+by JavaScript. `proxy.ts` maps the bare paths onto `app/[lang]` and redirects
+the redundant `/uk/...` form back.
+
+Russian is **plumbed but not finished**: the chrome and every page title,
+description and h1 are translated, the rest of the interface is not, and
+catalogue content cannot be — the API has one `name`/`description` per record
+with no language variants. `RU_INDEXABLE` in `lib/i18n.ts` is `false` while
+that is true, which keeps Russian pages `noindex` and out of the sitemap. Flip
+it once the backend has localized fields and the copy is written.
+
 ## Assets
 
 Decorative photography is Unsplash, downloaded once at 2000px and committed to

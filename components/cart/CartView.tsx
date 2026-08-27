@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import { Link } from '@/components/ui/Link';
 import { useCart } from '@/lib/cart-context';
 import { CartLine } from './CartLine';
 import { OrderSummary } from './OrderSummary';
