@@ -18,8 +18,7 @@ export default function CheckoutPage() {
           Наш менеджер звʼяжеться з вами в Telegram/WhatsApp/Viber, а якщо ні — на email.
         </p>
         <p style={{ margin: '0 0 34px', fontSize: 14.5, color: 'var(--color-neutral-600)' }}>
-          Для замовлення великих композицій уточніть наявність у менеджера за телефоном
-          +380234923.
+          Для замовлення великих композицій уточніть наявність у менеджера за телефоном +380234923.
         </p>
       </div>
       <CheckoutForm />
