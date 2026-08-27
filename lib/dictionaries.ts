@@ -32,7 +32,6 @@ export interface Dictionary {
     promoBefore: string;
     promoAfter: string;
     switchLabel: string;
-    switchTo: string;
   };
   footer: {
     blurb: string;
@@ -85,7 +84,6 @@ const uk: Dictionary = {
     promoBefore: 'Замовлення до',
     promoAfter: '— доставка сьогодні · Безкоштовна доставка від',
     switchLabel: 'Мова',
-    switchTo: 'Русский',
   },
   footer: {
     blurb:
@@ -181,7 +179,6 @@ const ru: Dictionary = {
     promoBefore: 'Заказы до',
     promoAfter: '— доставка сегодня · Бесплатная доставка от',
     switchLabel: 'Язык',
-    switchTo: 'Українська',
   },
   footer: {
     blurb:

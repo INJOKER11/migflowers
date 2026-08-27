@@ -52,10 +52,11 @@ export function Header({ nav, chrome }: Pick<Dictionary, 'nav' | 'chrome'>) {
               {link.label}
             </Link>
           ))}
-          <LanguageSwitcher label={chrome.switchLabel} switchTo={chrome.switchTo} />
         </nav>
 
         <div className="header-actions">
+          <LanguageSwitcher label={chrome.switchLabel} />
+
           <button
             type="button"
             className="icon-btn nav-toggle"
@@ -93,12 +94,7 @@ export function Header({ nav, chrome }: Pick<Dictionary, 'nav' | 'chrome'>) {
       </div>
 
       {navOpen && (
-        <MobileNav
-          pathname={here}
-          links={links}
-          dict={chrome}
-          onNavigate={() => setNavOpen(false)}
-        />
+        <MobileNav pathname={here} links={links} onNavigate={() => setNavOpen(false)} />
       )}
     </header>
   );
