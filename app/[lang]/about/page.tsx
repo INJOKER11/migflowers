@@ -1,9 +1,7 @@
 import type { Metadata } from 'next';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Plate } from '@/components/ui/Plate';
-import { TEAM } from '@/lib/content';
 import { photo } from '@/lib/images';
 import { localeOf, metadataFor } from '@/lib/seo';
 
@@ -27,7 +25,10 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: st
   return (
     <>
       <Section pt={44} pb={40}>
-        <Breadcrumb locale={locale} trail={[{ label: 'Головна', href: '/' }, { label: 'Про нас' }]} />
+        <Breadcrumb
+          locale={locale}
+          trail={[{ label: 'Головна', href: '/' }, { label: 'Про нас' }]}
+        />
         <h1
           style={{
             fontSize: 'clamp(40px, 5vw, 64px)',
@@ -74,57 +75,7 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: st
             marginTop: 10,
             fontStyle: 'italic',
           }}
-        >
-          Стіл у четвер зранку, у розпалі замовлення.
-        </div>
-      </Section>
-
-      <Section pt={20} pb={90}>
-        <SectionHeading size={32} marginBottom={28}>
-          Наші люди
-        </SectionHeading>
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 240px), 1fr))',
-            gap: 32,
-          }}
-        >
-          {TEAM.map((member) => (
-            <div key={member.name}>
-              <Plate
-                src={member.img}
-                alt={member.name}
-                ratio="4/5"
-                sizes="(max-width: 760px) 100vw, 380px"
-              />
-              <div style={{ fontFamily: 'var(--font-heading)', fontSize: 22, marginTop: 14 }}>
-                {member.name}
-              </div>
-              <div
-                style={{
-                  fontSize: 12,
-                  letterSpacing: '.14em',
-                  textTransform: 'uppercase',
-                  color: 'var(--color-accent-700)',
-                  marginTop: 4,
-                }}
-              >
-                {member.role}
-              </div>
-              <p
-                style={{
-                  margin: '10px 0 0',
-                  fontSize: 14,
-                  lineHeight: 1.7,
-                  color: 'var(--color-neutral-700)',
-                }}
-              >
-                {member.bio}
-              </p>
-            </div>
-          ))}
-        </div>
+        ></div>
       </Section>
     </>
   );
