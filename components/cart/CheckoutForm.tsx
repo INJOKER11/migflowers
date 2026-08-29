@@ -2,7 +2,7 @@
 
 import { type ComponentProps, type FormEvent, useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { useLocalePath } from '@/lib/use-locale';
+import { useLocale, useLocalePath } from '@/lib/use-locale';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
 import { DELIVERY, DeliveryEnum, PaymentEnum, PAYMENTS, SHOP_DETAILS, SLOTS } from '@/lib/content';
@@ -11,7 +11,13 @@ import { Button } from '@/components/ui/Button';
 import { Chip, ChipRow } from '@/components/ui/Chip';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { CartLine } from './CartLine';
-import { createOrder, District, type FieldErrors, getDistricts, OrderValidationError } from '@/lib/api';
+import {
+  createOrder,
+  District,
+  type FieldErrors,
+  getDistricts,
+  OrderValidationError,
+} from '@/lib/api';
 
 const NAMED_FIELDS = [
   'customer_name',
@@ -65,6 +71,7 @@ function Field({ name, errors, full, ...input }: FieldProps) {
 
 export function CheckoutForm() {
   const router = useRouter();
+  const locale = useLocale();
   const withLocale = useLocalePath();
   const cart = useCart();
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -76,7 +83,7 @@ export function CheckoutForm() {
     if (!cart.ready) return;
     let cancelled = false;
 
-    getDistricts()
+    getDistricts(locale)
       .then((fetched) => {
         if (!cancelled) setDistricts(fetched);
       })
@@ -85,7 +92,7 @@ export function CheckoutForm() {
     return () => {
       cancelled = true;
     };
-  }, [cart.ready]);
+  }, [cart.ready, locale]);
 
   useEffect(() => {
     if (cart.district != null || districts.length === 0) return;
@@ -117,23 +124,26 @@ export function CheckoutForm() {
     setSubmitting(true);
 
     try {
-      await createOrder({
-        delivery_method: cart.delivery,
-        district_id: cart.district,
-        customer_name: text('customer_name'),
-        customer_email: text('customer_email'),
-        customer_phone: text('customer_phone'),
-        delivery_address: address,
-        with_card: cart.hasCardMessage,
-        recipient_name: text('recipient_name') || undefined,
-        card_message: text('card_message') || undefined,
-        delivery_date: date,
-        payment_method: cart.payment,
-        items: cart.lines.map((line) => ({
-          product_id: Number(line.product.id),
-          quantity: line.qty,
-        })),
-      });
+      await createOrder(
+        {
+          delivery_method: cart.delivery,
+          district_id: cart.district,
+          customer_name: text('customer_name'),
+          customer_email: text('customer_email'),
+          customer_phone: text('customer_phone'),
+          delivery_address: address,
+          with_card: cart.hasCardMessage,
+          recipient_name: text('recipient_name') || undefined,
+          card_message: text('card_message') || undefined,
+          delivery_date: date,
+          payment_method: cart.payment,
+          items: cart.lines.map((line) => ({
+            product_id: Number(line.product.id),
+            quantity: line.qty,
+          })),
+        },
+        locale,
+      );
     } catch (error) {
       setErrors(
         error instanceof OrderValidationError

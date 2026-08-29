@@ -17,7 +17,7 @@ export async function generateMetadata(props: {
 export default async function DeliveryPage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await localeOf(params);
 
-  const districts = await getDistricts();
+  const districts = await getDistricts(locale);
   return (
     <Section width={1000} pt={44} pb={90}>
       <Breadcrumb locale={locale} trail={[{ label: 'Головна', href: '/' }, { label: 'Доставка та оплата' }]} />

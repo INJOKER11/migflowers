@@ -3,11 +3,12 @@ import { Section } from '@/components/ui/Section';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { getProducts } from '@/lib/api';
+import type { Locale } from '@/lib/i18n';
 
 const COUNT = 4;
 
-export async function QuickBuy() {
-  const products = await getProducts({ perPage: COUNT });
+export async function QuickBuy({ locale }: { locale: Locale }) {
+  const products = await getProducts({ locale, perPage: COUNT });
 
   return (
     <Section pt={0} pb={84}>

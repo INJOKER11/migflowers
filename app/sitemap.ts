@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
 import { getBlogPosts, getCategories, getProducts } from '@/lib/api';
-import { LOCALES, RU_INDEXABLE, localeUrl, type Locale } from '@/lib/i18n';
+import { DEFAULT_LOCALE, LOCALES, RU_INDEXABLE, localeUrl, type Locale } from '@/lib/i18n';
 
 /**
  * The public pages, by hand. Everything under `app/[lang]` that is *not* here
@@ -55,9 +55,11 @@ async function safely<T>(load: () => Promise<T[]>): Promise<T[]> {
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const [categories, products, posts] = await Promise.all([
-    safely(() => getCategories()),
-    safely(() => getProducts()),
-    safely(() => getBlogPosts()),
+    /* Only the slugs are read below, and those don't differ by locale — the
+       entries themselves are emitted for every locale further down. */
+    safely(() => getCategories({ locale: DEFAULT_LOCALE })),
+    safely(() => getProducts({ locale: DEFAULT_LOCALE })),
+    safely(() => getBlogPosts(DEFAULT_LOCALE)),
   ]);
 
   return [

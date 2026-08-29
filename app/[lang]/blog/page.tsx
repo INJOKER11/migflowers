@@ -17,7 +17,7 @@ export async function generateMetadata(props: {
 export default async function BlogPage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await localeOf(params);
 
-  const posts = await getBlogPosts();
+  const posts = await getBlogPosts(locale);
 
   return (
     <Section pt={44} pb={90}>

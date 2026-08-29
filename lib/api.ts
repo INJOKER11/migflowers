@@ -1,9 +1,22 @@
 import type { Category, Product, Review } from '@/types';
 import { DeliveryEnum } from '@/lib/content';
+import type { Locale } from '@/lib/i18n';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL;
 
 const REVALIDATE = 1800;
+
+/**
+ * Every request carries `?lang=` so the backend knows which language to
+ * answer in. It is required rather than defaulted: a silent `uk` on a Russian
+ * page is a bug that never throws, so the compiler asks for it at every call
+ * site instead. Paths are left exactly as they were — some end in a slash and
+ * some don't, and a redirect between the two forms would drop a POST body.
+ */
+function query(locale: Locale, params = new URLSearchParams()): string {
+  params.set('lang', locale);
+  return `?${params}`;
+}
 
 interface ApiProduct {
   id: number;
@@ -79,6 +92,7 @@ function toPost(raw: ApiPost): Post {
 }
 
 export interface ProductQuery {
+  locale: Locale;
   ids?: string[];
   page?: number;
   perPage?: number;
@@ -88,16 +102,18 @@ export interface ProductQuery {
 }
 
 export interface CategoryQuery {
+  locale: Locale;
   perPage?: number;
 }
 
 export interface ReviewQuery {
+  locale: Locale;
   page?: number;
   perPage?: number;
 }
 
-export async function getProducts(query: ProductQuery = {}): Promise<Product[]> {
-  const { ids, page, perPage, category, maxPrice, sort } = query;
+export async function getProducts(q: ProductQuery): Promise<Product[]> {
+  const { locale, ids, page, perPage, category, maxPrice, sort } = q;
   if (ids?.length === 0) return [];
 
   const params = new URLSearchParams();
@@ -109,8 +125,9 @@ export async function getProducts(query: ProductQuery = {}): Promise<Product[]> 
   if (page !== undefined) params.set('page', String(page));
   if (perPage !== undefined) params.set('per_page', String(perPage));
 
-  const search = params.size ? `?${params}` : '';
-  const res = await fetch(`${BASE}/api/products/${search}`, { next: { revalidate: REVALIDATE } });
+  const res = await fetch(`${BASE}/api/products/${query(locale, params)}`, {
+    next: { revalidate: REVALIDATE },
+  });
 
   if (!res.ok) throw new Error(`GET /api/products failed: ${res.status}`);
 
@@ -118,8 +135,10 @@ export async function getProducts(query: ProductQuery = {}): Promise<Product[]> 
   return json.data.map(toProduct);
 }
 
-export async function getProduct(slug: string): Promise<Product | null> {
-  const res = await fetch(`${BASE}/api/products/${slug}`, { next: { revalidate: REVALIDATE } });
+export async function getProduct(slug: string, locale: Locale): Promise<Product | null> {
+  const res = await fetch(`${BASE}/api/products/${slug}${query(locale)}`, {
+    next: { revalidate: REVALIDATE },
+  });
 
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`GET /api/products/${slug} failed: ${res.status}`);
@@ -128,26 +147,35 @@ export async function getProduct(slug: string): Promise<Product | null> {
   return toProduct(json.data);
 }
 
-export async function getRelatedProducts(product: Product, count = 4): Promise<Product[]> {
-  const sameCategory = await getProducts({ category: product.category.slug, perPage: count + 1 });
+export async function getRelatedProducts(
+  product: Product,
+  locale: Locale,
+  count = 4,
+): Promise<Product[]> {
+  const sameCategory = await getProducts({
+    locale,
+    category: product.category.slug,
+    perPage: count + 1,
+  });
   const related = sameCategory.filter((p) => p.id !== product.id).slice(0, count);
   if (related.length >= count) return related;
 
   const seen = new Set([product.id, ...related.map((p) => p.id)]);
-  const popular = await getProducts({ sort: 'popular', perPage: count + seen.size });
+  const popular = await getProducts({ locale, sort: 'popular', perPage: count + seen.size });
   const backfill = popular.filter((p) => !seen.has(p.id)).slice(0, count - related.length);
 
   return [...related, ...backfill];
 }
 
-export async function getCategories(query: CategoryQuery = {}): Promise<Category[]> {
-  const { perPage } = query;
+export async function getCategories(q: CategoryQuery): Promise<Category[]> {
+  const { locale, perPage } = q;
 
   const params = new URLSearchParams();
 
   if (perPage !== undefined) params.set('per_page', String(perPage));
-  const search = params.size ? `?${params}` : '';
-  const res = await fetch(`${BASE}/api/categories/${search}`, { next: { revalidate: REVALIDATE } });
+  const res = await fetch(`${BASE}/api/categories/${query(locale, params)}`, {
+    next: { revalidate: REVALIDATE },
+  });
 
   if (!res.ok) throw new Error(`GET /api/categories/ failed: ${res.status}`);
 
@@ -155,8 +183,10 @@ export async function getCategories(query: CategoryQuery = {}): Promise<Category
   return json.data.map(toCategory);
 }
 
-export async function getCategory(slug: string): Promise<Category | null> {
-  const res = await fetch(`${BASE}/api/categories/${slug}`, { next: { revalidate: REVALIDATE } });
+export async function getCategory(slug: string, locale: Locale): Promise<Category | null> {
+  const res = await fetch(`${BASE}/api/categories/${slug}${query(locale)}`, {
+    next: { revalidate: REVALIDATE },
+  });
 
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`GET /api/categories/${slug} failed: ${res.status}`);
@@ -165,22 +195,22 @@ export async function getCategory(slug: string): Promise<Category | null> {
   return toCategory(json.data);
 }
 
-async function fetchReviewPage(query: ReviewQuery = {}): Promise<ApiList<ApiReview>> {
-  const { page, perPage } = query;
+async function fetchReviewPage(q: ReviewQuery): Promise<ApiList<ApiReview>> {
+  const { locale, page, perPage } = q;
 
   const params = new URLSearchParams();
 
   if (page !== undefined) params.set('page', String(page));
   if (perPage !== undefined) params.set('per_page', String(perPage));
-  const search = params.size ? `?${params}` : '';
+  const search = query(locale, params);
   const res = await fetch(`${BASE}/api/reviews/${search}`, { next: { revalidate: REVALIDATE } });
   if (!res.ok) throw new Error(`GET /api/reviews/${search} failed: ${res.status}`);
 
   return (await res.json()) as ApiList<ApiReview>;
 }
 
-export async function getReviews(query: ReviewQuery = {}): Promise<Review[]> {
-  const json = await fetchReviewPage(query);
+export async function getReviews(q: ReviewQuery): Promise<Review[]> {
+  const json = await fetchReviewPage(q);
   return json.data.map(toReview);
 }
 
@@ -192,12 +222,12 @@ export interface ReviewCollection {
   average: number;
 }
 
-export async function getAllReviews(): Promise<ReviewCollection> {
-  const first = await fetchReviewPage({ perPage: REVIEW_BATCH });
+export async function getAllReviews(locale: Locale): Promise<ReviewCollection> {
+  const first = await fetchReviewPage({ locale, perPage: REVIEW_BATCH });
 
   const rest = await Promise.all(
     Array.from({ length: Math.max(0, first.meta.last_page - 1) }, (_, i) =>
-      fetchReviewPage({ page: i + 2, perPage: REVIEW_BATCH }),
+      fetchReviewPage({ locale, page: i + 2, perPage: REVIEW_BATCH }),
     ),
   );
 
@@ -246,8 +276,8 @@ export interface Order {
   items: OrderItem[];
 }
 
-export async function createOrder(values: Order): Promise<unknown> {
-  const res = await fetch(`${BASE}/api/orders`, {
+export async function createOrder(values: Order, locale: Locale): Promise<unknown> {
+  const res = await fetch(`${BASE}/api/orders${query(locale)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
     body: JSON.stringify(values),
@@ -272,8 +302,10 @@ export interface Post {
   created_at: string;
 }
 
-export async function getBlogPosts(): Promise<Post[]> {
-  const res = await fetch(`${BASE}/api/posts`, { next: { revalidate: REVALIDATE } });
+export async function getBlogPosts(locale: Locale): Promise<Post[]> {
+  const res = await fetch(`${BASE}/api/posts${query(locale)}`, {
+    next: { revalidate: REVALIDATE },
+  });
 
   if (!res.ok) throw new Error(`GET /api/posts failed: ${res.status}`);
 
@@ -281,8 +313,10 @@ export async function getBlogPosts(): Promise<Post[]> {
   return json.data.map(toPost);
 }
 
-export async function getBlogPost(slug: string): Promise<Post | null> {
-  const res = await fetch(`${BASE}/api/posts/${slug}`, { next: { revalidate: REVALIDATE } });
+export async function getBlogPost(slug: string, locale: Locale): Promise<Post | null> {
+  const res = await fetch(`${BASE}/api/posts/${slug}${query(locale)}`, {
+    next: { revalidate: REVALIDATE },
+  });
 
   if (res.status === 404) return null;
   if (!res.ok) throw new Error(`GET /api/posts/${slug} failed: ${res.status}`);
@@ -299,8 +333,10 @@ export interface District {
   price_for_delivery: string | null;
 }
 
-export async function getDistricts(): Promise<District[]> {
-  const res = await fetch(`${BASE}/api/districts/`, { next: { revalidate: REVALIDATE } });
+export async function getDistricts(locale: Locale): Promise<District[]> {
+  const res = await fetch(`${BASE}/api/districts/${query(locale)}`, {
+    next: { revalidate: REVALIDATE },
+  });
 
   if (!res.ok) throw new Error(`GET /api/districts failed: ${res.status}`);
 

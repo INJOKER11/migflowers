@@ -1,10 +1,11 @@
 import { Link } from '@/components/ui/Link';
 import { getCategories } from '@/lib/api';
+import type { Locale } from '@/lib/i18n';
 
 const COUNT = 4;
 
-export async function OccasionGrid() {
-  const categories = await getCategories({ perPage: COUNT });
+export async function OccasionGrid({ locale }: { locale: Locale }) {
+  const categories = await getCategories({ locale, perPage: COUNT });
 
   return (
     <section className="occasion-band">

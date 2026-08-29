@@ -52,11 +52,12 @@ export default async function ShopPage({
 
   const [products, categories] = await Promise.all([
     getProducts({
+      locale,
       category: one(sp.category),
       maxPrice: toPrice(sp.maxPrice),
       sort: toSort(sp.sort),
     }),
-    getCategories(),
+    getCategories({ locale }),
   ]);
 
   return (

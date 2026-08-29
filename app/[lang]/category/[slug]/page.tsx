@@ -7,19 +7,23 @@ import { ProductGrid } from '@/components/product/ProductGrid';
 import { getCategories, getCategory, getProducts } from '@/lib/api';
 import { getDictionary } from '@/lib/dictionaries';
 import { localeOf, pageMetadata } from '@/lib/seo';
+import { DEFAULT_LOCALE } from '@/lib/i18n';
 
 interface Params {
   params: Promise<{ lang: string; slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const categories = await getCategories();
+  /* Slugs are the same in both locales, so the language this asks for doesn't
+     matter — it just has to be one of them. */
+  const categories = await getCategories({ locale: DEFAULT_LOCALE });
   return (categories ?? []).map((c) => ({ slug: c.slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const [category, locale] = await Promise.all([getCategory(slug), localeOf(params)]);
+  const locale = await localeOf(params);
+  const category = await getCategory(slug, locale);
   if (!category) return {};
 
   return pageMetadata({
@@ -32,13 +36,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function CategoryPage({ params }: Params) {
   const { slug } = await params;
-  const [category, locale] = await Promise.all([getCategory(slug), localeOf(params)]);
+  const locale = await localeOf(params);
+  const category = await getCategory(slug, locale);
   if (!category) notFound();
 
   /* Filtered by this category, not the whole catalogue. Fetching everything
      made each category page a copy of /shop — the same products under a
      different heading, which is what duplicate content means. */
-  const products = await getProducts({ category: slug });
+  const products = await getProducts({ locale, category: slug });
   const nav = getDictionary(locale).nav;
 
   return (

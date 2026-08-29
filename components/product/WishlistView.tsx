@@ -4,15 +4,16 @@ import { Link } from '@/components/ui/Link';
 import { useEffect, useState } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { getProducts } from '@/lib/api';
+import { useLocale } from '@/lib/use-locale';
 import { ProductGrid } from './ProductGrid';
 import type { Product } from '@/types';
 
 export function WishlistView() {
+  const locale = useLocale();
   const { savedIds, ready } = useCart();
   const [fetched, setFetched] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
   const [failed, setFailed] = useState(false);
-
 
   useEffect(() => {
     if (!ready || savedIds.length === 0) {
@@ -23,7 +24,7 @@ export function WishlistView() {
     let ignore = false;
     setLoading(true);
 
-    getProducts({ ids: savedIds })
+    getProducts({ locale, ids: savedIds })
       .then((data) => {
         if (!ignore) setFetched(data);
       })
@@ -38,7 +39,7 @@ export function WishlistView() {
       ignore = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [ready]);
+  }, [ready, locale]);
 
   if (!ready) return null;
 
