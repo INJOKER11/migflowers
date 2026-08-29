@@ -21,7 +21,8 @@ interface Params {
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const [product, locale] = await Promise.all([getProduct(slug), localeOf(params)]);
+  const locale = await localeOf(params);
+  const product = await getProduct(slug, locale);
   if (!product) return {};
 
   return pageMetadata({
@@ -36,10 +37,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function ProductPage({ params }: Params) {
   const { slug } = await params;
-  const [product, locale] = await Promise.all([getProduct(slug), localeOf(params)]);
+  const locale = await localeOf(params);
+  const product = await getProduct(slug, locale);
   if (!product) notFound();
 
-  const related = await getRelatedProducts(product);
+  const related = await getRelatedProducts(product, locale);
   const nav = getDictionary(locale).nav;
 
   return (

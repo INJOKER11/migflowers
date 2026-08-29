@@ -14,7 +14,7 @@ export async function generateMetadata(props: {
 
 export default async function ReviewsPage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await localeOf(params);
-  const { reviews, total, average } = await getAllReviews();
+  const { reviews, total, average } = await getAllReviews(locale);
 
   return (
     <Section width={900} pt={44} pb={90}>

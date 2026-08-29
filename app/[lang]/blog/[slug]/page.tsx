@@ -8,19 +8,23 @@ import { getBlogPost, getBlogPosts } from '@/lib/api';
 import { excerpt, shortDate } from '@/lib/format';
 import { getDictionary } from '@/lib/dictionaries';
 import { localeOf, pageMetadata } from '@/lib/seo';
+import { DEFAULT_LOCALE } from '@/lib/i18n';
 
 interface Params {
   params: Promise<{ lang: string; slug: string }>;
 }
 
 export async function generateStaticParams() {
-  const posts = await getBlogPosts();
+  /* Slugs are the same in both locales, so the language this asks for doesn't
+     matter — it just has to be one of them. */
+  const posts = await getBlogPosts(DEFAULT_LOCALE);
   return posts.map((post) => ({ slug: post.slug }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { slug } = await params;
-  const [post, locale] = await Promise.all([getBlogPost(slug), localeOf(params)]);
+  const locale = await localeOf(params);
+  const post = await getBlogPost(slug, locale);
   if (!post) return {};
 
   return pageMetadata({
@@ -33,7 +37,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function PostPage({ params }: Params) {
   const { slug } = await params;
-  const [post, locale] = await Promise.all([getBlogPost(slug), localeOf(params)]);
+  const locale = await localeOf(params);
+  const post = await getBlogPost(slug, locale);
   if (!post) notFound();
 
   const nav = getDictionary(locale).nav;
