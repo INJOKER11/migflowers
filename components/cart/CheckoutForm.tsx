@@ -426,7 +426,11 @@ export function CheckoutForm() {
           style={{ marginTop: 18, padding: '14px 0' }}
           disabled={!cart.ready || cart.isEmpty || submitting}
         >
-          {submitting ? 'Надсилаємо…' : 'Підтвердити замовлення'}
+          {submitting
+            ? 'Надсилаємо…'
+            : cart.payment === PaymentEnum.online
+              ? 'Сплатити замовлення'
+              : 'Підтвердити замовлення'}
         </Button>
       </div>
     </form>
