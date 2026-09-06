@@ -7,9 +7,11 @@ import { Header } from '@/components/chrome/Header';
 import { Footer } from '@/components/chrome/Footer';
 import { CartDrawer } from '@/components/cart/CartDrawer';
 import { JsonLd } from '@/components/seo/JsonLd';
-import { getDictionary } from '@/lib/dictionaries';
+import { getDictionary, getUiDictionary } from '@/lib/dictionaries';
+import { DictionaryProvider } from '@/lib/dictionary-context';
 import { DEFAULT_LOCALE, HTML_LANG, LOCALES, SITE_URL, isLocale } from '@/lib/i18n';
 import { floristSchema } from '@/lib/schema';
+import { SHARE_CARD } from '@/lib/seo';
 import '../globals.css';
 
 const heading = Cormorant_Garamond({
@@ -52,6 +54,22 @@ export async function generateMetadata({ params }: LangParams): Promise<Metadata
     metadataBase: new URL(SITE_URL),
     title: dict.seo.brand.title,
     description: dict.seo.brand.description,
+    /* Inherited by anything without its own — the 404 included, which is the
+       one page that can still be shared by accident. */
+    openGraph: {
+      type: 'website',
+      siteName: 'MIG Flowers',
+      locale: HTML_LANG[locale].replace('-', '_'),
+      title: dict.seo.brand.title,
+      description: dict.seo.brand.description,
+      images: [SHARE_CARD],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title: dict.seo.brand.title,
+      description: dict.seo.brand.description,
+      images: [SHARE_CARD],
+    },
   };
 }
 
@@ -69,14 +87,16 @@ export default async function RootLayout({
       <body>
         {/* Site-wide, so it sits in the layout rather than on the home page —
             the shop is the same shop on every route. */}
-        <JsonLd data={floristSchema()} />
-        <CartProvider>
-          <PromoBar dict={dict.chrome} />
-          <Header nav={dict.nav} chrome={dict.chrome} />
-          <main>{children}</main>
-          <Footer dict={dict.footer} />
-          <CartDrawer />
-        </CartProvider>
+        <JsonLd data={floristSchema(lang)} />
+        <DictionaryProvider dict={getUiDictionary(lang)}>
+          <CartProvider>
+            <PromoBar dict={dict.chrome} />
+            <Header nav={dict.nav} chrome={dict.chrome} />
+            <main>{children}</main>
+            <Footer dict={dict.footer} locale={lang} />
+            <CartDrawer />
+          </CartProvider>
+        </DictionaryProvider>
       </body>
     </html>
   );

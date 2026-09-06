@@ -8,10 +8,10 @@ import { uah } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
 import { STROKE_HEAVY, X } from '@/components/ui/icons';
 import { CartLine } from './CartLine';
-
-const TITLE = 'Ваш кошик';
+import { useDict } from '@/lib/dictionary-context';
 
 export function CartDrawer() {
+  const t = useDict().cart;
   const router = useRouter();
   const withLocale = useLocalePath();
   const cart = useCart();
@@ -39,23 +39,23 @@ export function CartDrawer() {
 
   return (
     <>
-      <button type="button" className="scrim" aria-label="Закрити кошик" onClick={closeDrawer} />
+      <button type="button" className="scrim" aria-label={t.closeCart} onClick={closeDrawer} />
 
       <aside
         ref={panel}
         className="drawer"
         role="dialog"
         aria-modal="true"
-        aria-label={TITLE}
+        aria-label={t.drawerTitle}
         tabIndex={-1}
       >
         <div className="drawer-head">
-          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 22 }}>{TITLE}</span>
+          <span style={{ fontFamily: 'var(--font-heading)', fontSize: 22 }}>{t.drawerTitle}</span>
           <Button
             variant="ghost"
             icon
-            title="Закрити"
-            aria-label="Закрити"
+            title={t.close}
+            aria-label={t.close}
             style={{ width: 34, height: 34 }}
             onClick={closeDrawer}
           >
@@ -74,9 +74,9 @@ export function CartDrawer() {
                 lineHeight: 1.7,
               }}
             >
-              Тут поки що порожньо.
+              {t.emptyA}
               <br />
-              Цього тижня дуже гарні півонії.
+              {t.emptyB}
             </p>
           )}
           <div className="cart-lines">
@@ -88,7 +88,7 @@ export function CartDrawer() {
 
         <div className="drawer-foot">
           <div className="summary-total" style={{ fontSize: 22 }}>
-            <span>Сума</span>
+            <span>{t.sum}</span>
             <span className="tabular">{uah(cart.total ?? 0)}</span>
           </div>
           <Button
@@ -98,7 +98,7 @@ export function CartDrawer() {
             onClick={() => goTo('/checkout')}
             disabled={cart.isEmpty}
           >
-            Оформити
+            {t.checkout}
           </Button>
         </div>
       </aside>

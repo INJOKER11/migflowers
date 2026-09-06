@@ -2,8 +2,10 @@
 
 import { useCallback, useEffect, useState } from 'react';
 import { usePathname, useRouter, useSearchParams } from 'next/navigation';
-import { COLOR_FILTERS, PRICE_MAX, PRICE_MIN, SORT_OPTIONS, TYPE_FILTERS } from '@/lib/catalog';
+import { COLOR_FILTERS, PRICE_MAX, PRICE_MIN, SORT_KEYS, sortOptions, TYPE_FILTERS } from '@/lib/catalog';
 import { arrangementCount } from '@/lib/format';
+import { useDict } from '@/lib/dictionary-context';
+import { useLocale } from '@/lib/use-locale';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { FilterRail } from './FilterRail';
 import type { Category, Product, SortKey } from '@/types';
@@ -20,8 +22,8 @@ function pick(
 }
 
 function pickSort(value: string | null): SortKey {
-  const match = SORT_OPTIONS.find((o) => o.value === value);
-  return match ? match.value : 'popular';
+  const match = SORT_KEYS.find((key) => key === value);
+  return match ?? 'popular';
 }
 
 /* An absent param means no cap. Checked before Number(), because Number(null)
@@ -44,6 +46,8 @@ export function ShopBrowser({
   const router = useRouter();
   const pathname = usePathname();
   const params = useSearchParams();
+  const locale = useLocale();
+  const t = useDict().shop;
 
   const mappedCategories = categories.map((c) => ({
     value: c.slug,
@@ -123,7 +127,7 @@ export function ShopBrowser({
           }}
         >
           <span className="tabular" style={{ fontSize: 13, color: 'var(--color-neutral-600)' }}>
-            {arrangementCount(products.length)}
+            {arrangementCount(products.length, locale)}
           </span>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
             <label
@@ -135,7 +139,7 @@ export function ShopBrowser({
                 color: 'var(--color-neutral-600)',
               }}
             >
-              Сортування
+              {t.sortLabel}
             </label>
             <select
               id="sort"
@@ -144,7 +148,7 @@ export function ShopBrowser({
               onChange={(e) => setParam('sort', e.target.value)}
               style={{ fontSize: 13, padding: '7px 10px' }}
             >
-              {SORT_OPTIONS.map((option) => (
+              {sortOptions(t).map((option) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>

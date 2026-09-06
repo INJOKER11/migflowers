@@ -1,11 +1,37 @@
 'use client';
 
-import { useState } from 'react';
-import { PROMO_CODE } from '@/lib/constants';
+import { useState, type FormEvent } from 'react';
+import { createFirstOrderPromoCode, ValidationError } from '@/lib/api';
 import { Button } from '@/components/ui/Button';
+import { useDict } from '@/lib/dictionary-context';
+import { useLocale } from '@/lib/use-locale';
+import { fill } from '@/lib/format';
 
 export function Newsletter() {
-  const [sent, setSent] = useState(false);
+  const locale = useLocale();
+  const t = useDict().home;
+
+  const [sending, setSending] = useState(false);
+  const [sent, setSent] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  const send = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    if (sending) return;
+
+    const email = String(new FormData(e.currentTarget).get('email') ?? '').trim();
+
+    setError(null);
+    setSending(true);
+    try {
+      const promo = await createFirstOrderPromoCode(email, locale);
+      setSent(promo.code);
+    } catch (err) {
+      setError(err instanceof ValidationError ? (err.fields.email?.[0] ?? t.newsFailed) : t.newsFailed);
+    } finally {
+      setSending(false);
+    }
+  };
 
   return (
     <section style={{ borderTop: '1px solid var(--color-divider)' }}>
@@ -22,9 +48,7 @@ export function Newsletter() {
         }}
       >
         <div>
-          <h2 style={{ fontSize: 36, margin: '0 0 12px' }}>
-            Десять відсотків знижки на перший букет
-          </h2>
+          <h2 style={{ fontSize: 36, margin: '0 0 12px' }}>{t.newsTitle}</h2>
           <p
             style={{
               margin: 0,
@@ -35,39 +59,29 @@ export function Newsletter() {
               textAlign: 'justify',
             }}
           >
-            Один лист на місяць: що зараз у сезоні, що надіслали садівники, і час від часу — як
-            продовжити життя зрізаним квітам.
+            {t.newsBody}
           </p>
         </div>
 
-        <form
-          onSubmit={(e) => {
-            e.preventDefault();
-            setSent(true);
-          }}
-          style={{ display: 'flex', flexDirection: 'column', gap: 12 }}
-        >
+        <form onSubmit={send} style={{ display: 'flex', flexDirection: 'column', gap: 12 }} noValidate>
           <div style={{ display: 'flex', gap: 12, flexWrap: 'wrap' }}>
             <input
-              className="input"
+              name="email"
+              className={error ? 'input input-invalid' : 'input'}
               type="email"
               required
               placeholder="your@email.com"
-              aria-label="Ел. пошта"
+              aria-label={t.newsEmailLabel}
+              aria-invalid={error ? true : undefined}
+              disabled={sending || sent !== null}
               style={{ flex: 1, minWidth: 220 }}
             />
-            <Button
-              type="submit"
-              cta
-              style={{ padding: '0 26px' }}
-            >
-              Отримати код
+            <Button type="submit" cta style={{ padding: '0 26px' }} disabled={sending || sent !== null}>
+              {sending ? t.newsSending : t.newsCta}
             </Button>
           </div>
           <div style={{ fontSize: 12, color: 'var(--color-neutral-600)' }} aria-live="polite">
-            {sent
-              ? `Дякуємо — код ${PROMO_CODE} уже в дорозі.`
-              : 'Один лист на місяць. Відписка в один клік.'}
+            {sent ? fill(t.newsSent, { code: sent }) : (error ?? t.newsNote)}
           </div>
         </form>
       </div>

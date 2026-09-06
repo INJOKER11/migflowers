@@ -3,7 +3,19 @@
 import { useState, type CSSProperties } from 'react';
 import { useCart } from '@/lib/cart-context';
 import { uah } from '@/lib/format';
-import { CARE_TEXT, descriptionFor, productShots, variantPrice } from '@/lib/catalog';
+import {
+  careText,
+  descriptionFor,
+  discountPercent,
+  isDiscounted,
+  priceOf,
+  productAlt,
+  productShots,
+  variantPrice,
+} from '@/lib/catalog';
+import { useDict } from '@/lib/dictionary-context';
+import { useLocale } from '@/lib/use-locale';
+import { fill } from '@/lib/format';
 import { Button } from '@/components/ui/Button';
 import { Plate } from '@/components/ui/Plate';
 import { Chip, ChipRow } from '@/components/ui/Chip';
@@ -11,14 +23,13 @@ import { QuantityStepper } from '@/components/cart/QuantityStepper';
 import type { Product, VariantSize } from '@/types';
 
 const SIZES: VariantSize[] = ['Мала', 'Стандарт', 'Велика'];
-const TABS = [
-  { key: 'desc', label: 'Опис' },
-  // { key: 'care', label: 'Догляд' },
-] as const;
+const TAB_KEYS = ['desc'] as const; // 'care' is behind the commented-out tab.
 
-type TabKey = (typeof TABS)[number]['key'];
+type TabKey = (typeof TAB_KEYS)[number];
 
 export function ProductDetail({ product }: { product: Product }) {
+  const locale = useLocale();
+  const t = useDict().product;
   const { add, bump, qtyOf, isSaved, toggleSaved, ready } = useCart();
   const [shot, setShot] = useState(0);
   /* 'Стандарт' is the quoted price. */
@@ -26,6 +37,7 @@ export function ProductDetail({ product }: { product: Product }) {
   const [tab, setTab] = useState<TabKey>('desc');
 
   const saved = isSaved(product.id);
+  const discount = discountPercent(product);
   /* Held back until `ready` so the first client render still matches the server. */
   const qty = ready ? qtyOf(product.id) : 0;
   const large = productShots(product);
@@ -42,7 +54,7 @@ export function ProductDetail({ product }: { product: Product }) {
       <div>
         <Plate
           src={large?.[shot] ?? null}
-          alt={`${product.name} — ${product.category.name}`}
+          alt={productAlt(product)}
           sizes="(max-width: 1000px) 100vw, 560px"
           priority
           zoom={1.35}
@@ -56,7 +68,7 @@ export function ProductDetail({ product }: { product: Product }) {
             textAlign: 'center',
           }}
         >
-          Наведіть на фото, щоб збільшити
+          {t.zoomHint}
         </div>
 
 
@@ -84,15 +96,33 @@ export function ProductDetail({ product }: { product: Product }) {
         {/*</div>*/}
         <div
           className="tabular"
-          style={{ fontFamily: 'var(--font-heading)', fontSize: 32, margin: '20px 0 0' }}
+          style={{
+            fontFamily: 'var(--font-heading)',
+            fontSize: 32,
+            margin: '20px 0 0',
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: 12,
+            flexWrap: 'wrap',
+          }}
         >
-          {uah(variantPrice(product.price, variant))}
+          {isDiscounted(product) && (
+            /* Struck through at the size the discounted figure is not, so the
+               eye lands on what the bouquet costs today. */
+            <span className="price-was" style={{ fontSize: 20 }}>
+              {uah(variantPrice(product.price, variant))}
+            </span>
+          )}
+          <span className={isDiscounted(product) ? 'price-now' : undefined}>
+            {uah(variantPrice(priceOf(product), variant))}
+          </span>
+          {discount !== null && <span className="tag tag-sale">−{discount}%</span>}
         </div>
 
 
           {/* todo: support sizes +/ variants on backend */}
         {/*<div className="kicker" style={{ margin: '26px 0 10px' }}>*/}
-        {/*  Розмір*/}
+        {/*  {t.sizeLabel}*/}
         {/*</div>*/}
         {/*<ChipRow>*/}
         {/*  {SIZES.map((label, i) => (*/}
@@ -121,7 +151,7 @@ export function ProductDetail({ product }: { product: Product }) {
               style={{ flex: 1, minWidth: 180, padding: '14px 0' }}
               onClick={() => add(product)}
             >
-              Додати в кошик
+              {t.addToCart}
             </Button>
           )}
           <Button
@@ -133,7 +163,7 @@ export function ProductDetail({ product }: { product: Product }) {
             style={{ padding: '14px 22px', width: 144 }}
             onClick={() => toggleSaved(product.id)}
           >
-            {saved ? 'Збережено ♥' : 'Зберегти'}
+            {saved ? t.saved : t.save}
           </Button>
         </div>
 
@@ -147,18 +177,18 @@ export function ProductDetail({ product }: { product: Product }) {
             borderTop: '1px solid var(--color-divider)',
           }}
         >
-          {TABS.map((t) => (
+          {TAB_KEYS.map((key) => (
             <button
-              key={t.key}
+              key={key}
               type="button"
               role="tab"
-              id={`tab-${t.key}`}
-              aria-selected={tab === t.key}
+              id={`tab-${key}`}
+              aria-selected={tab === key}
               aria-controls="tab-body"
               className="tab-btn"
-              onClick={() => setTab(t.key)}
+              onClick={() => setTab(key)}
             >
-              {t.label}
+              {key === 'desc' ? t.tabDescription : t.tabCare}
             </button>
           ))}
         </div>
@@ -175,7 +205,7 @@ export function ProductDetail({ product }: { product: Product }) {
             textAlign: 'justify',
           }}
         >
-          {tab === 'desc' ? descriptionFor(product) : CARE_TEXT}
+          {tab === 'desc' ? descriptionFor(product, locale) : careText(locale)}
         </p>
       </div>
     </div>

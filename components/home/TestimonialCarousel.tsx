@@ -5,8 +5,10 @@ import { useState } from 'react';
 import { Button } from '@/components/ui/Button';
 import { ChevronLeft, ChevronRight, Quote, STROKE_HEAVY } from '@/components/ui/icons';
 import { Review } from '@/types';
+import { useDict } from '@/lib/dictionary-context';
 
 export function TestimonialCarousel({ reviews }: { reviews: Review[] }) {
+  const t = useDict().home;
   const [index, setIndex] = useState(0);
 
   const current = reviews.length ? reviews[index % reviews.length] : null;
@@ -70,8 +72,8 @@ export function TestimonialCarousel({ reviews }: { reviews: Review[] }) {
           <Button
             variant="ghost"
             icon
-            title="Назад"
-            aria-label="Попередній відгук"
+            title={t.reviewPrev}
+            aria-label={t.reviewPrevLabel}
             style={{ width: 38, height: 38, borderRadius: '50%' }}
             onClick={() => step(-1)}
           >
@@ -83,8 +85,8 @@ export function TestimonialCarousel({ reviews }: { reviews: Review[] }) {
           <Button
             variant="ghost"
             icon
-            title="Далі"
-            aria-label="Наступний відгук"
+            title={t.reviewNext}
+            aria-label={t.reviewNextLabel}
             style={{ width: 38, height: 38, borderRadius: '50%' }}
             onClick={() => step(1)}
           >
@@ -102,7 +104,7 @@ export function TestimonialCarousel({ reviews }: { reviews: Review[] }) {
             textTransform: 'uppercase',
           }}
         >
-          Усі відгуки
+          {t.reviewsAll}
         </Link>
       </div>
     </section>

@@ -38,6 +38,13 @@
   border-radius: calc(var(--radius-md) * 0.75);
 }
 .tag-outline { border: 1px solid var(--color-accent); color: var(--color-accent); }
+/* The saving on a discounted product page — filled, because it sits on the
+   page's own ground rather than over a photograph. */
+.tag-sale {
+  background: var(--color-accent-100);
+  color: var(--color-accent-800);
+  font-variant-numeric: tabular-nums;
+}
 
 /* ── tables ────────────────────────────────────────────────────────────── */
 

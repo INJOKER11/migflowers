@@ -6,6 +6,7 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { getBlogPosts } from '@/lib/api';
 import { excerpt, shortDate } from '@/lib/format';
+import { getDictionary } from '@/lib/dictionaries';
 import { localeOf, metadataFor } from '@/lib/seo';
 
 export async function generateMetadata(props: {
@@ -17,12 +18,18 @@ export async function generateMetadata(props: {
 export default async function BlogPage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await localeOf(params);
 
+  const dict = getDictionary(locale);
+  const t = dict.blog;
+
   const posts = await getBlogPosts(locale);
 
   return (
     <Section pt={44} pb={90}>
-      <Breadcrumb locale={locale} trail={[{ label: 'Головна', href: '/' }, { label: 'Журнал' }]} />
-      <h1 style={{ fontSize: 46, margin: '0 0 12px' }}>Журнал</h1>
+      <Breadcrumb
+        locale={locale}
+        trail={[{ label: dict.nav.home, href: '/' }, { label: t.crumb }]}
+      />
+      <h1 style={{ fontSize: 46, margin: '0 0 12px' }}>{t.h1}</h1>
       <p
         style={{
           margin: '0 0 40px',
@@ -31,7 +38,7 @@ export default async function BlogPage({ params }: { params: Promise<{ lang: str
           maxWidth: '56ch',
         }}
       >
-        Що зараз у сезоні, як зберегти квіти живими і час від часу — суперечки про стрічку.
+        {t.intro}
       </p>
 
       <div
@@ -84,7 +91,7 @@ export default async function BlogPage({ params }: { params: Promise<{ lang: str
               {excerpt(post.content)}
             </p>
             <div style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 12 }}>
-              {shortDate(post.created_at)}
+              {shortDate(post.created_at, locale)}
             </div>
           </Link>
         ))}

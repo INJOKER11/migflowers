@@ -1,24 +1,28 @@
-import type { Metadata } from 'next';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { EnquiryForm } from '@/components/corporate/EnquiryForm';
 import { VOLUME_TIERS } from '@/lib/content';
 import { photo } from '@/lib/images';
-import { localeOf, metadataFor } from '@/lib/seo';
+import { localeOf } from '@/lib/seo';
+import { notFound } from 'next/navigation';
 
-export async function generateMetadata(props: {
-  params: Promise<{ lang: string }>;
-}): Promise<Metadata> {
-  return metadataFor(props.params, '/corporate', 'corporate');
-}
+// export async function generateMetadata(props: {
+//   params: Promise<{ lang: string }>;
+// }): Promise<Metadata> {
+//   return metadataFor(props.params, '/corporate', 'corporate');
+// }
 
 export default async function CorporatePage({ params }: { params: Promise<{ lang: string }> }) {
+  notFound();
   const locale = await localeOf(params);
 
   return (
     <Section width={1100} pt={44} pb={90}>
-      <Breadcrumb locale={locale} trail={[{ label: 'Головна', href: '/' }, { label: 'Для бізнесу' }]} />
+      <Breadcrumb
+        locale={locale}
+        trail={[{ label: 'Головна', href: '/' }, { label: 'Для бізнесу' }]}
+      />
       <h1
         style={{
           fontSize: 'clamp(38px, 4.6vw, 54px)',

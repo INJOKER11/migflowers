@@ -1,24 +1,58 @@
-import type { Cadence, Plan, TeamMember } from '@/types';
+import type { Cadence, Plan } from '@/types';
+import type { Locale } from './i18n';
 import { photo, type PhotoKey } from './images';
 
-/** Home — why us, four numbered columns. */
-export const WHY_US = [
-  {
-    n: '01',
-    title: 'Доставка того ж дня',
-    body: 'Замовляйте до 14:00 — і квіти приїдуть уже по обіді, у будь-який куток міста.',
-  },
-  {
-    n: '02',
-    title: 'Ручна робота, ніяких наборів',
-    body: 'Кожен букет складає один флорист від початку до кінця — просто в майстерні на Люстдорфській.',
-  },
-  {
-    n: '03',
-    title: 'Прості повернення',
-    body: 'Не той день, не та адреса, змінилися плани. Напишіть протягом доби — усе владнаємо.',
-  },
-];
+/**
+ * Copy that is content rather than interface — the home page's four columns,
+ * the payment explanations, the shop's own address — lives here in both
+ * languages. Labels and buttons live in `./dictionaries`.
+ *
+ * The blocks that belong to the retired routes (`/subscription`,
+ * `/gift-cards`, `/account`) are Ukrainian only: those pages answer
+ * `notFound()`, so nothing renders them. Translate them if one comes back.
+ */
+
+/** Home — why us, numbered columns. */
+const WHY_US: Record<Locale, { n: string; title: string; body: string }[]> = {
+  uk: [
+    {
+      n: '01',
+      title: 'Доставка того ж дня',
+      body: 'За наявності квітів. Найшвидша доставка буде, якщо ви зателефонуєте на +380 67 422 72 98.',
+    },
+    {
+      n: '02',
+      title: 'Ручна робота, ніяких наборів',
+      body: 'Кожен букет складає один флорист від початку до кінця — просто в майстерні на Корольова.',
+    },
+    {
+      n: '03',
+      title: 'Прості повернення',
+      body: 'Не той день, не та адреса, змінилися плани. Напишіть протягом доби — усе владнаємо.',
+    },
+  ],
+  ru: [
+    {
+      n: '01',
+      title: 'Доставка в день заказа',
+      body: 'При наличии цветов. Быстрее всего доставим, если вы позвоните на +380 67 422 72 98.',
+    },
+    {
+      n: '02',
+      title: 'Ручная работа, никаких наборов',
+      body: 'Каждый букет собирает один флорист от начала до конца — прямо в мастерской на Королёва.',
+    },
+    {
+      n: '03',
+      title: 'Простые возвраты',
+      body: 'Не тот день, не тот адрес, изменились планы. Напишите в течение суток — всё уладим.',
+    },
+  ],
+};
+
+export function whyUs(locale: Locale) {
+  return WHY_US[locale];
+}
 
 /** Home — six square plates, @migflowers. */
 const GALLERY_KEYS: PhotoKey[] = [
@@ -31,42 +65,22 @@ const GALLERY_KEYS: PhotoKey[] = [
 ];
 export const GALLERY = GALLERY_KEYS.map((key) => photo(key));
 
-/** Checkout — shared by the drawer and the full page. */
-export const SLOTS = ['Сьогодні, 15:00 – 18:00', 'Завтра зранку', 'Вибрати дату'] as const;
+/** Checkout — the three delivery slots, in the order the chips show them.
+    Their labels are `checkout.slotToday`/`slotTomorrow`/`slotPick`. */
+export const SLOT_COUNT = 3;
+
 export enum DeliveryEnum {
   delivery = 'delivery',
   takeaway = 'takeaway',
 }
-export const DELIVERY = [
-  {
-    value: DeliveryEnum.delivery,
-    name: 'Доставка',
-  },
-  {
-    value: DeliveryEnum.takeaway,
-    name: 'Самовивіз',
-  },
-];
+export const DELIVERY_METHODS = [DeliveryEnum.delivery, DeliveryEnum.takeaway] as const;
 
 export enum PaymentEnum {
   card = 'card',
   online = 'online',
   on_site = 'on_site',
 }
-export const PAYMENTS = [
-  {
-    value: PaymentEnum.card,
-    name: 'Переказ на карту',
-  },
-  {
-    value: PaymentEnum.online,
-    name: 'Онлайн оплата',
-  },
-  {
-    value: PaymentEnum.on_site,
-    name: 'Оплата на мiсцi',
-  },
-];
+export const PAYMENT_OPTIONS = [PaymentEnum.card, PaymentEnum.online, PaymentEnum.on_site] as const;
 
 export const CADENCES: Cadence[] = [
   { label: 'Щотижня', per: 'щотижня', mult: 1 },
@@ -82,7 +96,7 @@ export const PLANS: Plan[] = [
     features: [
       'Невеликий букет, звʼязаний руками',
       'Сезонний, ніколи не повторюється',
-      'Безкоштовна доставка в усі зони',
+      'Безкоштовна доставка по Одесі',
     ],
   },
   {
@@ -113,26 +127,42 @@ export const RECOMMENDED_PLAN_INDEX = 1;
 export const GIFT_AMOUNTS = [500, 1000, 2000, 3500];
 export const GIFT_DELIVERY = ['Ел. поштою', 'Друком і поштою'] as const;
 
-export const PAYMENT_METHODS = [
-  {
-    title: 'Картка',
-    body: 'Visa і Mastercard через захищений шлюз. Ми не бачимо і не зберігаємо номер картки.',
-  },
-  {
-    title: 'Apple та Google Pay',
-    body: 'Один дотик під час оформлення з телефона. Найшвидший спосіб надіслати квіти просто з вулиці.',
-  },
-  // {
-  //   title: 'Готівка курʼєру',
-  //   body: 'Оплата курʼєру на порозі. Доступно лише в Таїрово і Черемушках.',
-  // },
-  {
-    title: 'Банківський переказ',
-    body: 'Для корпоративних клієнтів і постійних щотижневих замовлень. Виставляємо рахунок раз на місяць.',
-  },
-];
+const PAYMENT_METHODS: Record<Locale, { title: string; body: string }[]> = {
+  uk: [
+    {
+      title: 'Картка',
+      body: 'Visa і Mastercard через захищений шлюз. Ми не бачимо і не зберігаємо номер картки.',
+    },
+    {
+      title: 'Apple та Google Pay',
+      body: 'Один дотик під час оформлення з телефона. Найшвидший спосіб надіслати квіти просто з вулиці.',
+    },
+    {
+      title: 'Банківський переказ',
+      body: 'Для корпоративних клієнтів і постійних щотижневих замовлень. Виставляємо рахунок раз на місяць.',
+    },
+  ],
+  ru: [
+    {
+      title: 'Карта',
+      body: 'Visa и Mastercard через защищённый шлюз. Мы не видим и не храним номер карты.',
+    },
+    {
+      title: 'Apple и Google Pay',
+      body: 'Одно касание при оформлении с телефона. Самый быстрый способ отправить цветы прямо с улицы.',
+    },
+    {
+      title: 'Банковский перевод',
+      body: 'Для корпоративных клиентов и постоянных еженедельных заказов. Выставляем счёт раз в месяц.',
+    },
+  ],
+};
 
-/** Corporate — volume discounts. */
+export function paymentMethods(locale: Locale) {
+  return PAYMENT_METHODS[locale];
+}
+
+/** Corporate — volume discounts. The route is retired, so Ukrainian only. */
 export const VOLUME_TIERS = [
   { volume: '10 – 24 композиції', discount: '10%', terms: 'Картка або переказ' },
   { volume: '25 – 49 композицій', discount: '15%', terms: 'Рахунок раз на місяць' },
@@ -181,12 +211,27 @@ export const SAVED_ADDRESSES = [
 export const TRACKING_STAGES = ['Зрізано', 'Звʼязано', 'У дорозі', 'Доставлено'];
 export const TRACKING_DONE = 2;
 
-/** Contact. */
+/** Contact — the parts that read the same in either language. */
 export const SHOP_DETAILS = {
-  address: 'Люстдорфська дор. 125/4, Одеса',
-  addressShort: 'Люстдорфська дор. 125/4',
   phone: '+380 67 422 72 98',
   phoneHref: 'tel:+380674227298',
-  email: 'hello@migflowers.ua',
-  hours: 'Щодня, 08:00 – 21:00',
+  // email: 'hello@migflowers.ua',
 };
+
+/** Contact — the parts that don't: the street and the opening hours. */
+const SHOP_LOCATION: Record<Locale, { address: string; addressShort: string; hours: string }> = {
+  uk: {
+    address: 'вул. Академіка Корольова, 22, Одеса',
+    addressShort: 'вул. Академіка Корольова, 22',
+    hours: 'Щодня, 08:00 – 21:00',
+  },
+  ru: {
+    address: 'ул. Академика Королёва, 22, Одесса',
+    addressShort: 'ул. Академика Королёва, 22',
+    hours: 'Ежедневно, 08:00 – 21:00',
+  },
+};
+
+export function shopLocation(locale: Locale) {
+  return SHOP_LOCATION[locale];
+}

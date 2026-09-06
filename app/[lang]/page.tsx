@@ -19,15 +19,16 @@ export async function generateMetadata(props: {
 export default async function HomePage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await localeOf(params);
   const reviews = await getReviews({ locale, perPage: 5 });
+  const dict = getDictionary(locale).home;
 
   return (
     <>
-      <Hero dict={getDictionary(locale).home} />
-      <QuickBuy locale={locale} />
-      <OccasionGrid locale={locale} />
-      <WhyUs />
+      <Hero dict={dict} />
+      <QuickBuy locale={locale} dict={dict} />
+      <OccasionGrid locale={locale} dict={dict} />
+      <WhyUs locale={locale} />
       <TestimonialCarousel reviews={reviews} />
-      <InstaGrid />
+      <InstaGrid dict={dict} />
       <Newsletter />
     </>
   );

@@ -32,6 +32,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     path: `/blog/${post.slug}`,
     title: `${post.title} — MIG Flowers`,
     description: excerpt(post.content),
+    image: post.image_url,
   });
 }
 
@@ -41,7 +42,8 @@ export default async function PostPage({ params }: Params) {
   const post = await getBlogPost(slug, locale);
   if (!post) notFound();
 
-  const nav = getDictionary(locale).nav;
+  const dict = getDictionary(locale);
+  const nav = dict.nav;
 
   return (
     <Section width={760} pt={44} pb={90}>
@@ -83,7 +85,7 @@ export default async function PostPage({ params }: Params) {
           borderBottom: '1px solid var(--color-divider)',
         }}
       >
-        {shortDate(post.created_at)}
+        {shortDate(post.created_at, locale)}
       </div>
 
       <Plate
@@ -112,7 +114,7 @@ export default async function PostPage({ params }: Params) {
           href="/blog"
           style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase' }}
         >
-          ← Усі записи журналу
+          {dict.blog.back}
         </Link>
       </div>
     </Section>

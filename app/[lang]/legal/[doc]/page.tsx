@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import { notFound } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import { LEGAL, LEGAL_UPDATED, getLegal } from '@/lib/legal';
+import { LEGAL_DOCS, LEGAL_UPDATED, getLegal } from '@/lib/legal';
 import { getDictionary } from '@/lib/dictionaries';
 import { localeOf, pageMetadata } from '@/lib/seo';
 
@@ -11,16 +11,17 @@ interface Params {
 }
 
 export function generateStaticParams() {
-  return Object.keys(LEGAL).map((doc) => ({ doc }));
+  return LEGAL_DOCS.map((doc) => ({ doc }));
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { doc } = await params;
-  const document = getLegal(doc);
+  const locale = await localeOf(params);
+  const document = getLegal(doc, locale);
   if (!document) return {};
 
   return pageMetadata({
-    locale: await localeOf(params),
+    locale,
     path: `/legal/${doc}`,
     title: `${document.title} — MIG Flowers`,
   });
@@ -28,10 +29,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
 
 export default async function LegalPage({ params }: Params) {
   const { doc } = await params;
-  const document = getLegal(doc);
+  const locale = await localeOf(params);
+  const document = getLegal(doc, locale);
   if (!document) notFound();
 
-  const locale = await localeOf(params);
   const nav = getDictionary(locale).nav;
 
   return (
@@ -49,7 +50,7 @@ export default async function LegalPage({ params }: Params) {
           borderBottom: '1px solid var(--color-divider)',
         }}
       >
-        {LEGAL_UPDATED}
+        {LEGAL_UPDATED[locale]}
       </div>
 
       {document.sections.map((section) => (

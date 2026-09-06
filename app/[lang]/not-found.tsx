@@ -3,6 +3,17 @@ import { Section } from '@/components/ui/Section';
 import { Plate } from '@/components/ui/Plate';
 import { photo } from '@/lib/images';
 
+/**
+ * The one page that is Ukrainian in both locales, and not for want of trying.
+ *
+ * It renders in Next's error shell: no route params, and no
+ * `DictionaryProvider` — that lives in the layout. Reading the locale off the
+ * URL needs a client component, and a client subtree here is left out of the
+ * statically generated 404 HTML entirely (`not-found.tsx` as a client component
+ * is dropped outright, and a client child renders nothing until hydration), so
+ * either way the words go missing from the server response. Ukrainian text
+ * beats no text. Revisit if the retired routes stop being prerendered.
+ */
 export default function NotFound() {
   return (
     <Section width={760} pt={90} pb={130} style={{ textAlign: 'center' }}>

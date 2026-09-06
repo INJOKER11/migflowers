@@ -1,5 +1,5 @@
 import type { Product } from '@/types';
-import { SHOP_DETAILS } from './content';
+import { SHOP_DETAILS, shopLocation } from './content';
 import { SITE_URL, localeUrl, type Locale } from './i18n';
 import type { Crumb } from '@/components/ui/Breadcrumb';
 
@@ -15,9 +15,16 @@ import type { Crumb } from '@/components/ui/Breadcrumb';
     catalogue is empty today, so it cannot be derived from real prices either. */
 const PRICE_RANGE: string | null = null;
 
+/* One shop, two spellings of the city it stands in — the block is emitted on
+   both locales' pages. */
+const CITY: Record<Locale, { locality: string; region: string }> = {
+  uk: { locality: 'Одеса', region: 'Одеська область' },
+  ru: { locality: 'Одесса', region: 'Одесская область' },
+};
+
 /** `Florist` is the schema.org type for a flower shop. (`FloristsShop` is a
     Google Business Profile category — it is not part of the vocabulary.) */
-export function floristSchema() {
+export function floristSchema(locale: Locale) {
   return {
     '@context': 'https://schema.org',
     '@type': 'Florist',
@@ -26,17 +33,16 @@ export function floristSchema() {
     url: SITE_URL,
     image: `${SITE_URL}/logo.png`,
     telephone: SHOP_DETAILS.phone,
-    email: SHOP_DETAILS.email,
     address: {
       '@type': 'PostalAddress',
-      streetAddress: SHOP_DETAILS.addressShort,
-      addressLocality: 'Одеса',
-      addressRegion: 'Одеська область',
+      streetAddress: shopLocation(locale).addressShort,
+      addressLocality: CITY[locale].locality,
+      addressRegion: CITY[locale].region,
       addressCountry: 'UA',
     },
-    areaServed: { '@type': 'City', name: 'Одеса' },
-    /* `SHOP_DETAILS.hours` is "Щодня, 08:00 – 21:00" — the same window every
-       day, so one specification covers the week. */
+    areaServed: { '@type': 'City', name: CITY[locale].locality },
+    /* The shop keeps the same window every day, so one specification covers
+       the week. */
     openingHoursSpecification: {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
@@ -57,7 +63,16 @@ export function productSchema(product: Product, locale: Locale) {
     name: product.name,
     description: product.description,
     ...(product.image_url ? { image: product.image_url } : null),
-    category: product.category.name,
+    /* schema.org takes one category or a list; a product with none says
+       nothing rather than an empty string. */
+    ...(product.categories.length
+      ? {
+          category:
+            product.categories.length === 1
+              ? product.categories[0].name
+              : product.categories.map((c) => c.name),
+        }
+      : null),
     offers: {
       '@type': 'Offer',
       url: localeUrl(locale, `/product/${product.slug}`),

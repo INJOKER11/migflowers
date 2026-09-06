@@ -7,9 +7,11 @@ import { getProducts } from '@/lib/api';
 import { useLocale } from '@/lib/use-locale';
 import { ProductGrid } from './ProductGrid';
 import type { Product } from '@/types';
+import { useDict } from '@/lib/dictionary-context';
 
 export function WishlistView() {
   const locale = useLocale();
+  const t = useDict().wishlist;
   const { savedIds, ready } = useCart();
   const [fetched, setFetched] = useState<Product[]>([]);
   const [loading, setLoading] = useState(true);
@@ -46,9 +48,9 @@ export function WishlistView() {
   if (savedIds.length === 0) {
     return (
       <p style={{ fontSize: 15, color: 'var(--color-neutral-700)', lineHeight: 1.8 }}>
-        Ви ще нічого не зберегли. Натисніть сердечко на будь-якому букеті.
+        {t.empty}
         <br />
-        <Link href="/shop">До магазину</Link>
+        <Link href="/shop">{t.toShop}</Link>
       </p>
     );
   }
@@ -56,7 +58,7 @@ export function WishlistView() {
   if (loading) {
     return (
       <p style={{ fontSize: 15, color: 'var(--color-neutral-600)', lineHeight: 1.8 }}>
-        Завантажуємо збережене…
+        {t.loading}
       </p>
     );
   }
@@ -64,7 +66,7 @@ export function WishlistView() {
   if (failed) {
     return (
       <p style={{ fontSize: 15, color: 'var(--color-neutral-700)', lineHeight: 1.8 }}>
-        Не вдалося завантажити збережені букети. Спробуйте оновити сторінку.
+        {t.failed}
       </p>
     );
   }

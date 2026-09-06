@@ -1,17 +1,19 @@
 import Image from 'next/image';
 import { Link } from '@/components/ui/Link';
-import { SHOP_DETAILS } from '@/lib/content';
+import { SHOP_DETAILS, shopLocation } from '@/lib/content';
 import type { Dictionary } from '@/lib/dictionaries';
+import type { Locale } from '@/lib/i18n';
 import { Facebook, Instagram, STROKE, Send } from '@/components/ui/icons';
 
-export function Footer({ dict: t }: { dict: Dictionary['footer'] }) {
+export function Footer({ dict: t, locale }: { dict: Dictionary['footer']; locale: Locale }) {
+  const shop = shopLocation(locale);
 
   const shopLinks = [
     { href: '/shop', label: t.allFlowers },
     // { href: '/category/wedding-flowers', label: … },
     // { href: '/subscription', label: … },
     // { href: '/gift-cards', label: … },
-    { href: '/corporate', label: t.corporate },
+    // { href: '/corporate', label: t.corporate },
   ];
 
   const helpLinks = [
@@ -84,14 +86,14 @@ export function Footer({ dict: t }: { dict: Dictionary['footer'] }) {
         <div>
           <div className="footer-heading">{t.where}</div>
           <div className="footer-col">
-            <span>{SHOP_DETAILS.addressShort}</span>
+            <span>{shop.addressShort}</span>
             <a href={SHOP_DETAILS.phoneHref} className="footer-link">
               {SHOP_DETAILS.phone}
             </a>
-            <a href={`mailto:${SHOP_DETAILS.email}`} className="footer-link">
-              {SHOP_DETAILS.email}
-            </a>
-            <span>{SHOP_DETAILS.hours}</span>
+            {/*<a href={`mailto:${SHOP_DETAILS.email}`} className="footer-link">*/}
+            {/*  {SHOP_DETAILS.email}*/}
+            {/*</a>*/}
+            <span>{shop.hours}</span>
           </div>
           <div style={{ display: 'flex', gap: 12, marginTop: 18 }}>
             <Link
@@ -103,9 +105,9 @@ export function Footer({ dict: t }: { dict: Dictionary['footer'] }) {
             >
               <Instagram size={15} strokeWidth={STROKE} />
             </Link>
-            <Link href="/contact" className="social-btn" title="Facebook" aria-label="Facebook">
-              <Facebook size={15} strokeWidth={STROKE} />
-            </Link>
+            {/*<Link href="/contact" className="social-btn" title="Facebook" aria-label="Facebook">*/}
+            {/*  <Facebook size={15} strokeWidth={STROKE} />*/}
+            {/*</Link>*/}
             <Link href="/contact" className="social-btn" title="Telegram" aria-label="Telegram">
               <Send size={15} strokeWidth={STROKE} />
             </Link>

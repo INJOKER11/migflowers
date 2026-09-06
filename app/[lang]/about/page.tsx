@@ -3,6 +3,7 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { photo } from '@/lib/images';
+import { getDictionary } from '@/lib/dictionaries';
 import { localeOf, metadataFor } from '@/lib/seo';
 
 export async function generateMetadata(props: {
@@ -21,13 +22,15 @@ const PARAGRAPH = {
 
 export default async function AboutPage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await localeOf(params);
+  const dict = getDictionary(locale);
+  const t = dict.about;
 
   return (
     <>
       <Section pt={44} pb={40}>
         <Breadcrumb
           locale={locale}
-          trail={[{ label: 'Головна', href: '/' }, { label: 'Про нас' }]}
+          trail={[{ label: dict.nav.home, href: '/' }, { label: t.crumb }]}
         />
         <h1
           style={{
@@ -37,7 +40,7 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: st
             lineHeight: 1.05,
           }}
         >
-          Родинна майстерня і теплиця, з якої все починається
+          {t.h1}
         </h1>
         <div
           style={{
@@ -48,23 +51,15 @@ export default async function AboutPage({ params }: { params: Promise<{ lang: st
             marginTop: 36,
           }}
         >
-          <p style={PARAGRAPH}>
-            Ми — родинна справа: вирощуємо і продаємо квіти в Одесі вже понад десять років. Частину
-            букета складають квіти з наших теплиць, а частину докуповуємо — коли сезон ще не дав
-            того, що потрібно для композиції. У букет іде тільки те, за якість чого ми відповідаємо.
-          </p>
-          <p style={PARAGRAPH}>
-            Майстерня стоїть на Люстдорфській дорозі, у Таїрово. Стрічку й досі завʼязуємо вручну, і
-            з неї не виходить нічого, що ми не хотіли б отримати самі. Якщо ви телефонуєте вдень,
-            відповідає хтось із родини.
-          </p>
+          <p style={PARAGRAPH}>{t.p1}</p>
+          <p style={PARAGRAPH}>{t.p2}</p>
         </div>
       </Section>
 
       <Section pt={0} pb={60}>
         <Plate
           src={photo('bench')}
-          alt="Робочий стіл у майстерні"
+          alt={t.imageAlt}
           ratio="21/9"
           sizes="(max-width: 1240px) 100vw, 1240px"
         />

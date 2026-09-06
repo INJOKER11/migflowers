@@ -5,7 +5,10 @@ import { uah } from '@/lib/format';
 import { Plate } from '@/components/ui/Plate';
 import { STROKE, Trash2 } from '@/components/ui/icons';
 import { QuantityStepper } from './QuantityStepper';
+import { isDiscounted, priceOf } from '@/lib/catalog';
 import type { CartLine as Line } from '@/types';
+import { useDict } from '@/lib/dictionary-context';
+import { fill } from '@/lib/format';
 
 interface CartLineProps {
   line: Line;
@@ -14,6 +17,7 @@ interface CartLineProps {
 
 export function CartLine({ line, variant = 'drawer' }: CartLineProps) {
   const { bump, remove } = useCart();
+  const t = useDict().cart;
   const { product, qty } = line;
   const onPage = variant === 'page';
 
@@ -29,7 +33,10 @@ export function CartLine({ line, variant = 'drawer' }: CartLineProps) {
 
       <div className="cart-line-text">
         <div className="cart-line-name">{product.name}</div>
-        <div className="tabular cart-line-unit">{uah(product.price)} / шт.</div>
+        <div className="tabular cart-line-unit">
+          {isDiscounted(product) && <span className="price-was">{uah(product.price)}</span>}
+          {uah(priceOf(product))} {t.perUnit}
+        </div>
       </div>
 
       <div className="cart-line-controls">
@@ -42,14 +49,14 @@ export function CartLine({ line, variant = 'drawer' }: CartLineProps) {
         />
 
         {onPage && (
-          <div className="tabular cart-line-total">{uah(product.price * qty)}</div>
+          <div className="tabular cart-line-total">{uah(priceOf(product) * qty)}</div>
         )}
 
         <button
           type="button"
           className="icon-plain"
-          title="Видалити"
-          aria-label={`Видалити: ${product.name}`}
+          title={t.remove}
+          aria-label={fill(t.removeAria, { name: product.name })}
           onClick={() => remove(product.id)}
         >
           <Trash2 size={onPage ? 16 : 15} strokeWidth={STROKE} />

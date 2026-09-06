@@ -8,6 +8,14 @@ export type VariantSize = 'Мала' | 'Стандарт' | 'Велика';
 
 export type ProductTag = 'Хіт продажів' | 'Новинка' | 'Довго стоїть';
 
+/** A category as a product carries it: the name and the slug, without the
+    description and the cover photo `Category` has. */
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug: string;
+}
+
 export interface Product {
   id: string;
   name: string;
@@ -18,11 +26,10 @@ export interface Product {
   image_url: string | null;
   is_available: boolean;
   stock: number;
-  category: {
-    id: string;
-    name: string;
-    slug: string;
-  };
+  /** A product can sit in several — «троянди» and «на день народження» are
+      both true of the same bouquet. Possibly empty: nothing in the UI may
+      assume a first element. */
+  categories: ProductCategory[];
 }
 
 export interface Category {
