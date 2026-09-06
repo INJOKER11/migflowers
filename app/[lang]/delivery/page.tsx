@@ -2,9 +2,10 @@ import type { Metadata } from 'next';
 import { Link } from '@/components/ui/Link';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
-import { PAYMENT_METHODS } from '@/lib/content';
-import { FREE_DELIVERY_THRESHOLD, SAME_DAY_CUTOFF } from '@/lib/constants';
-import { uah } from '@/lib/format';
+import { paymentMethods } from '@/lib/content';
+import { FREE_DELIVERY_THRESHOLD } from '@/lib/constants';
+import { fill, uah } from '@/lib/format';
+import { getDictionary } from '@/lib/dictionaries';
 import { getDistricts } from '@/lib/api';
 import { localeOf, metadataFor } from '@/lib/seo';
 
@@ -17,11 +18,17 @@ export async function generateMetadata(props: {
 export default async function DeliveryPage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await localeOf(params);
 
+  const dict = getDictionary(locale);
+  const t = dict.delivery;
+
   const districts = await getDistricts(locale);
   return (
     <Section width={1000} pt={44} pb={90}>
-      <Breadcrumb locale={locale} trail={[{ label: 'Головна', href: '/' }, { label: 'Доставка та оплата' }]} />
-      <h1 style={{ fontSize: 46, margin: '0 0 16px' }}>Доставка та оплата</h1>
+      <Breadcrumb
+        locale={locale}
+        trail={[{ label: dict.nav.home, href: '/' }, { label: t.crumb }]}
+      />
+      <h1 style={{ fontSize: 46, margin: '0 0 16px' }}>{t.h1}</h1>
       <p
         style={{
           margin: '0 0 40px',
@@ -32,16 +39,15 @@ export default async function DeliveryPage({ params }: { params: Promise<{ lang:
           textAlign: 'justify',
         }}
       >
-        Ми доставляємо по Одесі щодня, включно з неділями та святами. Замовлення до{' '}
-        {SAME_DAY_CUTOFF} виїжджають того ж дня по обіді.
+        {t.intro}
       </p>
 
       <table className="table">
         <thead>
           <tr>
-            <th>Район</th>
-            <th>Вартість</th>
-            <th>Час</th>
+            <th>{t.colDistrict}</th>
+            <th>{t.colPrice}</th>
+            <th>{t.colTime}</th>
           </tr>
         </thead>
         <tbody>
@@ -49,7 +55,7 @@ export default async function DeliveryPage({ params }: { params: Promise<{ lang:
             <tr key={d.id}>
               <td>{d.name}</td>
               <td className="tabular">
-                {d.price_for_delivery ? uah(Number(d.price_for_delivery)) : 'Уточніть у менеджера'}
+                {d.price_for_delivery ? uah(Number(d.price_for_delivery)) : t.quote}
               </td>
               {/*<td>{d.time}</td>*/}
             </tr>
@@ -58,7 +64,7 @@ export default async function DeliveryPage({ params }: { params: Promise<{ lang:
       </table>
 
       <p style={{ margin: '16px 0 0', fontSize: 13.5, color: 'var(--color-neutral-600)' }}>
-        Доставка безкоштовна для замовлень понад {uah(FREE_DELIVERY_THRESHOLD)} — у будь-якій зоні.
+        {fill(t.freeNote, { amount: uah(FREE_DELIVERY_THRESHOLD) })}
       </p>
 
       <div
@@ -69,7 +75,7 @@ export default async function DeliveryPage({ params }: { params: Promise<{ lang:
           marginTop: 56,
         }}
       >
-        {PAYMENT_METHODS.map((method) => (
+        {paymentMethods(locale).map((method) => (
           <div key={method.title}>
             <h3 style={{ fontSize: 22, margin: '0 0 8px' }}>{method.title}</h3>
             <p
@@ -88,8 +94,8 @@ export default async function DeliveryPage({ params }: { params: Promise<{ lang:
 
       <div style={{ marginTop: 56, paddingTop: 32, borderTop: '1px solid var(--color-divider)' }}>
         <p style={{ margin: 0, fontSize: 15, color: 'var(--color-neutral-700)' }}>
-          Щось залишилося незрозумілим? <Link href="/faq">Прочитайте поширені питання</Link> або{' '}
-          <Link href="/contact">напишіть нам</Link>.
+          {t.helpBefore} <Link href="/faq">{t.helpFaq}</Link> {t.helpOr}{' '}
+          <Link href="/contact">{t.helpContact}</Link>.
         </p>
       </div>
     </Section>

@@ -1,7 +1,8 @@
 import { Section } from '@/components/ui/Section';
-import { WHY_US } from '@/lib/content';
+import { whyUs } from '@/lib/content';
+import type { Locale } from '@/lib/i18n';
 
-export function WhyUs() {
+export function WhyUs({ locale }: { locale: Locale }) {
   return (
     <Section pt={84} pb={84}>
       <div
@@ -11,7 +12,7 @@ export function WhyUs() {
           gap: 44,
         }}
       >
-        {WHY_US.map((item) => (
+        {whyUs(locale).map((item) => (
           <div key={item.n}>
             <div
               className="tabular"

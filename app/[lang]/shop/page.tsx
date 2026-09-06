@@ -4,7 +4,7 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ShopBrowser } from '@/components/shop/ShopBrowser';
 import { getCategories, getProducts } from '@/lib/api';
-import { PRICE_MAX, PRICE_MIN, SORT_OPTIONS } from '@/lib/catalog';
+import { PRICE_MAX, PRICE_MIN, SORT_KEYS } from '@/lib/catalog';
 import { SortKey } from '@/types';
 import { getDictionary } from '@/lib/dictionaries';
 import { localeOf, metadataFor } from '@/lib/seo';
@@ -34,7 +34,7 @@ function toPrice(value: Param): number | undefined {
 
 function toSort(value: Param): string | undefined {
   const raw = one(value);
-  return SORT_OPTIONS.some((o) => o.value === raw) ? (raw as SortKey) : 'popular';
+  return SORT_KEYS.some((key) => key === raw) ? (raw as SortKey) : 'popular';
 }
 
 export default async function ShopPage({

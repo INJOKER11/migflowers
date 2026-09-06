@@ -5,6 +5,7 @@ import {
   HTML_LANG,
   LOCALES,
   RU_INDEXABLE,
+  SITE_URL,
   isLocale,
   localeUrl,
   type Locale,
@@ -28,7 +29,28 @@ interface PageSeo {
   /** Pages that are useful to a customer but pointless in a search result —
       checkout, saved items. Crawlable, never indexed. */
   noindex?: boolean;
+  /** The picture to show when the page is shared — a product's or a post's own
+      photograph, absolute, straight from the API. Falls back to the shop's
+      card when a page has none, or when the API has no photo for that record. */
+  image?: string | null;
 }
+
+/**
+ * The share card. Facebook, Telegram and Viber all read `og:image`, and a link
+ * posted without one renders as a bare grey box — which is most of what gets
+ * shared here, since people send bouquets to each other in messengers.
+ *
+ * 1200×630 is the size every platform crops from; `public/og.jpg` is cut to it
+ * exactly, so nothing important is lost at the edges. It is a photograph with
+ * no text: the platform draws the title and description next to it from the
+ * tags below, in whichever language the page is.
+ */
+export const SHARE_CARD = {
+  url: `${SITE_URL}/og.jpg`,
+  width: 1200,
+  height: 630,
+  alt: 'MIG Flowers',
+};
 
 /**
  * hreflang has to be reciprocal: uk points at ru and ru points back at uk, or
@@ -48,8 +70,27 @@ function languageAlternates(path: string): Record<string, string> | undefined {
   return languages;
 }
 
-export function pageMetadata({ locale, path, title, description, noindex }: PageSeo): Metadata {
+/** `og:locale:alternate` says "this page also exists in that language". Like
+    the hreflang pair it stays quiet while the Russian side is `noindex` —
+    advertising a version we are asking Google to ignore says two things at
+    once. */
+function alternateLocales(locale: Locale): string[] | undefined {
+  if (!RU_INDEXABLE) return undefined;
+  return LOCALES.filter((other) => other !== locale).map((other) =>
+    HTML_LANG[other].replace('-', '_'),
+  );
+}
+
+export function pageMetadata({
+  locale,
+  path,
+  title,
+  description,
+  noindex,
+  image,
+}: PageSeo): Metadata {
   const hidden = noindex || (locale === 'ru' && !RU_INDEXABLE);
+  const images = [image ? { url: image, alt: title } : SHARE_CARD];
 
   return {
     title,
@@ -63,9 +104,19 @@ export function pageMetadata({ locale, path, title, description, noindex }: Page
       type: 'website',
       siteName: 'MIG Flowers',
       locale: HTML_LANG[locale].replace('-', '_'),
+      alternateLocale: alternateLocales(locale),
       url: localeUrl(locale, path),
       title,
       ...(description ? { description } : null),
+      images,
+    },
+    /* Twitter falls back to the Open Graph tags on its own, but only for the
+       small card. The large one has to be asked for. */
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      ...(description ? { description } : null),
+      images,
     },
   };
 }

@@ -3,7 +3,8 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ShopMap } from '@/components/contact/ShopMap';
 import { ContactForm } from '@/components/contact/ContactForm';
-import { SHOP_DETAILS } from '@/lib/content';
+import { SHOP_DETAILS, shopLocation } from '@/lib/content';
+import { getDictionary } from '@/lib/dictionaries';
 import { localeOf, metadataFor } from '@/lib/seo';
 
 export async function generateMetadata(props: {
@@ -23,11 +24,17 @@ function Detail({ label, children }: { label: string; children: React.ReactNode 
 
 export default async function ContactPage({ params }: { params: Promise<{ lang: string }> }) {
   const locale = await localeOf(params);
+  const dict = getDictionary(locale);
+  const t = dict.contact;
+  const shop = shopLocation(locale);
 
   return (
     <Section width={1100} pt={44} pb={90}>
-      <Breadcrumb locale={locale} trail={[{ label: 'Головна', href: '/' }, { label: 'Контакти' }]} />
-      <h1 style={{ fontSize: 46, margin: '0 0 14px' }}>Приходьте до нас</h1>
+      <Breadcrumb
+        locale={locale}
+        trail={[{ label: dict.nav.home, href: '/' }, { label: t.crumb }]}
+      />
+      <h1 style={{ fontSize: 46, margin: '0 0 14px' }}>{t.h1}</h1>
       <p
         style={{
           margin: '0 0 40px',
@@ -38,7 +45,7 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
           textAlign: 'justify',
         }}
       >
-        Крамниця й майстерня — в одному місці, на Люстдорфській дорозі. Заходьте просто з вулиці.
+        {t.intro}
       </p>
 
       <div
@@ -51,17 +58,14 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
       >
         <div>
           <div style={{ display: 'flex', flexDirection: 'column', gap: 18 }}>
-            <Detail label="Адреса">{SHOP_DETAILS.address}</Detail>
-            <Detail label="Телефон">
+            <Detail label={t.address}>{shop.address}</Detail>
+            <Detail label={t.phone}>
               <a href={SHOP_DETAILS.phoneHref}>{SHOP_DETAILS.phone}</a>
             </Detail>
-            <Detail label="Ел. пошта">
-              <a href={`mailto:${SHOP_DETAILS.email}`}>{SHOP_DETAILS.email}</a>
-            </Detail>
-            <Detail label="Години роботи">{SHOP_DETAILS.hours}</Detail>
+            <Detail label={t.hours}>{shop.hours}</Detail>
           </div>
 
-          <ShopMap />
+          <ShopMap locale={locale} dict={t} />
         </div>
 
         <ContactForm />

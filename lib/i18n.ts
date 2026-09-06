@@ -18,14 +18,18 @@ export const DEFAULT_LOCALE: Locale = 'uk';
 export const SITE_URL = 'https://www.migflowers.com';
 
 /**
- * Russian is plumbed but not yet written: the UI strings outside the chrome,
- * and every product, category and post coming from the API, are still
- * Ukrainian. Indexing that now would hand Google two near-identical pages per
- * route, which costs more than the missing locale does.
+ * The interface is written in both languages now — `lib/dictionaries.ts`,
+ * `lib/content.ts`, `lib/faqs.ts` and `lib/legal.ts` all carry a Russian side.
+ * What is still Ukrainian on a Russian page is everything coming from the API:
+ * `ApiProduct`/`ApiCategory`/`ApiPost` carry a single `name`/`description`/
+ * `content` with no `*_uk`/`*_ru` variants, so product, category, review and
+ * blog copy cannot be localized from this repo at all. Indexing `/ru` while a
+ * catalogue page is half-translated would hand Google two near-identical pages
+ * per route, which costs more than the missing locale does.
  *
- * Flip this to `true` once the copy and the API's localized fields exist. It
- * governs all three places that have to agree: the `noindex` on Russian pages,
- * the hreflang alternates, and the sitemap.
+ * Flip this to `true` once the API serves localized fields. It governs all
+ * three places that have to agree: the `noindex` on Russian pages, the hreflang
+ * alternates, and the sitemap.
  */
 export const RU_INDEXABLE = false;
 

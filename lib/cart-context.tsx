@@ -10,7 +10,9 @@ import {
   type ReactNode,
 } from 'react';
 // import { CATALOG } from './catalog';
-import { DeliveryEnum, PaymentEnum, PAYMENTS, SLOTS } from './content';
+import { DeliveryEnum, PaymentEnum } from './content';
+import { priceOf } from './catalog';
+import { useDict } from './dictionary-context';
 import { CARD_MESSAGE_FEE, FREE_DELIVERY_THRESHOLD, PROMO_CODE, PROMO_DISCOUNT } from './constants';
 import type { CartLine, Product } from '@/types';
 import { uah } from '@/lib/format';
@@ -109,6 +111,7 @@ function isProducts(v: unknown): v is Products {
 }
 
 export function CartProvider({ children }: { children: ReactNode }) {
+  const dict = useDict();
   const [ready, setReady] = useState(false);
   const [saved, setSaved] = useState<Saved>({});
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -203,8 +206,11 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }, [] as CartLine[]);
   }, [products]);
 
+  /* `priceOf`, not `product.price`: a discounted bouquet has to cost in the
+     cart what the shop quoted on its card, and the free-delivery threshold has
+     to be measured against the same figure. */
   const subtotal = useMemo(
-    () => lines.reduce((sum, l) => sum + l.product.price * l.qty, 0),
+    () => lines.reduce((sum, l) => sum + priceOf(l.product) * l.qty, 0),
     [lines],
   );
 
@@ -232,6 +238,15 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setPromo('none');
     setHasCardMessage(false);
   }, []);
+
+  /* The order line is assembled here rather than in the checkout rail, so the
+     drawer, the rail and the confirmation all quote it the same way. */
+  const slotLabels = [dict.checkout.slotToday, dict.checkout.slotTomorrow, dict.checkout.slotPick];
+  const paymentLabels: Record<PaymentEnum, string> = {
+    [PaymentEnum.card]: dict.checkout.payCard,
+    [PaymentEnum.online]: dict.checkout.payOnline,
+    [PaymentEnum.on_site]: dict.checkout.payOnSite,
+  };
 
   const value: CartValue = {
     ready,
@@ -269,10 +284,14 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setZoneFee,
     hasCardMessage,
     setHasCardMessage,
+    /* `deliveryFee`, not `zoneFee`: the zone's price is what the district
+       costs, the fee is what this order pays — they differ the moment the
+       subtotal clears the free-delivery threshold, and quoting the wrong one
+       put "100 ₴" under a summary that said "Безкоштовно". */
     orderSummary:
       delivery === DeliveryEnum.delivery
-        ? `${SLOTS[slot]}${zoneFee ? ` · ${uah(zoneFee)}` : ''} · ${PAYMENTS.find((p) => p.value === payment)?.name ?? ''}.`
-        : `Самовивіз · ${PAYMENTS.find((p) => p.value === payment)?.name ?? ''}.`,
+        ? `${slotLabels[slot] ?? ''} · ${deliveryFee ? uah(deliveryFee) : dict.cart.free} · ${paymentLabels[payment]}.`
+        : `${dict.cart.pickup} · ${paymentLabels[payment]}.`,
   };
 
   return <CartContext.Provider value={value}>{children}</CartContext.Provider>;

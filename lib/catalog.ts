@@ -2,17 +2,63 @@ import type { Product, SortKey } from '@/types';
 import { photo } from './images';
 import { VARIANT_MULTIPLIERS } from './constants';
 import { roundTo10 } from './format';
+import type { Dictionary } from './dictionaries';
+import type { Locale } from './i18n';
 
-export const SORT_OPTIONS: { value: SortKey; label: string }[] = [
-  { value: 'popular', label: 'За популярністю' },
-  { value: 'newest', label: 'Найновіші' },
-  { value: 'price_asc', label: 'Ціна: від найнижчої' },
-  { value: 'price_desc', label: 'Ціна: від найвищої' },
-];
+/** The sort keys, in menu order. They are URL values, so they never change
+    with the locale — only the labels do. */
+export const SORT_KEYS: SortKey[] = ['popular', 'newest', 'price_asc', 'price_desc'];
 
-/** Мала / Стандарт / Велика against the Signature price. */
+export function sortOptions(dict: Dictionary['shop']): { value: SortKey; label: string }[] {
+  return [
+    { value: 'popular', label: dict.sortPopular },
+    { value: 'newest', label: dict.sortNewest },
+    { value: 'price_asc', label: dict.sortPriceAsc },
+    { value: 'price_desc', label: dict.sortPriceDesc },
+  ];
+}
+
+/**
+ * A discount only counts when it is one: the API's `discount_price` is a free
+ * field, and a null, a zero or a number at or above the normal price all mean
+ * "no discount" rather than "this bouquet is free".
+ */
+export function isDiscounted(product: Product): boolean {
+  return (
+    product.discount_price !== undefined &&
+    product.discount_price > 0 &&
+    product.discount_price < product.price
+  );
+}
+
+/** What the customer actually pays — the discount when there is one, the
+    normal price otherwise. Every price the storefront quotes goes through
+    this, so a discounted product cannot show one number and charge another. */
+export function priceOf(product: Product): number {
+  return isDiscounted(product) ? product.discount_price! : product.price;
+}
+
+/** The saving, rounded, for the badge: 1290 → 990 is 23. `null` when there is
+    no discount to describe. */
+export function discountPercent(product: Product): number | null {
+  if (!isDiscounted(product)) return null;
+  return Math.round((1 - product.discount_price! / product.price) * 100);
+}
+
+/** Мала / Стандарт / Велика against the Signature price. Only the two derived
+    sizes are rounded: the standard one *is* the price, and rounding it would
+    quote 60 ₴ on a product page whose card — and whose cart — say 64. */
 export function variantPrice(base: number, variantIndex: number): number {
-  return roundTo10(base * VARIANT_MULTIPLIERS[variantIndex]);
+  const multiplier = VARIANT_MULTIPLIERS[variantIndex];
+  return multiplier === 1 ? base : roundTo10(base * multiplier);
+}
+
+/** What a product's photograph is described as. The lead category earns its
+    place in the alt text — "Букет Ніжність — троянди" says more than the name
+    alone — but a product filed under none still needs one. */
+export function productAlt(product: Product): string {
+  const lead = product.categories[0];
+  return lead ? `${product.name} — ${lead.name}` : product.name;
 }
 
 /** The four shots on the product page: the arrangement, then three angles. */
@@ -21,23 +67,49 @@ export function productShots(product: Product): string[] | null {
   return [product.image_url, photo('bench'), photo('florist'), photo('centerpiece')];
 }
 
-export function descriptionFor(product: Product): string {
+/* The product's own note is the middle of the sentence, so the wrapper comes
+   in two halves rather than as one `{note}` template. */
+const DESCRIPTION: Record<Locale, { before: string; after: string }> = {
+  uk: {
+    before: 'Складено одним флористом від початку до кінця того ранку, коли букет їде до вас. ',
+    after:
+      ', напоєно за ніч у глибокій воді та загорнуто в бавовняний папір, стебла — у водяній подушці. ' +
+      'Оскільки ми купуємо на ринку щоранку, окрему квітку може бути замінено на рівноцінну; форма й колір будуть такими, як на фото.',
+  },
+  ru: {
+    before: 'Собран одним флористом от начала до конца в то утро, когда букет едет к вам. ',
+    after:
+      ', напоён за ночь в глубокой воде и завёрнут в хлопковую бумагу, стебли — в водяной подушке. ' +
+      'Поскольку мы закупаемся на рынке каждое утро, отдельный цветок может быть заменён на равноценный; форма и цвет будут такими, как на фото.',
+  },
+};
+
+export function descriptionFor(product: Product, locale: Locale): string {
   const note = product.description.charAt(0).toUpperCase() + product.description.slice(1);
-  return (
-    'Складено одним флористом від початку до кінця того ранку, коли букет їде до вас. ' +
-    note +
-    ', напоєно за ніч у глибокій воді та загорнуто в бавовняний папір, стебла — у водяній подушці. ' +
-    'Оскільки ми купуємо на ринку щоранку, окрему квітку може бути замінено на рівноцінну; форма й колір будуть такими, як на фото.'
-  );
+  const wrap = DESCRIPTION[locale];
+  return wrap.before + note + wrap.after;
 }
 
-export const CARE_TEXT =
-  'Підріжте кожне стебло під гострим кутом під проточною водою, перш ніж ставити у вазу, і обірвіть листя, ' +
-  'яке опиниться під водою. Міняйте воду щодня, а не доливайте. Тримайте букет подалі від прямого сонця, ' +
-  'радіаторів і вази з фруктами — фрукти, що доспівають, виділяють етилен, який скорочує життя майже будь-якій ' +
-  'зрізаній квітці. За кімнатної температури розраховуйте на сім днів, у прохолодній кімнаті — довше.';
+const CARE: Record<Locale, string> = {
+  uk:
+    'Підріжте кожне стебло під гострим кутом під проточною водою, перш ніж ставити у вазу, і обірвіть листя, ' +
+    'яке опиниться під водою. Міняйте воду щодня, а не доливайте. Тримайте букет подалі від прямого сонця, ' +
+    'радіаторів і вази з фруктами — фрукти, що доспівають, виділяють етилен, який скорочує життя майже будь-якій ' +
+    'зрізаній квітці. За кімнатної температури розраховуйте на сім днів, у прохолодній кімнаті — довше.',
+  ru:
+    'Подрежьте каждый стебель под острым углом под проточной водой, прежде чем ставить в вазу, и оборвите листья, ' +
+    'которые окажутся под водой. Меняйте воду каждый день, а не доливайте. Держите букет подальше от прямого солнца, ' +
+    'радиаторов и вазы с фруктами — дозревающие фрукты выделяют этилен, который сокращает жизнь почти любому ' +
+    'срезанному цветку. При комнатной температуре рассчитывайте на семь дней, в прохладной комнате — дольше.',
+};
 
-/** Filter vocabularies. 'Усі' means no constraint. */
+export function careText(locale: Locale): string {
+  return CARE[locale];
+}
+
+/** Filter vocabularies. 'Усі' means no constraint. Only the category and the
+    price cap are wired up today — the type and colour groups are commented out
+    in `FilterRail`, which is why these are still Ukrainian only. */
 export const OCCASION_FILTERS = [
   'Усі',
   'День народження',

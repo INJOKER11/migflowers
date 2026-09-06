@@ -23,6 +23,16 @@
   letter-spacing: 0.12em;
   text-transform: uppercase;
 }
+/* A discounted price is two figures in one slot: the old one struck through
+   and stepped back in weight and colour, the new one in the accent. Both card
+   and product page use them, so they are classes rather than inline. */
+.price-was {
+  text-decoration: line-through;
+  color: var(--color-neutral-600);
+  margin-right: 8px;
+}
+.price-now { color: var(--color-accent-700); }
+
 .product-row {
   display: flex;
   justify-content: space-between;

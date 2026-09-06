@@ -4,20 +4,21 @@ import { type ComponentProps, type FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import { useLocale, useLocalePath } from '@/lib/use-locale';
 import { useCart } from '@/lib/cart-context';
-import { uah } from '@/lib/format';
-import { DELIVERY, DeliveryEnum, PaymentEnum, PAYMENTS, SHOP_DETAILS, SLOTS } from '@/lib/content';
+import { fill, uah } from '@/lib/format';
+import {
+  DELIVERY_METHODS,
+  DeliveryEnum,
+  PaymentEnum,
+  PAYMENT_OPTIONS,
+  shopLocation,
+} from '@/lib/content';
+import { useDict } from '@/lib/dictionary-context';
 import { CARD_MESSAGE_FEE } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
 import { Chip, ChipRow } from '@/components/ui/Chip';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { CartLine } from './CartLine';
-import {
-  createOrder,
-  District,
-  type FieldErrors,
-  getDistricts,
-  OrderValidationError,
-} from '@/lib/api';
+import { createOrder, District, type FieldErrors, getDistricts, ValidationError } from '@/lib/api';
 
 const NAMED_FIELDS = [
   'customer_name',
@@ -27,6 +28,7 @@ const NAMED_FIELDS = [
   'recipient_name',
   'card_message',
   'delivery_date',
+  'promo_code',
 ];
 
 function isoDate(addDays: number): string {
@@ -72,6 +74,19 @@ function Field({ name, errors, full, ...input }: FieldProps) {
 export function CheckoutForm() {
   const router = useRouter();
   const locale = useLocale();
+  const t = useDict().checkout;
+  const shop = shopLocation(locale);
+
+  const methodLabels: Record<DeliveryEnum, string> = {
+    [DeliveryEnum.delivery]: t.methodDelivery,
+    [DeliveryEnum.takeaway]: t.methodTakeaway,
+  };
+  const slotLabels = [t.slotToday, t.slotTomorrow, t.slotPick];
+  const paymentLabels: Record<PaymentEnum, string> = {
+    [PaymentEnum.card]: t.payCard,
+    [PaymentEnum.online]: t.payOnline,
+    [PaymentEnum.on_site]: t.payOnSite,
+  };
   const withLocale = useLocalePath();
   const cart = useCart();
   const [errors, setErrors] = useState<FieldErrors>({});
@@ -111,20 +126,17 @@ export function CheckoutForm() {
     const isTakeaway = cart.delivery === DeliveryEnum.takeaway;
     const date = isTakeaway ? isoDate(0) : deliveryDate(cart.slot, text('custom_date'));
     if (!date) {
-      setErrors({ delivery_date: ['Оберіть дату доставки.'] });
+      setErrors({ delivery_date: [t.dateMissing] });
       return;
     }
 
-    const districtName = districts.find((z) => z.id === cart.district)?.name;
-    const address = isTakeaway
-      ? SHOP_DETAILS.address
-      : [districtName, text('delivery_address')].filter(Boolean).join(', ');
+    const address = isTakeaway ? shop.address : text('delivery_address');
 
     setErrors({});
     setSubmitting(true);
 
     try {
-      await createOrder(
+      const res = await createOrder(
         {
           delivery_method: cart.delivery,
           district_id: cart.district,
@@ -141,15 +153,18 @@ export function CheckoutForm() {
             product_id: Number(line.product.id),
             quantity: line.qty,
           })),
+          promo_code: text('promo_code') || undefined,
         },
         locale,
       );
+
+      if (cart.payment === PaymentEnum.online && res?.payment_url) {
+        cart.placeOrder();
+        window.location.href = res.payment_url;
+        return;
+      }
     } catch (error) {
-      setErrors(
-        error instanceof OrderValidationError
-          ? error.fields
-          : { form: ['Не вдалося надіслати замовлення. Спробуйте ще раз.'] },
-      );
+      setErrors(error instanceof ValidationError ? error.fields : { form: [t.failed] });
       setSubmitting(false);
       return;
     }
@@ -160,10 +175,11 @@ export function CheckoutForm() {
 
   const generalError = Object.entries(errors).find(([key]) => !NAMED_FIELDS.includes(key))?.[1][0];
 
-  const paymentMethods =
+  /* Paying on site only makes sense when you come to the workshop yourself. */
+  const paymentOptions =
     cart.delivery !== DeliveryEnum.delivery
-      ? PAYMENTS
-      : PAYMENTS.filter((p) => p.value !== PaymentEnum.on_site);
+      ? PAYMENT_OPTIONS
+      : PAYMENT_OPTIONS.filter((value) => value !== PaymentEnum.on_site);
 
   const selectedDistrict = districts.find((d) => d.id === cart.district);
   const quoteRequired =
@@ -184,17 +200,17 @@ export function CheckoutForm() {
     >
       <div>
         <div className="kicker" style={{ marginBottom: 12 }}>
-          Спосіб отримання
+          {t.methodLabel}
         </div>
         <ChipRow>
-          {DELIVERY.map((d) => (
+          {DELIVERY_METHODS.map((method) => (
             <Chip
-              key={d.value}
+              key={method}
               size="lg"
-              active={d.value === cart.delivery}
-              onClick={() => cart.setDelivery(d.value)}
+              active={method === cart.delivery}
+              onClick={() => cart.setDelivery(method)}
             >
-              {d.name}
+              {methodLabels[method]}
             </Chip>
           ))}
         </ChipRow>
@@ -202,10 +218,10 @@ export function CheckoutForm() {
         {cart.delivery === DeliveryEnum.delivery ? (
           <>
             <div className="kicker" style={{ margin: '28px 0 12px' }}>
-              Коли доставити
+              {t.whenLabel}
             </div>
             <ChipRow>
-              {SLOTS.map((label, i) => (
+              {slotLabels.map((label, i) => (
                 <Chip
                   key={label}
                   size="lg"
@@ -224,19 +240,19 @@ export function CheckoutForm() {
                 style={{ marginTop: 10, maxWidth: 220 }}
                 min={isoDate(0)}
                 defaultValue={isoDate(0)}
-                aria-label="Дата доставки"
+                aria-label={t.dateLabel}
               />
             )}
             {errors.delivery_date && <p className="field-error">{errors.delivery_date[0]}</p>}
           </>
         ) : (
           <div style={{ marginTop: '12px', fontSize: 14.5, color: 'var(--color-neutral-600)' }}>
-            Заберете самі з майстерні: {SHOP_DETAILS.address}
+            {fill(t.pickupAt, { address: shop.address })}
           </div>
         )}
 
         <div className="kicker" style={{ margin: '28px 0 12px' }}>
-          Куди доставити
+          {t.whereLabel}
         </div>
 
         {cart.delivery === DeliveryEnum.delivery && (
@@ -252,10 +268,7 @@ export function CheckoutForm() {
                     cart.setZoneFee(d.price_for_delivery ? Number(d.price_for_delivery) : 0);
                   }}
                 >
-                  {d.name} ·{' '}
-                  {d.price_for_delivery
-                    ? uah(Number(d.price_for_delivery))
-                    : 'Уточніть у менеджера'}
+                  {d.name} · {d.price_for_delivery ? uah(Number(d.price_for_delivery)) : t.quote}
                 </Chip>
               ))}
             </ChipRow>
@@ -270,29 +283,29 @@ export function CheckoutForm() {
             gap: 10,
           }}
         >
-          <Field name="customer_name" errors={errors} placeholder="Імʼя" aria-label="Імʼя" />
+          <Field name="customer_name" errors={errors} placeholder={t.name} aria-label={t.name} />
           <Field
             name="customer_phone"
             errors={errors}
             type="tel"
-            placeholder="Телефон"
-            aria-label="Телефон"
+            placeholder={t.phone}
+            aria-label={t.phone}
           />
           <Field
             name="customer_email"
             errors={errors}
             type="email"
             full
-            placeholder="Ел. пошта"
-            aria-label="Ел. пошта"
+            placeholder={t.email}
+            aria-label={t.email}
           />
           {cart.delivery === DeliveryEnum.delivery && (
             <Field
               name="delivery_address"
               errors={errors}
               full
-              placeholder="Вулиця і будинок"
-              aria-label="Вулиця і будинок"
+              placeholder={t.address}
+              aria-label={t.address}
             />
           )}
         </div>
@@ -300,7 +313,7 @@ export function CheckoutForm() {
         {cart.delivery === DeliveryEnum.delivery && (
           <div style={{ marginTop: 12 }}>
             <Checkbox checked={isForMe} onChange={setIsForMe}>
-              Це для мене
+              {t.forMe}
             </Checkbox>
             {!isForMe && (
               <div style={{ marginTop: 10 }}>
@@ -308,8 +321,8 @@ export function CheckoutForm() {
                   name="recipient_name"
                   errors={errors}
                   full
-                  placeholder="Кому доставити (за бажанням)"
-                  aria-label="Кому доставити"
+                  placeholder={t.recipient}
+                  aria-label={t.recipientAria}
                 />
               </div>
             )}
@@ -318,7 +331,7 @@ export function CheckoutForm() {
 
         <div style={{ marginTop: 12 }}>
           <Checkbox checked={cart.hasCardMessage} onChange={cart.setHasCardMessage}>
-            Додати листівку (+{uah(CARD_MESSAGE_FEE)})
+            {fill(t.addCard, { fee: uah(CARD_MESSAGE_FEE) })}
           </Checkbox>
           {cart.hasCardMessage && (
             <div style={{ marginTop: 10 }}>
@@ -326,25 +339,25 @@ export function CheckoutForm() {
                 name="card_message"
                 errors={errors}
                 full
-                placeholder="Текст листівки"
-                aria-label="Текст листівки"
+                placeholder={t.cardText}
+                aria-label={t.cardText}
               />
             </div>
           )}
         </div>
 
         <div className="kicker" style={{ margin: '28px 0 12px' }}>
-          Оплата
+          {t.paymentLabel}
         </div>
         <ChipRow>
-          {paymentMethods.map((p) => (
+          {paymentOptions.map((value) => (
             <Chip
-              key={p.value}
+              key={value}
               size="lg"
-              active={p.value === cart.payment}
-              onClick={() => cart.setPayment(p.value)}
+              active={value === cart.payment}
+              onClick={() => cart.setPayment(value)}
             >
-              {p.name}
+              {paymentLabels[value]}
             </Chip>
           ))}
         </ChipRow>
@@ -352,7 +365,7 @@ export function CheckoutForm() {
 
       <div className="card" data-sticky style={{ padding: 26, position: 'sticky', top: 100 }}>
         <div style={{ fontFamily: 'var(--font-heading)', fontSize: 24, marginBottom: 16 }}>
-          Разом до сплати
+          {t.summaryTitle}
         </div>
 
         {cart.ready && (
@@ -367,7 +380,7 @@ export function CheckoutForm() {
                     textAlign: 'center',
                   }}
                 >
-                  Тут поки що порожньо.
+                  {t.empty}
                 </p>
               )
             ) : (
@@ -386,24 +399,24 @@ export function CheckoutForm() {
 
             {cart.delivery === DeliveryEnum.delivery && (
               <div className="summary-row" style={{ marginTop: 14 }}>
-                <span>Доставка</span>
+                <span>{t.delivery}</span>
                 <span className="tabular">
                   {quoteRequired
-                    ? 'Уточніть у менеджера'
+                    ? t.quote
                     : cart.deliveryFee === 0
-                      ? 'Безкоштовно'
+                      ? t.free
                       : uah(cart.deliveryFee)}
                 </span>
               </div>
             )}
             {cart.hasCardMessage && (
               <div className="summary-row" style={{ marginTop: 8 }}>
-                <span>Листівка</span>
+                <span>{t.cardRow}</span>
                 <span className="tabular">{uah(CARD_MESSAGE_FEE)}</span>
               </div>
             )}
             <div className="summary-total" style={{ marginTop: 14, paddingTop: 14 }}>
-              <span>До сплати</span>
+              <span>{t.toPay}</span>
               <span className="tabular">{uah(cart.total)}</span>
             </div>
           </>
@@ -411,6 +424,15 @@ export function CheckoutForm() {
 
         <div style={{ fontSize: 12, color: 'var(--color-neutral-600)', marginTop: 10 }}>
           {cart.orderSummary}
+        </div>
+
+        <div style={{ marginTop: 14 }}>
+          <Field
+            name="promo_code"
+            errors={errors}
+            placeholder={t.promoLabel}
+            aria-label={t.promoLabel}
+          />
         </div>
 
         {generalError && (
@@ -426,11 +448,7 @@ export function CheckoutForm() {
           style={{ marginTop: 18, padding: '14px 0' }}
           disabled={!cart.ready || cart.isEmpty || submitting}
         >
-          {submitting
-            ? 'Надсилаємо…'
-            : cart.payment === PaymentEnum.online
-              ? 'Сплатити замовлення'
-              : 'Підтвердити замовлення'}
+          {submitting ? t.submitting : cart.payment === PaymentEnum.online ? t.pay : t.confirm}
         </Button>
       </div>
     </form>

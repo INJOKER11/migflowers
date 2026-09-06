@@ -4,10 +4,14 @@ import { DEFAULT_LOCALE, LOCALES, RU_INDEXABLE, localeUrl, type Locale } from '@
 
 /**
  * The public pages, by hand. Everything under `app/[lang]` that is *not* here
- * is deliberately absent: `/cart`, `/account`, `/login`, `/subscription` and
- * `/gift-cards` are retired routes that answer `notFound()`, and `/checkout`,
- * `/checkout/confirmed` and `/wishlist` are steps in a purchase, not
- * destinations from a search result.
+ * is deliberately absent: `/cart`, `/account`, `/login`, `/subscription`,
+ * `/gift-cards` and `/corporate` are retired routes that answer `notFound()`,
+ * and `/checkout`, `/checkout/<order>`, `/checkout/confirmed` and `/wishlist`
+ * are steps in a purchase, not destinations from a search result.
+ *
+ * The catalogue URLs below come from the API, so the sitemap is only ever as
+ * clean as the catalogue is: placeholder products and categories in the
+ * backend end up here, and on `/shop`, and in Google.
  */
 const STATIC_PATHS: { path: string; priority: number; changeFrequency: Frequency }[] = [
   { path: '/', priority: 1, changeFrequency: 'daily' },
@@ -15,7 +19,6 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: Frequency
   { path: '/delivery', priority: 0.8, changeFrequency: 'monthly' },
   { path: '/contact', priority: 0.8, changeFrequency: 'monthly' },
   { path: '/about', priority: 0.6, changeFrequency: 'monthly' },
-  { path: '/corporate', priority: 0.6, changeFrequency: 'monthly' },
   { path: '/faq', priority: 0.5, changeFrequency: 'monthly' },
   { path: '/reviews', priority: 0.5, changeFrequency: 'weekly' },
   { path: '/blog', priority: 0.5, changeFrequency: 'weekly' },

@@ -12,6 +12,8 @@ import {
   TYPE_FILTERS,
 } from '@/lib/catalog';
 import { Category } from '@/types';
+import { useDict } from '@/lib/dictionary-context';
+import { fill } from '@/lib/format';
 
 interface FilterRailProps {
   type: string;
@@ -69,10 +71,12 @@ export function FilterRail({
   categories,
   selectedCategory,
 }: FilterRailProps) {
+  const t = useDict().shop;
+
   return (
     <aside data-sticky style={{ maxWidth: 280, position: 'sticky', top: 100 }}>
       <Group
-        label="Категорія"
+        label={t.categoryLabel}
         options={categories}
         current={selectedCategory}
         onPick={onCategory}
@@ -90,7 +94,7 @@ export function FilterRail({
 
       <div className="hr" style={{ margin: '24px 0' }} />
       <label className="kicker" htmlFor="price-cap" style={{ display: 'block', marginBottom: 12 }}>
-        До {uah(priceCap)}
+        {fill(t.upTo, { price: uah(priceCap) })}
       </label>
       <input
         id="price-cap"
@@ -110,7 +114,7 @@ export function FilterRail({
         style={{ marginTop: 24, padding: '9px 0' }}
         onClick={onClear}
       >
-        Скинути фільтри
+        {t.reset}
       </Button>
     </aside>
   );

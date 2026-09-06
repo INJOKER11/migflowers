@@ -30,8 +30,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     path: `/product/${product.slug}`,
     /* The city belongs in every product title: "Букет Ніжність" on its own
        competes with every florist in the country, "… купити в Одесі" does not. */
-    title: `${product.name} — купити в Одесі | MIG Flowers`,
+    title: `${product.name} — ${getDictionary(locale).product.titleSuffix} | MIG Flowers`,
     description: product.description,
+    image: product.image_url,
   });
 }
 
@@ -42,7 +43,8 @@ export default async function ProductPage({ params }: Params) {
   if (!product) notFound();
 
   const related = await getRelatedProducts(product, locale);
-  const nav = getDictionary(locale).nav;
+  const dict = getDictionary(locale);
+  const nav = dict.nav;
 
   return (
     <Section pt={36} pb={80}>
@@ -61,7 +63,7 @@ export default async function ProductPage({ params }: Params) {
 
       {related.length > 0 && (
         <div style={{ marginTop: 80 }}>
-          <SectionHeading size={30}>Вам також може сподобатися</SectionHeading>
+          <SectionHeading size={30}>{dict.product.relatedTitle}</SectionHeading>
           <ProductGrid products={related} variant="related" />
         </div>
       )}

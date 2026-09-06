@@ -1,19 +1,26 @@
+'use client';
+
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
+import { useDict } from '@/lib/dictionary-context';
 
 export default function Loading() {
+  /* A `loading.tsx` gets no route params, but it does render inside the layout,
+     so the provider is there to read. */
+  const dict = useDict();
+
   return (
     <Section pt={36} pb={80}>
       <Breadcrumb
         trail={[
-          { label: 'Головна', href: '/' },
-          { label: 'Магазин', href: '/shop' },
+          { label: dict.nav.home, href: '/' },
+          { label: dict.nav.shop, href: '/shop' },
         ]}
       />
 
       <div
         role="status"
-        aria-label="Завантажуємо букет"
+        aria-label={dict.product.loading}
         style={{
           display: 'grid',
           gridTemplateColumns: 'repeat(auto-fit, minmax(min(100%, 340px), 1fr))',

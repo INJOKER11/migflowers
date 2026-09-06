@@ -8,7 +8,10 @@ import { Button } from '@/components/ui/Button';
 import { Plate } from '@/components/ui/Plate';
 import { Heart, STROKE_HEAVY } from '@/components/ui/icons';
 import { QuantityStepper } from '@/components/cart/QuantityStepper';
+import { isDiscounted, priceOf, productAlt } from '@/lib/catalog';
 import type { Product } from '@/types';
+import { useDict } from '@/lib/dictionary-context';
+import { fill } from '@/lib/format';
 
 export type CardVariant = 'home' | 'shop' | 'category' | 'related' | 'wishlist';
 
@@ -42,6 +45,7 @@ interface ProductCardProps {
 
 export function ProductCard({ product, variant = 'shop', priority = false }: ProductCardProps) {
   const spec = SPECS[variant];
+  const t = useDict().product;
   const { add, bump, qtyOf, isSaved, toggleSaved, ready } = useCart();
   const saved = isSaved(product.id);
 
@@ -52,7 +56,7 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
     <Link href={href} aria-label={product.name} style={{ display: 'block' }}>
       <Plate
         src={product.image_url}
-        alt={`${product.name} — ${product.category.name}`}
+        alt={productAlt(product)}
         sizes="(max-width: 760px) 100vw, (max-width: 1000px) 50vw, 300px"
         zoom={1.06}
         priority={priority}
@@ -70,8 +74,8 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
             <button
               type="button"
               className="wish-btn"
-              title="Зберегти"
-              aria-label={saved ? `Прибрати зі збережених: ${product.name}` : `Зберегти: ${product.name}`}
+              title={t.save}
+              aria-label={fill(saved ? t.unsaveAria : t.saveAria, { name: product.name })}
               aria-pressed={saved}
               onClick={() => toggleSaved(product.id)}
             >
@@ -98,7 +102,10 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
           {product.name}
         </Link>
         <div className="tabular nowrap" style={{ fontSize: spec.priceSize }}>
-          {uah(product.price)}
+          {isDiscounted(product) && <span className="price-was">{uah(product.price)}</span>}
+          <span className={isDiscounted(product) ? 'price-now' : undefined}>
+            {uah(priceOf(product))}
+          </span>
         </div>
       </div>
 
@@ -128,14 +135,14 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
             style={{ marginTop: spec.buttonGap, width: '100%', padding: spec.buttonPad }}
             onClick={() => add(product)}
           >
-            Додати в кошик
+            {t.addToCart}
           </Button>
         ))}
 
       {spec.action === 'move' && (
         <>
           <Button cta="sm" style={{ marginTop: 12, padding: '10px 0' }} onClick={() => add(product)}>
-            Перенести в кошик
+            {t.moveToCart}
           </Button>
           <Button
             variant="ghost"
@@ -143,7 +150,7 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
             style={{ marginTop: 8, padding: '9px 0', fontSize: 11 }}
             onClick={() => toggleSaved(product.id)}
           >
-            Видалити
+            {t.removeSaved}
           </Button>
         </>
       )}

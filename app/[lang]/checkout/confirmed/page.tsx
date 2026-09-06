@@ -2,16 +2,19 @@ import type { Metadata } from 'next';
 import { localeOf, pageMetadata } from '@/lib/seo';
 import { Section } from '@/components/ui/Section';
 import { Confirmation } from '@/components/cart/Confirmation';
+import { getDictionary } from '@/lib/dictionaries';
 
 /* A step in a purchase, not a destination from a search result: crawlable so
    the links out of it still count, never indexed. */
 export async function generateMetadata(props: {
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
+  const locale = await localeOf(props.params);
+
   return pageMetadata({
-    locale: await localeOf(props.params),
+    locale,
     path: '/checkout/confirmed',
-    title: 'Замовлення прийнято — MIG Flowers',
+    title: getDictionary(locale).confirmed.metaTitle,
     noindex: true,
   });
 }

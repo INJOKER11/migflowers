@@ -1,5 +1,8 @@
 import type { Metadata } from 'next';
 import { localeOf, pageMetadata } from '@/lib/seo';
+import { getDictionary } from '@/lib/dictionaries';
+import { SHOP_DETAILS } from '@/lib/content';
+import { fill } from '@/lib/format';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { CheckoutForm } from '@/components/cart/CheckoutForm';
@@ -9,28 +12,37 @@ import { CheckoutForm } from '@/components/cart/CheckoutForm';
 export async function generateMetadata(props: {
   params: Promise<{ lang: string }>;
 }): Promise<Metadata> {
+  const locale = await localeOf(props.params);
+
   return pageMetadata({
-    locale: await localeOf(props.params),
+    locale,
     path: '/checkout',
-    title: 'Оформлення — MIG Flowers',
+    title: getDictionary(locale).checkout.metaTitle,
     noindex: true,
   });
 }
 
-export default function CheckoutPage() {
+export default async function CheckoutPage({ params }: { params: Promise<{ lang: string }> }) {
+  const locale = await localeOf(params);
+  const dict = getDictionary(locale);
+  const t = dict.checkout;
+
   return (
     <Section width={1100} pt={44} pb={90}>
-      <Breadcrumb trail={[{ label: 'Головна', href: '/' }, { label: 'Оформлення' }]} />
-      <h1 style={{ fontSize: 44, margin: '0 0 8px' }}>Оформлення</h1>
+      <Breadcrumb
+        locale={locale}
+        trail={[{ label: dict.nav.home, href: '/' }, { label: t.crumb }]}
+      />
+      <h1 style={{ fontSize: 44, margin: '0 0 8px' }}>{t.h1}</h1>
       <div>
         <p style={{ margin: 0, fontSize: 14.5, color: 'var(--color-neutral-600)' }}>
-          Оформлення без реєстрації. Без акаунта, без пароля, на одному екрані.
+          {t.noteGuest}
         </p>
         <p style={{ margin: 0, fontSize: 14.5, color: 'var(--color-neutral-600)' }}>
-          Наш менеджер звʼяжеться з вами в Telegram/WhatsApp/Viber, а якщо ні — на email.
+          {t.noteContact}
         </p>
         <p style={{ margin: '0 0 34px', fontSize: 14.5, color: 'var(--color-neutral-600)' }}>
-          Для замовлення великих композицій уточніть наявність у менеджера за телефоном +380234923.
+          {fill(t.noteLarge, { phone: SHOP_DETAILS.phone })}
         </p>
       </div>
       <CheckoutForm />

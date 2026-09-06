@@ -29,8 +29,9 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: `/category/${category.slug}`,
-    title: `${category.name} — купити в Одесі з доставкою | MIG Flowers`,
+    title: `${category.name} — ${getDictionary(locale).category.titleSuffix} | MIG Flowers`,
     description: category.description.slice(0, 160),
+    image: category.image_url,
   });
 }
 

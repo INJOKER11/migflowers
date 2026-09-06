@@ -3,8 +3,9 @@ import { Section } from '@/components/ui/Section';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { Plate } from '@/components/ui/Plate';
 import { GALLERY } from '@/lib/content';
+import type { Dictionary } from '@/lib/dictionaries';
 
-export function InstaGrid() {
+export function InstaGrid({ dict }: { dict: Dictionary['home'] }) {
   return (
     <Section pt={80} pb={80}>
       <SectionHeading
@@ -21,7 +22,7 @@ export function InstaGrid() {
           </span>
         }
       >
-        З майстерні
+        {dict.galleryTitle}
       </SectionHeading>
 
       <div className="grid-auto" style={{ '--min': '150px', '--gap': '12px' } as CSSProperties}>
@@ -29,7 +30,7 @@ export function InstaGrid() {
           <Plate
             key={src}
             src={src}
-            alt="Фото з майстерні"
+            alt={dict.galleryAlt}
             sizes="(max-width: 760px) 50vw, 200px"
             zoom={1.07}
             zoomTime="0.5s"

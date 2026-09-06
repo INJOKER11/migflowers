@@ -61,14 +61,12 @@ export function Hero({ dict }: { dict: Dictionary['home'] }) {
             textWrap: 'pretty',
           }}
         >
-          Родинна справа: вирощуємо квіти в Одесі вже понад десять років — частину в наших теплицях,
-          частину докуповуємо для композицій, яких потребує сезон. Кожен букет зрізаємо, напуваємо і
-          звʼязуємо руками того самого дня, коли він їде до вас.
+          {dict.lead}
         </p>
 
         <div style={{ display: 'flex', gap: 14, marginTop: 34, flexWrap: 'wrap' }}>
           <Button href="/shop" cta style={{ padding: '13px 30px', fontSize: 12.5 }}>
-            Купити зараз
+            {dict.cta}
           </Button>
           {/*<Button*/}
           {/*  href="/subscription"*/}
@@ -92,16 +90,16 @@ export function Hero({ dict }: { dict: Dictionary['home'] }) {
         >
           <div>
             <div className="tabular" style={{ fontFamily: 'var(--font-heading)', fontSize: 30 }}>
-              Від 3 годин
+              {dict.statValue}
             </div>
-            <div style={STAT_LABEL}>Доставка містом того ж дня</div>
+            <div style={STAT_LABEL}>{dict.statLabel}</div>
           </div>
         </div>
       </div>
 
       <Plate
         src={photo('roseBouquet')}
-        alt="Букет рожевих і білих троянд"
+        alt={dict.heroAlt}
         ratio="4/5"
         sizes="(max-width: 1000px) 100vw, 560px"
         priority
