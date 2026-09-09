@@ -8,7 +8,7 @@ import { Button } from '@/components/ui/Button';
 import { Plate } from '@/components/ui/Plate';
 import { Heart, STROKE_HEAVY } from '@/components/ui/icons';
 import { QuantityStepper } from '@/components/cart/QuantityStepper';
-import { isDiscounted, priceOf, productAlt } from '@/lib/catalog';
+import { isDiscounted, optionAdjustment, productAlt, unitPriceOf } from '@/lib/catalog';
 import type { Product } from '@/types';
 import { useDict } from '@/lib/dictionary-context';
 import { fill } from '@/lib/format';
@@ -49,13 +49,23 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
   const { add, bump, qtyOf, isSaved, toggleSaved, ready } = useCart();
   const saved = isSaved(product.id);
 
-  const qty = ready ? qtyOf(product.id) : 0;
+  /* Same backend-driven defaults the product page starts on — at most one
+     size/colour per product is flagged `is_default`. Using them here too
+     keeps the grid's price and photo in agreement with what "Add" actually
+     puts in the cart. */
+  const defaultSize = product.sizes.find((s) => s.is_default) ?? null;
+  const defaultColor = product.colors.find((c) => c.is_default) ?? null;
+  const unitPrice = unitPriceOf(product, defaultSize, defaultColor);
+  const wasPrice = product.price + optionAdjustment(defaultSize, defaultColor);
+  const image = defaultColor ? (defaultColor.image_url ?? product.image_url) : product.image_url;
+
+  const qty = ready ? qtyOf(product.id, defaultSize?.id, defaultColor?.id) : 0;
   const href = `/product/${product.slug}`;
 
   const plate = (
     <Link href={href} aria-label={product.name} style={{ display: 'block' }}>
       <Plate
-        src={product.image_url}
+        src={image}
         alt={productAlt(product)}
         sizes="(max-width: 760px) 100vw, (max-width: 1000px) 50vw, 300px"
         zoom={1.06}
@@ -102,9 +112,9 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
           {product.name}
         </Link>
         <div className="tabular nowrap" style={{ fontSize: spec.priceSize }}>
-          {isDiscounted(product) && <span className="price-was">{uah(product.price)}</span>}
+          {isDiscounted(product) && <span className="price-was">{uah(wasPrice)}</span>}
           <span className={isDiscounted(product) ? 'price-now' : undefined}>
-            {uah(priceOf(product))}
+            {uah(unitPrice)}
           </span>
         </div>
       </div>
@@ -125,15 +135,15 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
               block
               qty={qty}
               label={product.name}
-              onDecrease={() => bump(product.id, -1)}
-              onIncrease={() => bump(product.id, 1)}
+              onDecrease={() => bump(product.id, -1, defaultSize?.id, defaultColor?.id)}
+              onIncrease={() => bump(product.id, 1, defaultSize?.id, defaultColor?.id)}
             />
           </div>
         ) : (
           <Button
             cta="sm"
             style={{ marginTop: spec.buttonGap, width: '100%', padding: spec.buttonPad }}
-            onClick={() => add(product)}
+            onClick={() => add(product, defaultSize, defaultColor)}
           >
             {t.addToCart}
           </Button>
@@ -141,7 +151,11 @@ export function ProductCard({ product, variant = 'shop', priority = false }: Pro
 
       {spec.action === 'move' && (
         <>
-          <Button cta="sm" style={{ marginTop: 12, padding: '10px 0' }} onClick={() => add(product)}>
+          <Button
+            cta="sm"
+            style={{ marginTop: 12, padding: '10px 0' }}
+            onClick={() => add(product, defaultSize, defaultColor)}
+          >
             {t.moveToCart}
           </Button>
           <Button

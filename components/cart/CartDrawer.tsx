@@ -81,7 +81,7 @@ export function CartDrawer() {
           )}
           <div className="cart-lines">
             {cart.lines.map((line) => (
-              <CartLine key={line.product.id} line={line} />
+              <CartLine key={line.key} line={line} />
             ))}
           </div>
         </div>

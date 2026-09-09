@@ -152,6 +152,8 @@ export function CheckoutForm() {
           items: cart.lines.map((line) => ({
             product_id: Number(line.product.id),
             quantity: line.qty,
+            size_id: line.size ? Number(line.size.id) : undefined,
+            color_id: line.color ? Number(line.color.id) : undefined,
           })),
           promo_code: text('promo_code') || undefined,
         },
@@ -161,6 +163,16 @@ export function CheckoutForm() {
       if (cart.payment === PaymentEnum.online && res?.payment_url) {
         cart.placeOrder();
         window.location.href = res.payment_url;
+        return;
+      }
+
+      /* Paid by bank transfer: there's no gateway to bounce through, but the
+         order still isn't confirmed until the shop checks the transfer
+         arrived — same "pending" state the status page already renders for
+         an offline payment method. */
+      if (cart.payment === PaymentEnum.card && res?.data?.order_number) {
+        cart.placeOrder();
+        router.push(withLocale(`/checkout/${res.data.order_number}`));
         return;
       }
     } catch (error) {
@@ -173,7 +185,22 @@ export function CheckoutForm() {
     router.push(withLocale('/checkout/confirmed'));
   };
 
-  const generalError = Object.entries(errors).find(([key]) => !NAMED_FIELDS.includes(key))?.[1][0];
+  /* `items.0.size_id` / `items.0.color_id` — a variant that was active when
+     the page loaded but got deactivated before checkout. Read out per line
+     index rather than lumped into `generalError`, so the message lands next
+     to the item it's actually about. */
+  const itemErrorPattern = /^items\.(\d+)\.(?:size_id|color_id)$/;
+  const itemErrors = new Map<number, string[]>();
+  for (const [key, messages] of Object.entries(errors)) {
+    const match = key.match(itemErrorPattern);
+    if (!match) continue;
+    const index = Number(match[1]);
+    itemErrors.set(index, [...(itemErrors.get(index) ?? []), ...messages]);
+  }
+
+  const generalError = Object.entries(errors).find(
+    ([key]) => !NAMED_FIELDS.includes(key) && !itemErrorPattern.test(key),
+  )?.[1][0];
 
   /* Paying on site only makes sense when you come to the workshop yourself. */
   const paymentOptions =
@@ -391,8 +418,14 @@ export function CheckoutForm() {
                   paddingRight: '5px',
                 }}
               >
-                {cart.lines.map((line) => (
-                  <CartLine key={line.product.id} line={line} variant="page" />
+                {cart.lines.map((line, i) => (
+                  <CartLine
+                    key={line.key}
+                    line={line}
+                    variant="page"
+                    locked={submitting}
+                    error={itemErrors.get(i)?.join(' ')}
+                  />
                 ))}
               </div>
             )}

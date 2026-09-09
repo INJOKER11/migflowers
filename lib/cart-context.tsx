@@ -11,17 +11,24 @@ import {
 } from 'react';
 // import { CATALOG } from './catalog';
 import { DeliveryEnum, PaymentEnum } from './content';
-import { priceOf } from './catalog';
+import { unitPriceOf } from './catalog';
 import { useDict } from './dictionary-context';
 import { CARD_MESSAGE_FEE, FREE_DELIVERY_THRESHOLD, PROMO_CODE, PROMO_DISCOUNT } from './constants';
-import type { CartLine, Product } from '@/types';
+import type { CartLine, Product, ProductColor, ProductSize } from '@/types';
 import { uah } from '@/lib/format';
 
-type Quantities = Record<string, number>;
 type Saved = Record<string, boolean>;
 
 const CART_KEY = 'mig.cart';
 const WISH_KEY = 'mig.wish';
+
+/** Composite of product + selected size + selected colour: "Rose bouquet, L,
+    Red" and "Rose bouquet, M, White" are different cart lines, so their
+    quantities never merge. A plain product with nothing selected keys the
+    same way, with both ids empty. */
+function lineKey(productId: string, sizeId?: string | null, colorId?: string | null): string {
+  return `${productId}::${sizeId ?? ''}::${colorId ?? ''}`;
+}
 
 export type PromoState = 'none' | 'applied' | 'rejected';
 
@@ -36,10 +43,10 @@ interface CartValue {
   total: number;
   isEmpty: boolean;
 
-  add: (product: Product) => void;
-  bump: (id: string, delta: number) => void;
-  qtyOf: (id: string) => number;
-  remove: (id: string) => void;
+  add: (product: Product, size?: ProductSize | null, color?: ProductColor | null) => void;
+  bump: (productId: string, delta: number, sizeId?: string | null, colorId?: string | null) => void;
+  qtyOf: (productId: string, sizeId?: string | null, colorId?: string | null) => number;
+  remove: (productId: string, sizeId?: string | null, colorId?: string | null) => void;
   clear: () => void;
 
   saved: Saved;
@@ -92,21 +99,27 @@ function writeStore(key: string, value: unknown): void {
   }
 }
 
-type Products = {
-  [id: string]: {
+/* Keyed by `lineKey`, but only loosely — the mount effect below rebuilds the
+   keys from each entry's own product/size/color rather than trusting the
+   stored key, so a cart saved before size/colour existed still bumps and
+   removes correctly. */
+type Entries = {
+  [key: string]: {
     product: Product;
+    size: ProductSize | null;
+    color: ProductColor | null;
     qty: number;
   };
 };
 
-function isProducts(v: unknown): v is Products {
+function isEntries(v: unknown): v is Entries {
   if (typeof v !== 'object' || v === null || Array.isArray(v)) return false;
   return Object.values(v).every(
     (e) =>
       typeof e === 'object' &&
       e !== null &&
-      typeof (e as CartLine).qty === 'number' &&
-      (e as CartLine).product?.id != null,
+      typeof (e as { qty?: unknown }).qty === 'number' &&
+      (e as { product?: { id?: unknown } }).product?.id != null,
   );
 }
 
@@ -120,19 +133,35 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const [delivery, setDeliveryState] = useState(DeliveryEnum.delivery);
   const [district, setDistrict] = useState<number | null>(null);
   const [payment, setPayment] = useState(PaymentEnum.card);
-  const [products, setProducts] = useState<Products>({});
+  const [entries, setEntries] = useState<Entries>({});
   const [zoneFee, setZoneFee] = useState(0);
   const [hasCardMessage, setHasCardMessage] = useState(false);
 
   useEffect(() => {
-    setProducts(readStore<Products>(CART_KEY, {}, isProducts));
+    const stored = readStore<Entries>(CART_KEY, {}, isEntries);
+    /* Rebuilt under the key each entry's own product/size/color computes
+       today, not the key it happened to be stored under — a cart saved
+       before size/colour existed has no size/color fields at all, and its
+       key was just the bare product id. */
+    const normalized: Entries = {};
+    for (const entry of Object.values(stored)) {
+      const size = entry.size ?? null;
+      const color = entry.color ?? null;
+      normalized[lineKey(entry.product.id, size?.id, color?.id)] = {
+        product: entry.product,
+        size,
+        color,
+        qty: entry.qty,
+      };
+    }
+    setEntries(normalized);
     setSaved(readStore<Saved>(WISH_KEY, {}));
     setReady(true);
   }, []);
 
   useEffect(() => {
-    if (ready) writeStore(CART_KEY, products);
-  }, [ready, products]);
+    if (ready) writeStore(CART_KEY, entries);
+  }, [ready, entries]);
 
   useEffect(() => {
     if (ready) writeStore(WISH_KEY, saved);
@@ -158,59 +187,63 @@ export function CartProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const add = useCallback((product: Product) => {
-    setProducts((p) => {
-      return {
-        ...p,
-        [product.id]: {
-          product: product,
-          qty: (p[product.id]?.qty ?? 0) + 1,
-        },
-      };
+  const add = useCallback(
+    (product: Product, size: ProductSize | null = null, color: ProductColor | null = null) => {
+      const key = lineKey(product.id, size?.id, color?.id);
+      setEntries((prev) => ({
+        ...prev,
+        [key]: { product, size, color, qty: (prev[key]?.qty ?? 0) + 1 },
+      }));
+    },
+    [],
+  );
+
+  const bump = useCallback(
+    (productId: string, delta: number, sizeId?: string | null, colorId?: string | null) => {
+      const key = lineKey(productId, sizeId, colorId);
+      setEntries((prev) => {
+        const existing = prev[key];
+        if (!existing) return prev;
+        if (existing.qty + delta <= 0) {
+          const { [key]: _, ...rest } = prev;
+          return rest;
+        }
+        return { ...prev, [key]: { ...existing, qty: existing.qty + delta } };
+      });
+    },
+    [],
+  );
+
+  const remove = useCallback((productId: string, sizeId?: string | null, colorId?: string | null) => {
+    const key = lineKey(productId, sizeId, colorId);
+    setEntries((prev) => {
+      const { [key]: _, ...rest } = prev;
+      return rest;
     });
   }, []);
 
-  const bump = useCallback((id: string, delta: number) => {
-    setProducts((p) => {
-      if ((p[id]?.qty ?? 0) + delta <= 0) {
-        const { [id]: _, ...restProducts } = p;
-        return restProducts;
-      }
-      return {
-        ...p,
-        [id]: {
-          product: p[id]?.product,
-          qty: (p[id]?.qty ?? 0) + delta,
-        },
-      };
-    });
-  }, []);
-
-  const remove = useCallback((id: string) => {
-    setProducts((p) => {
-      const { [id]: _, ...restProducts } = p;
-      return restProducts;
-    });
-  }, []);
-
-  const clear = useCallback(() => setProducts({}), []);
+  const clear = useCallback(() => setEntries({}), []);
 
   const toggleSaved = useCallback((id: string) => {
     setSaved((s) => ({ ...s, [id]: !s[id] }));
   }, []);
 
   const lines = useMemo<CartLine[]>(() => {
-    return Object.values(products).reduce((acc, { product, qty }) => {
-      acc.push({ product: product, qty: qty });
-      return acc;
-    }, [] as CartLine[]);
-  }, [products]);
+    return Object.entries(entries).map(([key, { product, size, color, qty }]) => ({
+      key,
+      product,
+      size,
+      color,
+      qty,
+    }));
+  }, [entries]);
 
-  /* `priceOf`, not `product.price`: a discounted bouquet has to cost in the
-     cart what the shop quoted on its card, and the free-delivery threshold has
-     to be measured against the same figure. */
+  /* `unitPriceOf`, not `product.price`: a discounted bouquet has to cost in
+     the cart what the shop quoted on its card (plus whatever the size/colour
+     picks add), and the free-delivery threshold has to be measured against
+     that same figure. */
   const subtotal = useMemo(
-    () => lines.reduce((sum, l) => sum + priceOf(l.product) * l.qty, 0),
+    () => lines.reduce((sum, l) => sum + unitPriceOf(l.product, l.size, l.color) * l.qty, 0),
     [lines],
   );
 
@@ -234,7 +267,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
   const closeDrawer = useCallback(() => setDrawerOpen(false), []);
 
   const placeOrder = useCallback(() => {
-    setProducts({});
+    setEntries({});
     setPromo('none');
     setHasCardMessage(false);
   }, []);
@@ -259,7 +292,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
     isEmpty: lines.length === 0,
     add,
     bump,
-    qtyOf: (id) => products[id]?.qty ?? 0,
+    qtyOf: (productId, sizeId, colorId) => entries[lineKey(productId, sizeId, colorId)]?.qty ?? 0,
     remove,
     clear,
     saved,

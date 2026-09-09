@@ -14,7 +14,7 @@ import { getOrderStatus, type OrderStatus } from '@/lib/api';
 import { SHOP_DETAILS } from '@/lib/content';
 import { useDict } from '@/lib/dictionary-context';
 import { useLocale } from '@/lib/use-locale';
-import { fill } from '@/lib/format';
+import { fill, uah } from '@/lib/format';
 
 /* An online payment is confirmed by the gateway out of band, so a pending one
    is worth re-checking for a couple of minutes after the customer lands back
@@ -149,13 +149,56 @@ export function OrderStatusView({ orderNumber }: { orderNumber: string }) {
   }
 
   const number = (
-    <div style={{ fontSize: 12.5, color: 'var(--color-neutral-600)', marginTop: 22 }}>
-      {t.numberLabel}
-      <br />
-      <span className="tabular" style={{ wordBreak: 'break-all' }}>
-        {order.order_number}
-      </span>
-    </div>
+    <>
+      <div style={{ fontSize: 12.5, color: 'var(--color-neutral-600)', marginTop: 22 }}>
+        {t.numberLabel}
+        <br />
+        <span className="tabular" style={{ wordBreak: 'break-all' }}>
+          {order.order_number}
+        </span>
+      </div>
+
+      {order.items.length > 0 && (
+        <div className="card" style={{ marginTop: 22, padding: 18, textAlign: 'left' }}>
+          <div className="kicker" style={{ marginBottom: 10 }}>
+            {t.itemsTitle}
+          </div>
+          {order.items.map((item, i) => {
+            /* Colour before size, comma-joined — "Red, sm" — distinct from the
+               ` · `-joined size-then-colour line `CartLine` shows pre-purchase;
+               this is a receipt, not a picker. */
+            const options = [item.color, item.size].filter(Boolean).join(', ');
+            return (
+              <div
+                key={i}
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  gap: 14,
+                  padding: '7px 0',
+                  borderTop: i > 0 ? '1px solid var(--color-divider)' : undefined,
+                }}
+              >
+                <div>
+                  <div style={{ fontSize: 14 }}>{item.product_name}</div>
+                  {options && (
+                    <div style={{ fontSize: 11.5, color: 'var(--color-neutral-600)', marginTop: 1 }}>
+                      {options}
+                    </div>
+                  )}
+                  <div className="tabular" style={{ fontSize: 11.5, color: 'var(--color-neutral-600)' }}>
+                    {item.quantity} × {uah(item.price_at_purchase)}
+                  </div>
+                </div>
+                <div className="tabular" style={{ fontSize: 14, whiteSpace: 'nowrap' }}>
+                  {uah(item.subtotal)}
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </>
   );
 
   if (order.status === 'paid') {
