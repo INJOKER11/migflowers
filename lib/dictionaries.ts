@@ -108,6 +108,8 @@ export interface Dictionary {
     tabDescription: string;
     tabCare: string;
     sizeLabel: string;
+    colorLabel: string;
+    resetColor: string;
     relatedTitle: string;
     moveToCart: string;
     removeSaved: string;
@@ -213,6 +215,9 @@ export interface Dictionary {
     metaTitle: string;
     crumb: string;
     numberLabel: string;
+    /** Heading over the purchased-lines list. Only shown when the API sent
+        at least one item. */
+    itemsTitle: string;
     loading: string;
     /** The lookup itself failed — a wrong order number, or the API is down.
         `{phone}` — the shop's number. */
@@ -429,6 +434,8 @@ const uk: Dictionary = {
     tabDescription: 'Опис',
     tabCare: 'Догляд',
     sizeLabel: 'Розмір',
+    colorLabel: 'Колір',
+    resetColor: 'Скинути',
     relatedTitle: 'Вам також може сподобатися',
     moveToCart: 'Перенести в кошик',
     removeSaved: 'Видалити',
@@ -521,6 +528,7 @@ const uk: Dictionary = {
     metaTitle: 'Статус замовлення — MIG Flowers',
     crumb: 'Статус замовлення',
     numberLabel: 'Номер замовлення',
+    itemsTitle: 'Ваше замовлення',
     loading: 'Перевіряємо статус замовлення…',
     errorTitle: 'Не вдалося перевірити замовлення',
     errorBody:
@@ -772,6 +780,8 @@ const ru: Dictionary = {
     tabDescription: 'Описание',
     tabCare: 'Уход',
     sizeLabel: 'Размер',
+    colorLabel: 'Цвет',
+    resetColor: 'Сбросить',
     relatedTitle: 'Вам также может понравиться',
     moveToCart: 'Перенести в корзину',
     removeSaved: 'Удалить',
@@ -863,6 +873,7 @@ const ru: Dictionary = {
     metaTitle: 'Статус заказа — MIG Flowers',
     crumb: 'Статус заказа',
     numberLabel: 'Номер заказа',
+    itemsTitle: 'Ваш заказ',
     loading: 'Проверяем статус заказа…',
     errorTitle: 'Не удалось проверить заказ',
     errorBody:

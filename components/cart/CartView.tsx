@@ -31,7 +31,7 @@ export function CartView() {
     >
       <div className="cart-lines">
         {lines.map((line) => (
-          <CartLine key={line.product.id} line={line} variant="page" />
+          <CartLine key={line.key} line={line} variant="page" />
         ))}
       </div>
       <OrderSummary />

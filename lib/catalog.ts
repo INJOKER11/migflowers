@@ -1,7 +1,5 @@
-import type { Product, SortKey } from '@/types';
+import type { Product, ProductColor, ProductSize, SortKey } from '@/types';
 import { photo } from './images';
-import { VARIANT_MULTIPLIERS } from './constants';
-import { roundTo10 } from './format';
 import type { Dictionary } from './dictionaries';
 import type { Locale } from './i18n';
 
@@ -38,19 +36,21 @@ export function priceOf(product: Product): number {
   return isDiscounted(product) ? product.discount_price! : product.price;
 }
 
-/** The saving, rounded, for the badge: 1290 → 990 is 23. `null` when there is
-    no discount to describe. */
-export function discountPercent(product: Product): number | null {
-  if (!isDiscounted(product)) return null;
-  return Math.round((1 - product.discount_price! / product.price) * 100);
+/** Size and colour surcharges are independent and additive — a product with
+    both picked pays for both, one with only one picked pays for just that
+    one. */
+export function optionAdjustment(size: ProductSize | null, color: ProductColor | null): number {
+  return (size?.price_adjustment ?? 0) + (color?.price_adjustment ?? 0);
 }
 
-/** Мала / Стандарт / Велика against the Signature price. Only the two derived
-    sizes are rounded: the standard one *is* the price, and rounding it would
-    quote 60 ₴ on a product page whose card — and whose cart — say 64. */
-export function variantPrice(base: number, variantIndex: number): number {
-  const multiplier = VARIANT_MULTIPLIERS[variantIndex];
-  return multiplier === 1 ? base : roundTo10(base * multiplier);
+/** What a specific size/colour selection costs — the quoted price (discounted
+    when there is one) plus whatever surcharge the picks carry. */
+export function unitPriceOf(
+  product: Product,
+  size: ProductSize | null,
+  color: ProductColor | null,
+): number {
+  return priceOf(product) + optionAdjustment(size, color);
 }
 
 /** What a product's photograph is described as. The lead category earns its

@@ -11,6 +11,7 @@ interface QuantityStepperProps {
   size?: 28 | 30;
   label: string;
   block?: boolean;
+  disabled?: boolean;
 }
 
 export function QuantityStepper({
@@ -20,6 +21,7 @@ export function QuantityStepper({
   size = 30,
   label,
   block = false,
+  disabled = false,
 }: QuantityStepperProps) {
   const t = useDict().cart;
   const box = block ? undefined : { width: size, height: size, fontSize: size === 28 ? 15 : 16 };
@@ -31,6 +33,7 @@ export function QuantityStepper({
       <button
         type="button"
         onClick={onDecrease}
+        disabled={disabled}
         title={removes ? t.remove : t.less}
         aria-label={fill(t.stepperAria, { action: removes ? t.remove : t.less, name: label })}
         style={box}
@@ -44,6 +47,7 @@ export function QuantityStepper({
       <button
         type="button"
         onClick={onIncrease}
+        disabled={disabled}
         title={t.more}
         aria-label={fill(t.stepperAria, { action: t.more, name: label })}
         style={box}

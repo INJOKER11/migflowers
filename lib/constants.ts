@@ -12,8 +12,5 @@ export const PROMO_DISCOUNT = 0.1;
 /** Flat fee for writing a message on the card, added to the order total. */
 export const CARD_MESSAGE_FEE = 30;
 
-/** Мала / Стандарт / Велика, against the Signature price. */
-export const VARIANT_MULTIPLIERS = [0.75, 1, 1.4] as const;
-
 /** Shop shows this many, then adds this many again. */
 export const PAGE_SIZE = 9;

@@ -1,4 +1,4 @@
-import type { Category, Product, ProductCategory, Review } from '@/types';
+import type { Category, Product, ProductCategory, ProductColor, ProductSize, Review } from '@/types';
 import { DeliveryEnum } from '@/lib/content';
 import type { Locale } from '@/lib/i18n';
 
@@ -24,6 +24,21 @@ interface ApiProductCategory {
   slug: string;
 }
 
+interface ApiProductSize {
+  id: number;
+  name: string;
+  price_adjustment: string | null;
+  is_default?: boolean;
+}
+
+interface ApiProductColor {
+  id: number;
+  name: string;
+  image_url: string | null;
+  price_adjustment: string | null;
+  is_default?: boolean;
+}
+
 interface ApiProduct {
   id: number;
   name: string;
@@ -38,6 +53,8 @@ interface ApiProduct {
   /** The old single-category shape. Drop it — and the fallback in
       `toProduct` — once the backend serves `categories` everywhere. */
   category?: ApiProductCategory;
+  sizes?: ApiProductSize[];
+  colors?: ApiProductColor[];
 }
 
 interface ApiCategory {
@@ -89,6 +106,33 @@ function toCategories(raw: ApiProduct): ProductCategory[] {
   return raw.category ? [toProductCategory(raw.category)] : [];
 }
 
+/** A nullable string decimal, as the API sends `price_adjustment` — `null`
+    means no surcharge. */
+function toAdjustment(raw: string | null): number {
+  return raw == null ? 0 : Number(raw);
+}
+
+function toProductSize(raw: ApiProductSize): ProductSize {
+  return {
+    id: String(raw.id),
+    name: raw.name,
+    price_adjustment: toAdjustment(raw.price_adjustment),
+    is_default: raw.is_default ?? false,
+  };
+}
+
+/* colors[].id is only unique within the product it came from — never keyed
+   or cached against other products' colors. */
+function toProductColor(raw: ApiProductColor): ProductColor {
+  return {
+    id: String(raw.id),
+    name: raw.name,
+    image_url: raw.image_url,
+    price_adjustment: toAdjustment(raw.price_adjustment),
+    is_default: raw.is_default ?? false,
+  };
+}
+
 function toProduct(raw: ApiProduct): Product {
   return {
     ...raw,
@@ -96,6 +140,8 @@ function toProduct(raw: ApiProduct): Product {
     price: Number(raw.price),
     discount_price: raw.discount_price == null ? undefined : Number(raw.discount_price),
     categories: toCategories(raw),
+    sizes: (raw.sizes ?? []).map(toProductSize),
+    colors: (raw.colors ?? []).map(toProductColor),
   };
 }
 
@@ -278,6 +324,9 @@ export class ValidationError extends Error {
 export interface OrderItem {
   product_id: number;
   quantity: number;
+  /** Independent of each other — either, both or neither may be picked. */
+  size_id?: number;
+  color_id?: number;
 }
 
 export interface Order {
@@ -301,7 +350,11 @@ export interface Order {
 }
 
 export interface OrderResponse {
-  data: Order;
+  /** The response echoes the submitted order back, plus fields only the
+      backend assigns. `order_number` is the one the checkout flow needs, to
+      send an offline-paid order to its status page — optional because that's
+      only ever been observed, not guaranteed by a documented contract. */
+  data: Order & { order_number?: string };
   payment_url?: string;
 }
 
@@ -326,6 +379,46 @@ export async function createOrder(values: Order, locale: Locale): Promise<OrderR
     never going to be paid online at all — see `payment_method`. */
 export type PaymentStatus = 'pending' | 'paid' | 'payment_failed';
 
+interface ApiOrderItemResource {
+  product_name: string;
+  quantity: number;
+  price_at_purchase: string;
+  subtotal: string;
+  /** Plain localized names, not ids — this is a receipt line, not a form the
+      customer picks from again. `null` when that line had no size/colour. */
+  size: string | null;
+  color: string | null;
+}
+
+/** One purchased line, as it was actually charged — the size/colour names as
+    they read at order time, not the (possibly since-changed) catalogue ones. */
+export interface OrderItemResource {
+  product_name: string;
+  quantity: number;
+  price_at_purchase: number;
+  subtotal: number;
+  size: string | null;
+  color: string | null;
+}
+
+function toOrderItem(raw: ApiOrderItemResource): OrderItemResource {
+  return {
+    product_name: raw.product_name,
+    quantity: raw.quantity,
+    price_at_purchase: Number(raw.price_at_purchase),
+    subtotal: Number(raw.subtotal),
+    size: raw.size,
+    color: raw.color,
+  };
+}
+
+interface ApiOrderStatus {
+  status: PaymentStatus;
+  order_number: string;
+  payment_method?: string;
+  items?: ApiOrderItemResource[];
+}
+
 export interface OrderStatus {
   status: PaymentStatus;
   order_number: string;
@@ -334,6 +427,11 @@ export interface OrderStatus {
       from one waiting on a manager, so the page says something true of both
       and does not poll. */
   payment_method?: string;
+  items: OrderItemResource[];
+}
+
+function toOrderStatus(raw: ApiOrderStatus): OrderStatus {
+  return { ...raw, items: (raw.items ?? []).map(toOrderItem) };
 }
 
 export async function getOrderStatus(orderNumber: string, locale: Locale): Promise<OrderStatus> {
@@ -348,8 +446,8 @@ export async function getOrderStatus(orderNumber: string, locale: Locale): Promi
     throw new ValidationError(json.errors ?? {});
   }
   if (!res.ok) throw new Error(`POST /api/orders/status failed: ${res.status}`);
-  const data = (await res.json()) as ApiItem<OrderStatus>;
-  return data.data;
+  const data = (await res.json()) as ApiItem<ApiOrderStatus>;
+  return toOrderStatus(data.data);
 }
 
 /** The contact form. There is no email field: the question is posted straight
