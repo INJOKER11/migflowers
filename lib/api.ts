@@ -1,10 +1,17 @@
-import type { Category, Product, ProductCategory, ProductColor, ProductSize, Review } from '@/types';
+import type {
+  Category,
+  Product,
+  ProductCategory,
+  ProductColor,
+  ProductSize,
+  Review,
+} from '@/types';
 import { DeliveryEnum } from '@/lib/content';
 import type { Locale } from '@/lib/i18n';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL;
 
-const REVALIDATE = 1800;
+const REVALIDATE = 60;
 
 /**
  * Every request carries `?lang=` so the backend knows which language to
@@ -504,10 +511,7 @@ function toPromoCode(raw: ApiPromoCode): PromoCode {
 /** Rate-limited to 5 requests/minute per the route's `throttle:5,1` — a 429
     surfaces to the caller as a plain `Error`, same as any other non-422,
     non-2xx response. */
-export async function createFirstOrderPromoCode(
-  email: string,
-  locale: Locale,
-): Promise<PromoCode> {
+export async function createFirstOrderPromoCode(email: string, locale: Locale): Promise<PromoCode> {
   const res = await fetch(`${BASE}/api/promo-codes/first-order${query(locale)}`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
