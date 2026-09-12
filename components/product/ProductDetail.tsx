@@ -187,12 +187,12 @@ export function ProductDetail({ product }: { product: Product }) {
             </div>
             <ChipRow>
               {product.colors.map((color) => {
-                /* The default colour stands in for the product itself, so it
-                   gets the product's own photo as its swatch when it has none
-                   of its own — otherwise it's the only chip in the row that
-                   falls back to plain text, which reads as inconsistent. */
-                const swatchImage =
-                  color.image_url ?? (color.is_default ? product.image_url : null);
+                /* The backend only sends a distinct photo for some colours —
+                   falling back to the product's own image for the rest keeps
+                   every swatch in the row an image, rather than mixing photo
+                   swatches with plain-text chips. Only a product with no
+                   image at all drops back to a chip. */
+                const swatchImage = color.image_url ?? product.image_url;
                 return swatchImage ? (
                   <button
                     key={color.id}
