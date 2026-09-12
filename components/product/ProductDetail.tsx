@@ -186,8 +186,14 @@ export function ProductDetail({ product }: { product: Product }) {
               )}
             </div>
             <ChipRow>
-              {product.colors.map((color) =>
-                color.image_url ? (
+              {product.colors.map((color) => {
+                /* The default colour stands in for the product itself, so it
+                   gets the product's own photo as its swatch when it has none
+                   of its own — otherwise it's the only chip in the row that
+                   falls back to plain text, which reads as inconsistent. */
+                const swatchImage =
+                  color.image_url ?? (color.is_default ? product.image_url : null);
+                return swatchImage ? (
                   <button
                     key={color.id}
                     type="button"
@@ -196,12 +202,12 @@ export function ProductDetail({ product }: { product: Product }) {
                     aria-label={color.name}
                     title={color.name}
                     onClick={() => setSelectedColor(color)}
-                    onMouseEnter={() => setPreviewImage(color.image_url)}
+                    onMouseEnter={() => setPreviewImage(swatchImage)}
                     onMouseLeave={() => setPreviewImage(null)}
-                    onFocus={() => setPreviewImage(color.image_url)}
+                    onFocus={() => setPreviewImage(swatchImage)}
                     onBlur={() => setPreviewImage(null)}
                   >
-                    <Plate src={color.image_url} alt={color.name} sizes="56px" />
+                    <Plate src={swatchImage} alt={color.name} sizes="56px" />
                     <span className="swatch-label">{color.name}</span>
                   </button>
                 ) : (
@@ -213,8 +219,8 @@ export function ProductDetail({ product }: { product: Product }) {
                   >
                     {color.name}
                   </Chip>
-                ),
-              )}
+                );
+              })}
             </ChipRow>
           </div>
         )}
