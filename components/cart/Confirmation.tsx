@@ -1,13 +1,15 @@
 'use client';
 
 import { useCart } from '@/lib/cart-context';
+import { DeliveryEnum } from '@/lib/content';
 import { Button } from '@/components/ui/Button';
 import { Check, STROKE_LIGHT } from '@/components/ui/icons';
 import { useDict } from '@/lib/dictionary-context';
 
 export function Confirmation() {
   const t = useDict().confirmed;
-  const { orderSummary } = useCart();
+  const { orderSummary, delivery } = useCart();
+  const tail = delivery === DeliveryEnum.takeaway ? t.tailPickup : t.tail;
 
   return (
     <>
@@ -26,7 +28,7 @@ export function Confirmation() {
           color: 'var(--color-neutral-700)',
         }}
       >
-        {orderSummary} {t.tail}
+        {orderSummary} {tail}
       </p>
       <div
         style={{
