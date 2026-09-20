@@ -27,6 +27,7 @@ const NAMED_FIELDS = [
   'delivery_address',
   'recipient_name',
   'card_message',
+  'comment',
   'delivery_date',
   'promo_code',
 ];
@@ -147,6 +148,7 @@ export function CheckoutForm() {
           with_card: cart.hasCardMessage,
           recipient_name: text('recipient_name') || undefined,
           card_message: text('card_message') || undefined,
+          comment: text('comment') || undefined,
           delivery_date: date,
           payment_method: cart.payment,
           items: cart.lines.map((line) => ({
@@ -370,6 +372,23 @@ export function CheckoutForm() {
                 aria-label={t.cardText}
               />
             </div>
+          )}
+        </div>
+
+        <div style={{ marginTop: 12 }}>
+          <textarea
+            name="comment"
+            className={errors.comment ? 'input input-invalid' : 'input'}
+            placeholder={t.commentLabel}
+            aria-label={t.commentLabel}
+            aria-invalid={errors.comment ? true : undefined}
+            aria-describedby={errors.comment ? 'comment-error' : undefined}
+            rows={4}
+          />
+          {errors.comment && (
+            <p className="field-error" id="comment-error">
+              {errors.comment[0]}
+            </p>
           )}
         </div>
 

@@ -1,7 +1,7 @@
 /** Figures that appear on more than one screen live here, nowhere else. */
 
 /** Delivery is free at or above this subtotal. */
-export const FREE_DELIVERY_THRESHOLD = 2500;
+export const FREE_DELIVERY_THRESHOLD = 3000;
 
 /** The one promo code the storefront knows. */
 export const PROMO_CODE = 'BLOOM10';
