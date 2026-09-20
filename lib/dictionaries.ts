@@ -209,7 +209,11 @@ export interface Dictionary {
   confirmed: {
     metaTitle: string;
     h1: string;
+    /** Follows the order line. The bouquet leaves the workshop only when it's
+        being delivered — on takeaway it waits there, so the two cases get
+        their own sentence rather than one vague one. */
     tail: string;
+    tailPickup: string;
     cta: string;
   };
   orderStatus: {
@@ -524,6 +528,7 @@ const uk: Dictionary = {
     metaTitle: 'Замовлення прийнято — MIG Flowers',
     h1: 'Замовлення прийнято',
     tail: 'Флорист надішле фото готового букета, перш ніж він поїде з майстерні.',
+    tailPickup: 'Флорист надішле фото букета, щойно він буде готовий до видачі в майстерні.',
     cta: 'Дивитися далі',
   },
   orderStatus: {
@@ -870,6 +875,7 @@ const ru: Dictionary = {
     metaTitle: 'Заказ принят — MIG Flowers',
     h1: 'Заказ принят',
     tail: 'Флорист пришлёт фото готового букета, прежде чем он уедет из мастерской.',
+    tailPickup: 'Флорист пришлёт фото букета, как только он будет готов к выдаче в мастерской.',
     cta: 'Смотреть дальше',
   },
   orderStatus: {
