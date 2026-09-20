@@ -345,6 +345,9 @@ export interface Order {
   delivery_date: string;
   recipient_name?: string;
   card_message?: string;
+  /** Free-text note from the customer — anything the structured fields don't
+      cover (entry code, a time window, "ring before you come up"). */
+  comment?: string;
   /** `online` or `cash_on_delivery` — see PAYMENT_METHOD in CheckoutForm. */
   payment_method: string;
   delivery_method: DeliveryEnum;

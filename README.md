@@ -77,7 +77,7 @@ variants; don't combine them with it.
 
 `lib/cart-context.tsx` holds `Record<string, number>` for the cart and
 `Record<string, boolean>` for the wishlist, both persisted to `localStorage`.
-Derived: `count`, `subtotal`, `deliveryFee` (free at or above 2 500 ₴, and on an
+Derived: `count`, `subtotal`, `deliveryFee` (free at or above 3 000 ₴, and on an
 empty cart), `discount` (10% with `BLOOM10`), `total`.
 
 The drawer is a three-step machine — `basket → checkout → done`. Adding any
@@ -130,13 +130,13 @@ Icons are `lucide-react`.
 
 Five copy fixes were made against the prototype; the original is on the left.
 
-| Prototype | Rendered | Where |
-|---|---|---|
-| `У дотроянді` | `У дорозі` | account tracking card, status tag, progress rail |
-| `на потроянді` | `на порозі` | Delivery, cash-on-delivery |
-| `код BLOOM10 уже в дотроянді` | `…уже в дорозі` | newsletter confirmation |
-| `З кем ми ділимося` | `З ким ми ділимося` | Privacy, section 3 |
-| English paragraph | Ukrainian | Terms, «Гарантія свіжості» |
+| Prototype                     | Rendered            | Where                                            |
+| ----------------------------- | ------------------- | ------------------------------------------------ |
+| `У дотроянді`                 | `У дорозі`          | account tracking card, status tag, progress rail |
+| `на потроянді`                | `на порозі`         | Delivery, cash-on-delivery                       |
+| `код BLOOM10 уже в дотроянді` | `…уже в дорозі`     | newsletter confirmation                          |
+| `З кем ми ділимося`           | `З ким ми ділимося` | Privacy, section 3                               |
+| English paragraph             | Ukrainian           | Terms, «Гарантія свіжості»                       |
 
 The first three are damage from a find-and-replace in the prototype
 (`розі` → `троянді`); the handoff README confirms `У дорозі` and `в дорозі`.
