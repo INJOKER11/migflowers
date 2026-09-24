@@ -1,23 +1,22 @@
 import type { Metadata } from 'next';
 import { Link } from '@/components/ui/Link';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
-import { getBlogPost, getBlogPosts } from '@/lib/api';
+import { getBlogPost, getBlogPosts, localizedSlugs, translateSlug } from '@/lib/api';
 import { excerpt, shortDate } from '@/lib/format';
 import { getDictionary } from '@/lib/dictionaries';
-import { localeOf, pageMetadata } from '@/lib/seo';
-import { DEFAULT_LOCALE } from '@/lib/i18n';
+import { localeOf, pageMetadata, slugPaths } from '@/lib/seo';
+import { DEFAULT_LOCALE, isLocale, localePath } from '@/lib/i18n';
 
 interface Params {
   params: Promise<{ lang: string; slug: string }>;
 }
 
-export async function generateStaticParams() {
-  /* Slugs are the same in both locales, so the language this asks for doesn't
-     matter — it just has to be one of them. */
-  const posts = await getBlogPosts(DEFAULT_LOCALE);
+/* Per `lang`, like the category page: posts may carry a slug per locale. */
+export async function generateStaticParams({ params }: { params: { lang: string } }) {
+  const posts = await getBlogPosts(isLocale(params.lang) ? params.lang : DEFAULT_LOCALE);
   return posts.map((post) => ({ slug: post.slug }));
 }
 
@@ -30,6 +29,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: `/blog/${post.slug}`,
+    paths: slugPaths('/blog', await localizedSlugs('posts', post.id)),
     title: `${post.title} — MIG Flowers`,
     description: excerpt(post.content),
     image: post.image_url,
@@ -40,7 +40,15 @@ export default async function PostPage({ params }: Params) {
   const { slug } = await params;
   const locale = await localeOf(params);
   const post = await getBlogPost(slug, locale);
-  if (!post) notFound();
+  /* Same rule as the product page: one URL per post per locale. */
+  if (!post) {
+    const own = await translateSlug('posts', slug, locale);
+    if (own) permanentRedirect(localePath(locale, `/blog/${own}`));
+    notFound();
+  }
+  if (post.slug !== decodeURIComponent(slug)) {
+    permanentRedirect(localePath(locale, `/blog/${post.slug}`));
+  }
 
   const dict = getDictionary(locale);
   const nav = dict.nav;

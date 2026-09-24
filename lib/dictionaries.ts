@@ -7,10 +7,9 @@ import type { Locale } from './i18n';
  * own audience searches and speaks — «купити квіти Одеса» and «купить цветы
  * Одесса» are separate queries, not one phrase in two spellings.
  *
- * Catalogue content — product, category, review and blog copy — still comes
- * from the API with a single `name`/`description`/`content` and no `*_uk`/
- * `*_ru` variants, so it stays Ukrainian on Russian pages. That, not this
- * file, is what still holds `RU_INDEXABLE` in `./i18n` at false.
+ * Catalogue content comes from the API, which answers `?lang=`: names and
+ * slugs are localized there, but some descriptions are still Ukrainian on the
+ * Russian side until the backend's copy is translated.
  *
  * Strings that need a number, a name or a price carry a `{placeholder}` and
  * are filled at the call site with `fill()` from `./format`.

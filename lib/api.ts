@@ -7,7 +7,7 @@ import type {
   Review,
 } from '@/types';
 import { DeliveryEnum } from '@/lib/content';
-import type { Locale } from '@/lib/i18n';
+import { LOCALES, type Locale } from '@/lib/i18n';
 
 const BASE = process.env.NEXT_PUBLIC_API_URL;
 
@@ -239,6 +239,73 @@ export async function getRelatedProducts(
   const backfill = popular.filter((p) => !seen.has(p.id)).slice(0, count - related.length);
 
   return [...related, ...backfill];
+}
+
+/**
+ * Products, categories and posts each have their own slug per locale —
+ * `buket-khmarynka` is `buket-oblachko` on the Russian side — while the id is
+ * shared. The backend resolves a Ukrainian slug under `?lang=ru` but not the
+ * reverse, and has no lookup by id, so pairing the two URLs of one record goes
+ * through the list endpoints: id → slug, one map per locale.
+ */
+export type SlugKind = 'products' | 'categories' | 'posts';
+
+/* Laravel honours up to 100 here; paging through `last_page` covers the rest. */
+const SLUG_PAGE = 100;
+
+export async function getSlugMap(kind: SlugKind, locale: Locale): Promise<Map<string, string>> {
+  const slugs = new Map<string, string>();
+
+  for (let page = 1; ; page++) {
+    const params = new URLSearchParams({ page: String(page), per_page: String(SLUG_PAGE) });
+    const slash = kind === 'posts' ? '' : '/';
+    const res = await fetch(`${BASE}/api/${kind}${slash}${query(locale, params)}`, {
+      next: { revalidate: REVALIDATE },
+    });
+    if (!res.ok) throw new Error(`GET /api/${kind} failed: ${res.status}`);
+
+    /* `posts` answers without the pagination envelope, all in one go. */
+    const json = (await res.json()) as { data: { id: number; slug: string }[] } & Partial<
+      Pick<ApiList<unknown>, 'meta'>
+    >;
+    for (const row of json.data) slugs.set(String(row.id), row.slug);
+    if (!json.meta || page >= json.meta.last_page) return slugs;
+  }
+}
+
+/** Every locale's slug for one record. A locale the record is missing from is
+    simply absent, and the caller decides what a partial pair means. */
+export async function localizedSlugs(
+  kind: SlugKind,
+  id: string,
+): Promise<Partial<Record<Locale, string>>> {
+  const maps = await Promise.all(LOCALES.map((locale) => getSlugMap(kind, locale)));
+  const slugs: Partial<Record<Locale, string>> = {};
+  LOCALES.forEach((locale, i) => {
+    const slug = maps[i].get(id);
+    if (slug) slugs[locale] = slug;
+  });
+  return slugs;
+}
+
+/**
+ * A slug that belongs to another locale, turned into this locale's slug for
+ * the same record — or null if it matches nothing. The language switcher keeps
+ * the path and swaps only the prefix, so `/ru/product/buket-oblachko` links to
+ * `/product/buket-oblachko`, which the backend does not know in Ukrainian.
+ */
+export async function translateSlug(
+  kind: SlugKind,
+  slug: string,
+  locale: Locale,
+): Promise<string | null> {
+  for (const other of LOCALES) {
+    if (other === locale) continue;
+    const theirs = await getSlugMap(kind, other);
+    const id = [...theirs].find(([, s]) => s === slug)?.[0];
+    if (id) return (await getSlugMap(kind, locale)).get(id) ?? null;
+  }
+  return null;
 }
 
 export async function getCategories(q: CategoryQuery): Promise<Category[]> {

@@ -1,6 +1,6 @@
 import type { MetadataRoute } from 'next';
-import { getBlogPosts, getCategories, getProducts } from '@/lib/api';
-import { DEFAULT_LOCALE, LOCALES, RU_INDEXABLE, localeUrl, type Locale } from '@/lib/i18n';
+import { getBlogPosts, getSlugMap } from '@/lib/api';
+import { LOCALES, RU_INDEXABLE, localeUrl, type Locale } from '@/lib/i18n';
 
 /**
  * The public pages, by hand. Everything under `app/[lang]` that is *not* here
@@ -28,8 +28,8 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: Frequency
 
 type Frequency = NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>;
 
-/** Locales whose URLs belong in the sitemap. Russian joins once it is actually
-    written — listing `noindex` pages here only earns a Search Console warning. */
+/** Locales whose URLs belong in the sitemap. Follows `RU_INDEXABLE` — listing
+    `noindex` pages here only earns a Search Console warning. */
 const indexable: Locale[] = RU_INDEXABLE ? [...LOCALES] : ['uk'];
 
 function entries(
@@ -37,8 +37,9 @@ function entries(
   priority: number,
   changeFrequency: Frequency,
   lastModified?: Date,
+  locales: Locale[] = indexable,
 ): MetadataRoute.Sitemap {
-  return indexable.map((locale) => ({
+  return locales.map((locale) => ({
     url: localeUrl(locale, path),
     lastModified: lastModified ?? new Date(),
     changeFrequency,
@@ -56,21 +57,32 @@ async function safely<T>(load: () => Promise<T[]>): Promise<T[]> {
   }
 }
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+/* Products, categories and posts carry a slug per locale (`buket-khmarynka`
+   / `buket-oblachko`), so each locale lists its own — the other language's
+   slug under its prefix would be a redirect, not a page. `getSlugMap` pages
+   through the whole list; the default page of 20 used to drop the rest. */
+async function catalogue(locale: Locale): Promise<MetadataRoute.Sitemap> {
   const [categories, products, posts] = await Promise.all([
-    /* Only the slugs are read below, and those don't differ by locale — the
-       entries themselves are emitted for every locale further down. */
-    safely(() => getCategories({ locale: DEFAULT_LOCALE })),
-    safely(() => getProducts({ locale: DEFAULT_LOCALE })),
-    safely(() => getBlogPosts(DEFAULT_LOCALE)),
+    safely(async () => [...(await getSlugMap('categories', locale)).values()]),
+    safely(async () => [...(await getSlugMap('products', locale)).values()]),
+    safely(() => getBlogPosts(locale)),
   ]);
+  const only = [locale];
+
+  return [
+    ...categories.flatMap((slug) => entries(`/category/${slug}`, 0.7, 'weekly', undefined, only)),
+    ...products.flatMap((slug) => entries(`/product/${slug}`, 0.8, 'weekly', undefined, only)),
+    ...posts.flatMap((post) =>
+      entries(`/blog/${post.slug}`, 0.4, 'monthly', new Date(post.created_at), only),
+    ),
+  ];
+}
+
+export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+  const perLocale = await Promise.all(indexable.map(catalogue));
 
   return [
     ...STATIC_PATHS.flatMap((page) => entries(page.path, page.priority, page.changeFrequency)),
-    ...categories.flatMap((category) => entries(`/category/${category.slug}`, 0.7, 'weekly')),
-    ...products.flatMap((product) => entries(`/product/${product.slug}`, 0.8, 'weekly')),
-    ...posts.flatMap((post) =>
-      entries(`/blog/${post.slug}`, 0.4, 'monthly', new Date(post.created_at)),
-    ),
+    ...perLocale.flat(),
   ];
 }
