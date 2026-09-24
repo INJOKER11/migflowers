@@ -1,15 +1,16 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { getProduct, getRelatedProducts } from '@/lib/api';
+import { getProduct, getRelatedProducts, localizedSlugs, translateSlug } from '@/lib/api';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getDictionary } from '@/lib/dictionaries';
 import { productSchema } from '@/lib/schema';
-import { localeOf, pageMetadata } from '@/lib/seo';
+import { localeOf, pageMetadata, slugPaths } from '@/lib/seo';
+import { localePath } from '@/lib/i18n';
 
 interface Params {
   params: Promise<{ lang: string; slug: string }>;
@@ -28,6 +29,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: `/product/${product.slug}`,
+    paths: slugPaths('/product', await localizedSlugs('products', product.id)),
     /* The city belongs in every product title: "Букет Ніжність" on its own
        competes with every florist in the country, "… купити в Одесі" does not. */
     title: `${product.name} — ${getDictionary(locale).product.titleSuffix} | MIG Flowers`,
@@ -40,7 +42,18 @@ export default async function ProductPage({ params }: Params) {
   const { slug } = await params;
   const locale = await localeOf(params);
   const product = await getProduct(slug, locale);
-  if (!product) notFound();
+  /* One URL per product per locale. A slug from the other language (the
+     language switcher keeps the path) is sent to this language's own; the
+     backend also answers a Ukrainian slug in Russian, which would otherwise
+     render the same product at two addresses. */
+  if (!product) {
+    const own = await translateSlug('products', slug, locale);
+    if (own) permanentRedirect(localePath(locale, `/product/${own}`));
+    notFound();
+  }
+  if (product.slug !== decodeURIComponent(slug)) {
+    permanentRedirect(localePath(locale, `/product/${product.slug}`));
+  }
 
   const related = await getRelatedProducts(product, locale);
   const dict = getDictionary(locale);

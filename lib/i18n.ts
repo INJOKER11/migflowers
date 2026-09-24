@@ -18,20 +18,19 @@ export const DEFAULT_LOCALE: Locale = 'uk';
 export const SITE_URL = 'https://www.migflowers.com';
 
 /**
- * The interface is written in both languages now — `lib/dictionaries.ts`,
- * `lib/content.ts`, `lib/faqs.ts` and `lib/legal.ts` all carry a Russian side.
- * What is still Ukrainian on a Russian page is everything coming from the API:
- * `ApiProduct`/`ApiCategory`/`ApiPost` carry a single `name`/`description`/
- * `content` with no `*_uk`/`*_ru` variants, so product, category, review and
- * blog copy cannot be localized from this repo at all. Indexing `/ru` while a
- * catalogue page is half-translated would hand Google two near-identical pages
- * per route, which costs more than the missing locale does.
+ * Whether `/ru` is offered to search engines. The interface is written in both
+ * languages (`lib/dictionaries.ts`, `lib/content.ts`, `lib/faqs.ts`,
+ * `lib/legal.ts`), and the API localizes names and slugs by `?lang=` — a
+ * product is `buket-khmarynka` in Ukrainian and `buket-oblachko` in Russian,
+ * which `pageMetadata`'s `paths` and the sitemap pair up by id. Some API
+ * descriptions are still Ukrainian on the Russian side; that is the backend's
+ * copy to translate, not a reason to hide the pages.
  *
- * Flip this to `true` once the API serves localized fields. It governs all
- * three places that have to agree: the `noindex` on Russian pages, the hreflang
- * alternates, and the sitemap.
+ * It governs all three places that have to agree: the `noindex` on Russian
+ * pages, the hreflang alternates, and the sitemap. Set it back to `false` and
+ * all three withdraw together.
  */
-export const RU_INDEXABLE = false;
+export const RU_INDEXABLE = true;
 
 /** BCP-47 tags for `<html lang>` and hreflang. `uk`/`ru` alone would be right
     too, but the regional form is what the Odesa audience actually searches in. */

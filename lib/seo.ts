@@ -33,6 +33,11 @@ interface PageSeo {
       photograph, absolute, straight from the API. Falls back to the shop's
       card when a page has none, or when the API has no photo for that record. */
   image?: string | null;
+  /** The page's path in each locale, when they differ — products, categories
+      and posts carry a slug per language. Omitted, every locale shares `path`.
+      A locale missing from the map means the record doesn't exist there, and
+      the page gets no hreflang pair at all rather than one pointing at a 404. */
+  paths?: Partial<Record<Locale, string>>;
 }
 
 /**
@@ -59,14 +64,14 @@ export const SHARE_CARD = {
  * is the honest signal — an hreflang pointing at a `noindex` page is a
  * contradiction Search Console reports as an error.
  */
-function languageAlternates(path: string): Record<string, string> | undefined {
-  if (!RU_INDEXABLE) return undefined;
+function languageAlternates(paths: Partial<Record<Locale, string>>): Record<string, string> | undefined {
+  if (!RU_INDEXABLE || LOCALES.some((locale) => !paths[locale])) return undefined;
 
   const languages: Record<string, string> = {};
-  for (const locale of LOCALES) languages[HTML_LANG[locale]] = localeUrl(locale, path);
+  for (const locale of LOCALES) languages[HTML_LANG[locale]] = localeUrl(locale, paths[locale]!);
   /* Ukrainian is x-default: it is the language of the market the shop
      physically serves, and the one on the bare URLs. */
-  languages['x-default'] = localeUrl(DEFAULT_LOCALE, path);
+  languages['x-default'] = localeUrl(DEFAULT_LOCALE, paths[DEFAULT_LOCALE]!);
   return languages;
 }
 
@@ -74,11 +79,25 @@ function languageAlternates(path: string): Record<string, string> | undefined {
     the hreflang pair it stays quiet while the Russian side is `noindex` —
     advertising a version we are asking Google to ignore says two things at
     once. */
-function alternateLocales(locale: Locale): string[] | undefined {
-  if (!RU_INDEXABLE) return undefined;
+function alternateLocales(locale: Locale, paired: boolean): string[] | undefined {
+  if (!paired) return undefined;
   return LOCALES.filter((other) => other !== locale).map((other) =>
     HTML_LANG[other].replace('-', '_'),
   );
+}
+
+/** `{ uk: 'buket-khmarynka', ru: 'buket-oblachko' }` → the `paths` a
+    per-locale-slug page hands to `pageMetadata`. */
+export function slugPaths(
+  base: string,
+  slugs: Partial<Record<Locale, string>>,
+): Partial<Record<Locale, string>> {
+  const paths: Partial<Record<Locale, string>> = {};
+  for (const locale of LOCALES) {
+    const slug = slugs[locale];
+    if (slug) paths[locale] = `${base}/${slug}`;
+  }
+  return paths;
 }
 
 export function pageMetadata({
@@ -88,7 +107,11 @@ export function pageMetadata({
   description,
   noindex,
   image,
+  paths,
 }: PageSeo): Metadata {
+  const languages = languageAlternates(
+    paths ?? Object.fromEntries(LOCALES.map((l) => [l, path])),
+  );
   const hidden = noindex || (locale === 'ru' && !RU_INDEXABLE);
   const images = [image ? { url: image, alt: title } : SHARE_CARD];
 
@@ -97,14 +120,14 @@ export function pageMetadata({
     ...(description ? { description } : null),
     alternates: {
       canonical: localeUrl(locale, path),
-      languages: languageAlternates(path),
+      languages,
     },
     ...(hidden ? { robots: { index: false, follow: true } } : null),
     openGraph: {
       type: 'website',
       siteName: 'MIG Flowers',
       locale: HTML_LANG[locale].replace('-', '_'),
-      alternateLocale: alternateLocales(locale),
+      alternateLocale: alternateLocales(locale, languages !== undefined),
       url: localeUrl(locale, path),
       title,
       ...(description ? { description } : null),

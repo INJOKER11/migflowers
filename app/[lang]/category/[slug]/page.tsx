@@ -1,22 +1,23 @@
 import type { Metadata } from 'next';
-import { notFound } from 'next/navigation';
+import { notFound, permanentRedirect } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { getCategories, getCategory, getProducts } from '@/lib/api';
+import { getCategories, getCategory, getProducts, localizedSlugs, translateSlug } from '@/lib/api';
 import { getDictionary } from '@/lib/dictionaries';
-import { localeOf, pageMetadata } from '@/lib/seo';
-import { DEFAULT_LOCALE } from '@/lib/i18n';
+import { localeOf, pageMetadata, slugPaths } from '@/lib/seo';
+import { DEFAULT_LOCALE, isLocale, localePath } from '@/lib/i18n';
 
 interface Params {
   params: Promise<{ lang: string; slug: string }>;
 }
 
-export async function generateStaticParams() {
-  /* Slugs are the same in both locales, so the language this asks for doesn't
-     matter — it just has to be one of them. */
-  const categories = await getCategories({ locale: DEFAULT_LOCALE });
+/* Runs once per `lang` from the layout's params — each locale has its own
+   slugs (`hryzantemy` / `hrizantemy`), so each prerenders its own. */
+export async function generateStaticParams({ params }: { params: { lang: string } }) {
+  const locale = isLocale(params.lang) ? params.lang : DEFAULT_LOCALE;
+  const categories = await getCategories({ locale });
   return (categories ?? []).map((c) => ({ slug: c.slug }));
 }
 
@@ -29,6 +30,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   return pageMetadata({
     locale,
     path: `/category/${category.slug}`,
+    paths: slugPaths('/category', await localizedSlugs('categories', category.id)),
     title: `${category.name} — ${getDictionary(locale).category.titleSuffix} | MIG Flowers`,
     description: category.description.slice(0, 160),
     image: category.image_url,
@@ -39,7 +41,15 @@ export default async function CategoryPage({ params }: Params) {
   const { slug } = await params;
   const locale = await localeOf(params);
   const category = await getCategory(slug, locale);
-  if (!category) notFound();
+  /* Same rule as the product page: one URL per category per locale. */
+  if (!category) {
+    const own = await translateSlug('categories', slug, locale);
+    if (own) permanentRedirect(localePath(locale, `/category/${own}`));
+    notFound();
+  }
+  if (category.slug !== decodeURIComponent(slug)) {
+    permanentRedirect(localePath(locale, `/category/${category.slug}`));
+  }
 
   /* Filtered by this category, not the whole catalogue. Fetching everything
      made each category page a copy of /shop — the same products under a
