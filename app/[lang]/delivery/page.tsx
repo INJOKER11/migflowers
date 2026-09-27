@@ -47,7 +47,6 @@ export default async function DeliveryPage({ params }: { params: Promise<{ lang:
           <tr>
             <th>{t.colDistrict}</th>
             <th>{t.colPrice}</th>
-            <th>{t.colTime}</th>
           </tr>
         </thead>
         <tbody>
@@ -57,7 +56,6 @@ export default async function DeliveryPage({ params }: { params: Promise<{ lang:
               <td className="tabular">
                 {d.price_for_delivery ? uah(Number(d.price_for_delivery)) : t.quote}
               </td>
-              {/*<td>{d.time}</td>*/}
             </tr>
           ))}
         </tbody>
