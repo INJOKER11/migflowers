@@ -139,3 +139,24 @@ export function excerpt(text: string, maxLength = 160): string {
   const lastSpace = cut.lastIndexOf(' ');
   return `${cut.slice(0, lastSpace > 0 ? lastSpace : maxLength)}…`;
 }
+
+/* `en-CA` is picked for its shape, not its language: it formats as
+   `YYYY-MM-DD`, which is exactly what a date input and the API take. */
+const KYIV_ISO = new Intl.DateTimeFormat('en-CA', {
+  year: 'numeric',
+  month: '2-digit',
+  day: '2-digit',
+  timeZone: 'Europe/Kyiv',
+});
+
+/**
+ * Today in Odesa, plus `addDays`, as `YYYY-MM-DD`. The shop's calendar, not
+ * the customer's: someone ordering from Berlin or Toronto at 23:30 their time
+ * is already on tomorrow in Kyiv (or still on yesterday), and the API rejects
+ * a delivery date before *its* today.
+ */
+export function kyivDate(addDays = 0): string {
+  const [y, m, d] = KYIV_ISO.format(new Date()).split('-').map(Number);
+  /* Day arithmetic in UTC, where no DST shift can move the date. */
+  return new Date(Date.UTC(y, m - 1, d + addDays)).toISOString().slice(0, 10);
+}

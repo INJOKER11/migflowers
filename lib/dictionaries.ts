@@ -205,6 +205,13 @@ export interface Dictionary {
     payOnline: string;
     payOnSite: string;
   };
+  /** The error boundary under the layout — header and footer stay. */
+  error: {
+    title: string;
+    body: string;
+    retry: string;
+    shop: string;
+  };
   confirmed: {
     metaTitle: string;
     h1: string;
@@ -392,7 +399,7 @@ const uk: Dictionary = {
     statValue: 'Щодня',
     statLabel: 'Доставка по Одесі, без вихідних',
     heroAlt: 'Букет рожевих і білих троянд',
-    quickBuyTitle: 'Готові до відправлення сьогодні',
+    quickBuyTitle: 'Букети з нашої майстерні',
     quickBuyAll: 'Усі квіти',
     quickBuyNote: 'Один дотик — і букет у кошику. Оформлення на одному екрані.',
     occasionTitle: 'Квіти на кожен випадок',
@@ -522,6 +529,12 @@ const uk: Dictionary = {
     payCard: 'Переказ на карту',
     payOnline: 'Онлайн оплата',
     payOnSite: 'Оплата на місці',
+  },
+  error: {
+    title: 'Щось пішло не так',
+    body: 'Сторінка не завантажилася — найчастіше це минає за хвилину. Спробуйте ще раз або зателефонуйте нам, і ми приймемо замовлення вручну.',
+    retry: 'Спробувати ще раз',
+    shop: 'До магазину',
   },
   confirmed: {
     metaTitle: 'Замовлення прийнято — MIG Flowers',
@@ -740,7 +753,7 @@ const ru: Dictionary = {
     statValue: 'Каждый день',
     statLabel: 'Доставка по Одессе, без выходных',
     heroAlt: 'Букет розовых и белых роз',
-    quickBuyTitle: 'Готовы к отправке сегодня',
+    quickBuyTitle: 'Букеты из нашей мастерской',
     quickBuyAll: 'Все цветы',
     quickBuyNote: 'Одно касание — и букет в корзине. Оформление на одном экране.',
     occasionTitle: 'Цветы на любой случай',
@@ -869,6 +882,12 @@ const ru: Dictionary = {
     payCard: 'Перевод на карту',
     payOnline: 'Онлайн оплата',
     payOnSite: 'Оплата на месте',
+  },
+  error: {
+    title: 'Что-то пошло не так',
+    body: 'Страница не загрузилась — чаще всего это проходит за минуту. Попробуйте ещё раз или позвоните нам, и мы примем заказ вручную.',
+    retry: 'Попробовать ещё раз',
+    shop: 'В магазин',
   },
   confirmed: {
     metaTitle: 'Заказ принят — MIG Flowers',
