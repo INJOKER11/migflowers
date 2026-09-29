@@ -4,7 +4,7 @@ import { type ComponentProps, type FormEvent, useEffect, useState } from 'react'
 import { useRouter } from 'next/navigation';
 import { useLocale, useLocalePath } from '@/lib/use-locale';
 import { useCart } from '@/lib/cart-context';
-import { fill, uah } from '@/lib/format';
+import { fill, kyivDate, uah } from '@/lib/format';
 import {
   DELIVERY_METHODS,
   DeliveryEnum,
@@ -32,17 +32,9 @@ const NAMED_FIELDS = [
   'promo_code',
 ];
 
-function isoDate(addDays: number): string {
-  const d = new Date();
-  d.setDate(d.getDate() + addDays);
-  const month = String(d.getMonth() + 1).padStart(2, '0');
-  const day = String(d.getDate()).padStart(2, '0');
-  return `${d.getFullYear()}-${month}-${day}`;
-}
-
 function deliveryDate(slot: number, custom: string): string | null {
-  if (slot === 0) return isoDate(0);
-  if (slot === 1) return isoDate(1);
+  if (slot === 0) return kyivDate(0);
+  if (slot === 1) return kyivDate(1);
   return custom || null;
 }
 
@@ -125,7 +117,7 @@ export function CheckoutForm() {
     const text = (name: string) => String(data.get(name) ?? '').trim();
 
     const isTakeaway = cart.delivery === DeliveryEnum.takeaway;
-    const date = isTakeaway ? isoDate(0) : deliveryDate(cart.slot, text('custom_date'));
+    const date = isTakeaway ? kyivDate(0) : deliveryDate(cart.slot, text('custom_date'));
     if (!date) {
       setErrors({ delivery_date: [t.dateMissing] });
       return;
@@ -267,8 +259,8 @@ export function CheckoutForm() {
                 name="custom_date"
                 className="input"
                 style={{ marginTop: 10, maxWidth: 220 }}
-                min={isoDate(0)}
-                defaultValue={isoDate(0)}
+                min={kyivDate(0)}
+                defaultValue={kyivDate(0)}
                 aria-label={t.dateLabel}
               />
             )}
