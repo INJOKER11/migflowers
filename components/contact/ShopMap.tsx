@@ -1,3 +1,4 @@
+import { SHOP_DETAILS } from '@/lib/content';
 import type { Dictionary } from '@/lib/dictionaries';
 import type { Locale } from '@/lib/i18n';
 
@@ -12,13 +13,7 @@ import type { Locale } from '@/lib/i18n';
  * The link underneath goes to the business listing itself, which is what a
  * phone actually wants: reviews, opening hours and a Directions button.
  */
-const LAT = 46.4109788;
-const LNG = 30.7195882;
-
-const PLACE_URL =
-  'https://www.google.com/maps/place/Mig+Flowers/@46.4108451,30.720441,1849m/' +
-  'data=!3m1!1e3!4m6!3m5!1s0x40c6335ed354e533:0x9930a2f04e64e251!8m2!3d46.4109788!4d30.7195882' +
-  '!16s%2Fg%2F11zx2pw7ml';
+const { lat: LAT, lng: LNG, mapsUrl: PLACE_URL } = SHOP_DETAILS;
 
 export function ShopMap({ locale, dict: t }: { locale: Locale; dict: Dictionary['contact'] }) {
   const src = `https://www.google.com/maps?q=${LAT},${LNG}&z=17&hl=${locale}&output=embed`;

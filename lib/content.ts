@@ -54,6 +54,58 @@ export function whyUs(locale: Locale) {
   return WHY_US[locale];
 }
 
+/**
+ * The home page's plain-text block — the one place the page says, in words a
+ * searcher types, what the shop sells and where. Everything that can drift is
+ * a placeholder filled from the API or `lib/constants`: `{districts}` (the
+ * priced districts), `{free}` (the free-delivery threshold), `{categories}`
+ * (rendered as links). Every other claim is one the rest of the site already
+ * makes — address, hours, the substitution rule from the terms.
+ */
+const HOME_INTRO: Record<
+  Locale,
+  { title: string; shop: string; delivery: string; suburbs: string; catalogue: string; and: string }
+> = {
+  uk: {
+    title: 'Купити квіти в Одесі з доставкою',
+    shop:
+      'MIG Flowers — родинна квіткова майстерня в Таїрово, на вулиці Академіка Корольова, 22. ' +
+      'Купити квіти в Одесі тут можна двома способами: замовити букет на сайті з доставкою ' +
+      'або забрати його самостійно — крамниця відкрита щодня з 08:00 до 21:00.',
+    delivery:
+      'Доставляємо квіти по Одесі щодня й без вихідних — у {districts} райони. Ціна доставки залежить від ' +
+      'району, а для замовлень від {free} доставка безкоштовна. Букет можна отримати в день ' +
+      'замовлення, якщо потрібні квіти є в майстерні; якщо ні — ми зателефонуємо й запропонуємо ' +
+      'рівноцінну заміну або інший день.',
+    suburbs: 'Доставку за місто узгоджуємо з менеджером.',
+    catalogue:
+      'У каталозі — {categories}. До букета можна додати листівку з вашим текстом, а оплатити ' +
+      'замовлення онлайн, переказом на карту або на місці під час самовивозу.',
+    and: 'і',
+  },
+  ru: {
+    title: 'Купить цветы в Одессе с доставкой',
+    shop:
+      'MIG Flowers — семейная цветочная мастерская в Таирово, на улице Академика Королёва, 22. ' +
+      'Купить цветы в Одессе здесь можно двумя способами: заказать букет на сайте с доставкой ' +
+      'или забрать его самостоятельно — магазин открыт ежедневно с 08:00 до 21:00.',
+    delivery:
+      'Доставляем цветы по Одессе каждый день и без выходных — в {districts} районы. Цена доставки зависит ' +
+      'от района, а для заказов от {free} доставка бесплатная. Букет можно получить в день ' +
+      'заказа, если нужные цветы есть в мастерской; если нет — мы позвоним и предложим ' +
+      'равноценную замену или другой день.',
+    suburbs: 'Доставку за город согласовываем с менеджером.',
+    catalogue:
+      'В каталоге — {categories}. К букету можно добавить открытку с вашим текстом, а оплатить ' +
+      'заказ онлайн, переводом на карту или на месте при самовывозе.',
+    and: 'и',
+  },
+};
+
+export function homeIntro(locale: Locale) {
+  return HOME_INTRO[locale];
+}
+
 /** Home — six square plates, @migflowers. */
 const GALLERY_KEYS: PhotoKey[] = [
   'pinkRoses',
@@ -216,6 +268,15 @@ export const SHOP_DETAILS = {
   phone: '+380 67 422 72 98',
   phoneHref: 'tel:+380674227298',
   // email: 'hello@migflowers.ua',
+  /* The door on Корольова, 22 — shared by the contact-page map and the
+     `Florist` structured data, so the pin and the rich result agree. */
+  lat: 46.4109788,
+  lng: 30.7195882,
+  /** The Google Business Profile listing — reviews, hours, Directions. */
+  mapsUrl:
+    'https://www.google.com/maps/place/Mig+Flowers/@46.4108451,30.720441,1849m/' +
+    'data=!3m1!1e3!4m6!3m5!1s0x40c6335ed354e533:0x9930a2f04e64e251!8m2!3d46.4109788!4d30.7195882' +
+    '!16s%2Fg%2F11zx2pw7ml',
 };
 
 /** Contact — the parts that don't: the street and the opening hours. */
