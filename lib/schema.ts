@@ -11,10 +11,9 @@ import type { Crumb } from '@/components/ui/Breadcrumb';
  * have is a manual-action risk, not a ranking win.
  */
 
-/** TODO — ask the owner. Google reads `priceRange` as a rough band ("₴₴"), and
-    guessing it would be a claim about the business we cannot support. The
-    catalogue is empty today, so it cannot be derived from real prices either. */
-const PRICE_RANGE: string | null = null;
+/** The catalogue's real span, confirmed by the owner: single stems from 60 ₴,
+    the largest bouquets around 2 000 ₴. Revisit if the catalogue moves. */
+const PRICE_RANGE: string | null = '60–2000 ₴';
 
 /* One shop, two spellings of the city it stands in — the block is emitted on
    both locales' pages. */
