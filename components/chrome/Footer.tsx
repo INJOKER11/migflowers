@@ -1,15 +1,29 @@
 import Image from 'next/image';
 import { Link } from '@/components/ui/Link';
 import { SHOP_DETAILS, shopLocation } from '@/lib/content';
+import { getCategories } from '@/lib/api';
 import type { Dictionary } from '@/lib/dictionaries';
 import type { Locale } from '@/lib/i18n';
 import { Facebook, Instagram, STROKE, Send } from '@/components/ui/icons';
 
-export function Footer({ dict: t, locale }: { dict: Dictionary['footer']; locale: Locale }) {
+/* Every page links to every category from here, which is most of what tells
+   Google the category pages matter. The footer sits in the layout, so an API
+   outage must cost these links, not the page. */
+async function categoryLinks(locale: Locale) {
+  try {
+    const categories = await getCategories({ locale });
+    return categories.map((c) => ({ href: `/category/${c.slug}`, label: c.name }));
+  } catch {
+    return [];
+  }
+}
+
+export async function Footer({ dict: t, locale }: { dict: Dictionary['footer']; locale: Locale }) {
   const shop = shopLocation(locale);
 
   const shopLinks = [
     { href: '/shop', label: t.allFlowers },
+    ...(await categoryLinks(locale)),
     // { href: '/category/wedding-flowers', label: … },
     // { href: '/subscription', label: … },
     // { href: '/gift-cards', label: … },

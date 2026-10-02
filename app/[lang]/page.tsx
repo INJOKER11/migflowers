@@ -4,6 +4,7 @@ import { QuickBuy } from '@/components/home/QuickBuy';
 import { OccasionGrid } from '@/components/home/OccasionGrid';
 import { WhyUs } from '@/components/home/WhyUs';
 import { TestimonialCarousel } from '@/components/home/TestimonialCarousel';
+import { HomeIntro } from '@/components/home/HomeIntro';
 import { InstaGrid } from '@/components/home/InstaGrid';
 import { Newsletter } from '@/components/home/Newsletter';
 import { getReviews } from '@/lib/api';
@@ -28,6 +29,7 @@ export default async function HomePage({ params }: { params: Promise<{ lang: str
       <OccasionGrid locale={locale} dict={dict} />
       <WhyUs locale={locale} />
       <TestimonialCarousel reviews={reviews} />
+      <HomeIntro locale={locale} />
       <InstaGrid dict={dict} />
       <Newsletter />
     </>

@@ -53,7 +53,7 @@ interface ApiProduct {
   description: string;
   price: string;
   discount_price: string | null;
-  stock: number;
+  stock: number | null;
   is_available: boolean;
   image_url: string | null;
   categories?: ApiProductCategory[];

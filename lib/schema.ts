@@ -1,6 +1,7 @@
 import type { Product } from '@/types';
 import { SHOP_DETAILS, shopLocation } from './content';
 import { SITE_URL, localeUrl, type Locale } from './i18n';
+import { SHARE_CARD } from './seo';
 import type { Crumb } from '@/components/ui/Breadcrumb';
 
 /**
@@ -10,10 +11,9 @@ import type { Crumb } from '@/components/ui/Breadcrumb';
  * have is a manual-action risk, not a ranking win.
  */
 
-/** TODO — ask the owner. Google reads `priceRange` as a rough band ("₴₴"), and
-    guessing it would be a claim about the business we cannot support. The
-    catalogue is empty today, so it cannot be derived from real prices either. */
-const PRICE_RANGE: string | null = null;
+/** The catalogue's real span, confirmed by the owner: single stems from 60 ₴,
+    the largest bouquets around 2 000 ₴. Revisit if the catalogue moves. */
+const PRICE_RANGE: string | null = '60–2000 ₴';
 
 /* One shop, two spellings of the city it stands in — the block is emitted on
    both locales' pages. */
@@ -31,7 +31,10 @@ export function floristSchema(locale: Locale) {
     '@id': `${SITE_URL}/#florist`,
     name: 'MIG Flowers',
     url: SITE_URL,
-    image: `${SITE_URL}/logo.png`,
+    /* `image` is what Google shows beside the result, so it gets the shop's
+       photograph; the round mark goes in `logo`. */
+    image: SHARE_CARD.url,
+    logo: `${SITE_URL}/logo.png`,
     telephone: SHOP_DETAILS.phone,
     address: {
       '@type': 'PostalAddress',
@@ -40,7 +43,10 @@ export function floristSchema(locale: Locale) {
       addressRegion: CITY[locale].region,
       addressCountry: 'UA',
     },
+    geo: { '@type': 'GeoCoordinates', latitude: SHOP_DETAILS.lat, longitude: SHOP_DETAILS.lng },
+    hasMap: SHOP_DETAILS.mapsUrl,
     areaServed: { '@type': 'City', name: CITY[locale].locality },
+    currenciesAccepted: 'UAH',
     /* The shop keeps the same window every day, so one specification covers
        the week. */
     openingHoursSpecification: {
@@ -55,13 +61,17 @@ export function floristSchema(locale: Locale) {
 }
 
 export function productSchema(product: Product, locale: Locale) {
-  const inStock = product.is_available && product.stock > 0;
+  /* `is_available` alone: the backend dropped its `stock` column, so `stock`
+     arrives as null, and reading it marked every bouquet OutOfStock. */
+  const inStock = product.is_available;
 
   return {
     '@context': 'https://schema.org',
     '@type': 'Product',
     name: product.name,
     description: product.description,
+    sku: product.id,
+    brand: { '@type': 'Brand', name: 'MIG Flowers' },
     ...(product.image_url ? { image: product.image_url } : null),
     /* schema.org takes one category or a list; a product with none says
        nothing rather than an empty string. */
