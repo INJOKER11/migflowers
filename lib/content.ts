@@ -294,9 +294,9 @@ export const SHOP_DETAILS = {
  */
 const SELLER = {
   /** «ФОП Прізвище Імʼя По батькові», as registered. */
-  name: '',
+  name: 'ФОП Міго Олена Володимирівна',
   /** РНОКПП — 10 digits. */
-  taxId: '',
+  taxId: '2925519863',
   /** The registration address from the ЄДР extract (may differ from the shop's). */
   address: '',
 };
