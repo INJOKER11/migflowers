@@ -298,7 +298,7 @@ const SELLER = {
   /** РНОКПП — 10 digits. */
   taxId: '2925519863',
   /** The registration address from the ЄДР extract (may differ from the shop's). */
-  address: '',
+  address: 'Україна, 67663, Одеська обл., Одеський р-н, село Усатове, провулок Пархоменко, будинок 10',
 };
 
 export function seller() {
