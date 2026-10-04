@@ -55,7 +55,8 @@ export default async function CategoryPage({ params }: Params) {
      made each category page a copy of /shop — the same products under a
      different heading, which is what duplicate content means. */
   const products = await getProducts({ locale, category: slug });
-  const nav = getDictionary(locale).nav;
+  const dict = getDictionary(locale);
+  const nav = dict.nav;
 
   return (
     <section>
@@ -78,7 +79,9 @@ export default async function CategoryPage({ params }: Params) {
             { label: category.name },
           ]}
         />
-        <h1 style={{ fontSize: 46, margin: '0 0 14px' }}>{category.name}</h1>
+        <h1 style={{ fontSize: 46, margin: '0 0 14px' }}>
+          {category.name} {dict.category.h1Suffix}
+        </h1>
         <p
           style={{
             margin: '0 0 36px',

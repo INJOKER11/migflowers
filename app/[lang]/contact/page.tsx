@@ -3,7 +3,7 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { ShopMap } from '@/components/contact/ShopMap';
 import { ContactForm } from '@/components/contact/ContactForm';
-import { SHOP_DETAILS, shopLocation } from '@/lib/content';
+import { SHOP_DETAILS, seller, shopLocation } from '@/lib/content';
 import { getDictionary } from '@/lib/dictionaries';
 import { localeOf, metadataFor } from '@/lib/seo';
 
@@ -63,6 +63,11 @@ export default async function ContactPage({ params }: { params: Promise<{ lang: 
               <a href={SHOP_DETAILS.phoneHref}>{SHOP_DETAILS.phone}</a>
             </Detail>
             <Detail label={t.hours}>{shop.hours}</Detail>
+            <Detail label={t.seller}>
+              {seller().name}, РНОКПП {seller().taxId}
+              <br />
+              {seller().address}
+            </Detail>
           </div>
 
           <ShopMap locale={locale} dict={t} />

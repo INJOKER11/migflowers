@@ -49,7 +49,8 @@ export interface Product {
   discount_price?: number;
   image_url: string | null;
   is_available: boolean;
-  stock: number;
+  /** Always null — the backend no longer keeps stock; `is_available` is the flag. */
+  stock: number | null;
   /** A product can sit in several — «троянди» and «на день народження» are
       both true of the same bouquet. Possibly empty: nothing in the UI may
       assume a first element. */
@@ -122,7 +123,7 @@ export interface Plan {
   features: [string, string, string];
 }
 
-export type LegalDoc = 'privacy' | 'terms';
+export type LegalDoc = 'privacy' | 'terms' | 'returns';
 
 export interface LegalSection {
   h: string;
