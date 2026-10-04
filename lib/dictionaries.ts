@@ -49,6 +49,7 @@ export interface Dictionary {
     contact: string;
     privacy: string;
     terms: string;
+    returns: string;
     rights: string;
   };
   home: {
@@ -194,6 +195,10 @@ export interface Dictionary {
     submitting: string;
     pay: string;
     confirm: string;
+    /** Under the submit button: `{terms}` and `{returns}` become links. */
+    agree: string;
+    agreeTerms: string;
+    agreeReturns: string;
     failed: string;
     /** Collection-method chips. */
     methodDelivery: string;
@@ -297,6 +302,8 @@ export interface Dictionary {
     address: string;
     phone: string;
     hours: string;
+    /** The legal seller's details — LiqPay requires them on the site. */
+    seller: string;
     /** The embedded map's iframe title, and the link out to the listing. */
     mapTitle: string;
     mapOpen: string;
@@ -387,6 +394,7 @@ const uk: Dictionary = {
     contact: 'Контакти',
     privacy: 'Політика приватності',
     terms: 'Умови користування',
+    returns: 'Обмін і повернення',
     rights: '© 2026 MIG Flowers. Родинна справа, понад 10 років.',
   },
   home: {
@@ -523,6 +531,9 @@ const uk: Dictionary = {
     submitting: 'Надсилаємо…',
     pay: 'Сплатити замовлення',
     confirm: 'Підтвердити замовлення',
+    agree: 'Оформлюючи замовлення, ви погоджуєтеся з {terms} та {returns}.',
+    agreeTerms: 'умовами користування',
+    agreeReturns: 'умовами обміну й повернення',
     failed: 'Не вдалося надіслати замовлення. Спробуйте ще раз.',
     methodDelivery: 'Доставка',
     methodTakeaway: 'Самовивіз',
@@ -623,6 +634,7 @@ const uk: Dictionary = {
     address: 'Адреса',
     phone: 'Телефон',
     hours: 'Години роботи',
+    seller: 'Продавець',
     mapTitle: 'Карта: майстерня на вулиці Академіка Корольова, 22',
     mapOpen: 'Відкрити в Google Картах',
     formTitle: 'Написати нам',
@@ -742,6 +754,7 @@ const ru: Dictionary = {
     contact: 'Контакты',
     privacy: 'Политика конфиденциальности',
     terms: 'Условия пользования',
+    returns: 'Обмен и возврат',
     rights: '© 2026 MIG Flowers. Семейное дело, больше 10 лет.',
   },
   home: {
@@ -877,6 +890,9 @@ const ru: Dictionary = {
     submitting: 'Отправляем…',
     pay: 'Оплатить заказ',
     confirm: 'Подтвердить заказ',
+    agree: 'Оформляя заказ, вы соглашаетесь с {terms} и {returns}.',
+    agreeTerms: 'условиями пользования',
+    agreeReturns: 'условиями обмена и возврата',
     failed: 'Не удалось отправить заказ. Попробуйте ещё раз.',
     methodDelivery: 'Доставка',
     methodTakeaway: 'Самовывоз',
@@ -976,6 +992,7 @@ const ru: Dictionary = {
     address: 'Адрес',
     phone: 'Телефон',
     hours: 'Часы работы',
+    seller: 'Продавец',
     mapTitle: 'Карта: мастерская на улице Академика Королёва, 22',
     mapOpen: 'Открыть в Google Картах',
     formTitle: 'Написать нам',

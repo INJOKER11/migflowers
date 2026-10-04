@@ -282,6 +282,40 @@ export const SHOP_DETAILS = {
     '!16s%2Fg%2F11zx2pw7ml',
 };
 
+/**
+ * The legal seller. LiqPay's monitoring requires the ФОП's registration data
+ * on the site, matching the merchant cabinet exactly — without it the bank
+ * stops paying out card payments. Legal data, so the same text in both
+ * locales.
+ *
+ * TODO(owner): fill in from the ЄДР extract / LiqPay cabinet. `seller()`
+ * fails the production build while any field is empty, so the site cannot
+ * ship without them.
+ */
+const SELLER = {
+  /** «ФОП Прізвище Імʼя По батькові», as registered. */
+  name: '',
+  /** РНОКПП — 10 digits. */
+  taxId: '',
+  /** The registration address from the ЄДР extract (may differ from the shop's). */
+  address: '',
+};
+
+export function seller() {
+  const missing = Object.entries(SELLER)
+    .filter(([, value]) => !value.trim())
+    .map(([key]) => key);
+  if (missing.length && process.env.NODE_ENV === 'production') {
+    throw new Error(`SELLER in lib/content.ts is incomplete (${missing.join(', ')}) — LiqPay requires it on the site.`);
+  }
+  return {
+    name: SELLER.name || '[ФОП — не заповнено]',
+    taxId: SELLER.taxId || '[РНОКПП]',
+    address: SELLER.address || '[адреса реєстрації]',
+    phone: SHOP_DETAILS.phone,
+  };
+}
+
 /** Contact — the parts that don't: the street and the opening hours. */
 const SHOP_LOCATION: Record<Locale, { address: string; addressShort: string; hours: string }> = {
   uk: {

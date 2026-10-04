@@ -123,7 +123,7 @@ export interface Plan {
   features: [string, string, string];
 }
 
-export type LegalDoc = 'privacy' | 'terms';
+export type LegalDoc = 'privacy' | 'terms' | 'returns';
 
 export interface LegalSection {
   h: string;
