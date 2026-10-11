@@ -28,7 +28,10 @@ export async function OccasionGrid({
           {categories.map((category) => (
             <Link
               key={category.name}
-              href={{ pathname: '/shop', query: { category: category.slug } }}
+              /* The category page, not `/shop?category=` — that URL canonicalizes
+                 to `/shop`, so the link's weight never reached the page that
+                 ranks for «троянди Одеса». */
+              href={`/category/${category.slug}`}
               className="occasion-cell"
             >
               <div style={{ fontFamily: 'var(--font-heading)', fontSize: 26 }}>{category.name}</div>

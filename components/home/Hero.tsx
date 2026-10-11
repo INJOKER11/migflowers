@@ -45,7 +45,7 @@ export function Hero({ dict }: { dict: Dictionary['home'] }) {
             letterSpacing: '-.01em',
           }}
         >
-          {dict.h1a}
+          {dict.h1a}{' '}
           <br />
           <em>{dict.h1b}</em>
         </h1>

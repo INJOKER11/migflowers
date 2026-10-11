@@ -15,6 +15,7 @@ import {
 import { useDict } from '@/lib/dictionary-context';
 import { CARD_MESSAGE_FEE } from '@/lib/constants';
 import { Button } from '@/components/ui/Button';
+import { Link } from '@/components/ui/Link';
 import { Chip, ChipRow } from '@/components/ui/Chip';
 import { Checkbox } from '@/components/ui/Checkbox';
 import { CartLine } from './CartLine';
@@ -494,6 +495,22 @@ export function CheckoutForm() {
         >
           {submitting ? t.submitting : cart.payment === PaymentEnum.online ? t.pay : t.confirm}
         </Button>
+
+        <p style={{ margin: '12px 0 0', fontSize: 12.5, lineHeight: 1.6, color: 'var(--color-neutral-600)' }}>
+          {t.agree.split(/(\{terms\}|\{returns\})/).map((part, i) =>
+            part === '{terms}' ? (
+              <Link key={i} href="/legal/terms" target="_blank">
+                {t.agreeTerms}
+              </Link>
+            ) : part === '{returns}' ? (
+              <Link key={i} href="/legal/returns" target="_blank">
+                {t.agreeReturns}
+              </Link>
+            ) : (
+              part
+            ),
+          )}
+        </p>
       </div>
     </form>
   );

@@ -24,6 +24,7 @@ const STATIC_PATHS: { path: string; priority: number; changeFrequency: Frequency
   { path: '/blog', priority: 0.5, changeFrequency: 'weekly' },
   { path: '/legal/privacy', priority: 0.2, changeFrequency: 'yearly' },
   { path: '/legal/terms', priority: 0.2, changeFrequency: 'yearly' },
+  { path: '/legal/returns', priority: 0.2, changeFrequency: 'yearly' },
 ];
 
 type Frequency = NonNullable<MetadataRoute.Sitemap[number]['changeFrequency']>;

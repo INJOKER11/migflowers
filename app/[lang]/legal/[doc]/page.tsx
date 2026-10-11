@@ -14,6 +14,11 @@ export function generateStaticParams() {
   return LEGAL_DOCS.map((doc) => ({ doc }));
 }
 
+function snippet(text: string, max = 160): string {
+  if (text.length <= max) return text;
+  return `${text.slice(0, text.lastIndexOf(' ', max - 1))}…`;
+}
+
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const { doc } = await params;
   const locale = await localeOf(params);
@@ -24,6 +29,10 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     locale,
     path: `/legal/${doc}`,
     title: `${document.title} — MIG Flowers`,
+    /* Without one, both documents inherited the layout's brand description —
+       two pages with the same snippet. The opening paragraph says what each
+       is about; cut at a word so the snippet doesn't end mid-word. */
+    description: snippet(document.sections[0]?.p ?? ''),
   });
 }
 
