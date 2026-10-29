@@ -9,7 +9,7 @@ import { getProduct, getRelatedProducts, localizedSlugs, translateSlug } from '@
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getDictionary } from '@/lib/dictionaries';
 import { productSchema } from '@/lib/schema';
-import { localeOf, pageMetadata, slugPaths } from '@/lib/seo';
+import { localeOf, pageMetadata, productDescription, productHeading, slugPaths } from '@/lib/seo';
 import { localePath } from '@/lib/i18n';
 
 interface Params {
@@ -32,8 +32,8 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     paths: slugPaths('/product', await localizedSlugs('products', product.id)),
     /* The city belongs in every product title: "Букет Ніжність" on its own
        competes with every florist in the country, "… купити в Одесі" does not. */
-    title: `${product.name} — ${getDictionary(locale).product.titleSuffix} | MIG Flowers`,
-    description: product.description,
+    title: `${productHeading(product, locale)} — ${getDictionary(locale).product.titleSuffix} | MIG Flowers`,
+    description: productDescription(product, locale),
     image: product.image_url,
   });
 }
@@ -72,7 +72,7 @@ export default async function ProductPage({ params }: Params) {
         ]}
       />
 
-      <ProductDetail product={product} />
+      <ProductDetail product={product} heading={productHeading(product, locale)} />
 
       {related.length > 0 && (
         <div style={{ marginTop: 80 }}>

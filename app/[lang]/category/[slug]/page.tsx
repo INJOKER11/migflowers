@@ -3,15 +3,21 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
+import { Link } from '@/components/ui/Link';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { getCategories, getCategory, getProducts, localizedSlugs, translateSlug } from '@/lib/api';
 import { getDictionary } from '@/lib/dictionaries';
-import { localeOf, pageMetadata, slugPaths } from '@/lib/seo';
+import { categoryDescription, categoryIntro, localeOf, pageMetadata, slugPaths } from '@/lib/seo';
 import { DEFAULT_LOCALE, isLocale, localePath } from '@/lib/i18n';
 
 interface Params {
   params: Promise<{ lang: string; slug: string }>;
 }
+
+/* The page has no pagination, so it asks for the whole category at once. The
+   API's default page is 20, and «Букети» holds more — the rest were linked
+   from nowhere on the page meant to list them. 100 is far above any category. */
+const CATEGORY_LIMIT = 100;
 
 /* Runs once per `lang` from the layout's params — each locale has its own
    slugs (`hryzantemy` / `hrizantemy`), so each prerenders its own. */
@@ -26,13 +32,14 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
   const locale = await localeOf(params);
   const category = await getCategory(slug, locale);
   if (!category) return {};
+  const products = await getProducts({ locale, category: slug, perPage: CATEGORY_LIMIT });
 
   return pageMetadata({
     locale,
     path: `/category/${category.slug}`,
     paths: slugPaths('/category', await localizedSlugs('categories', category.id)),
     title: `${category.name} — ${getDictionary(locale).category.titleSuffix} | MIG Flowers`,
-    description: category.description.slice(0, 160),
+    description: categoryDescription(category, products, locale),
     image: category.image_url,
   });
 }
@@ -54,9 +61,10 @@ export default async function CategoryPage({ params }: Params) {
   /* Filtered by this category, not the whole catalogue. Fetching everything
      made each category page a copy of /shop — the same products under a
      different heading, which is what duplicate content means. */
-  const products = await getProducts({ locale, category: slug });
+  const products = await getProducts({ locale, category: slug, perPage: CATEGORY_LIMIT });
   const dict = getDictionary(locale);
   const nav = dict.nav;
+  const intro = categoryIntro(category, products, locale);
 
   return (
     <section>
@@ -96,6 +104,20 @@ export default async function CategoryPage({ params }: Params) {
         </p>
 
         <ProductGrid products={products} variant="category" />
+
+        {intro && (
+          <p
+            style={{
+              margin: '48px 0 0',
+              fontSize: 15,
+              lineHeight: 1.8,
+              color: 'var(--color-neutral-700)',
+              maxWidth: '62ch',
+            }}
+          >
+            {intro} <Link href="/delivery">{dict.category.deliveryLink}</Link>
+          </p>
+        )}
       </Section>
     </section>
   );

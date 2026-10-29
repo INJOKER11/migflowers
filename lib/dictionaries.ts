@@ -117,12 +117,30 @@ export interface Dictionary {
     loading: string;
     /** Metadata: `<name> — <titleSuffix> | MIG Flowers`. */
     titleSuffix: string;
+    /** Added to the name of a product called the same as its category — the
+        single stems: «Троянди поштучно» beside the «Троянди» category. */
+    singleSuffix: string;
+    /** Meta description price when sizes or colours move it. `{price}` — the
+        lowest. */
+    metaFrom: string;
+    /** Closes every product's meta description. */
+    metaDelivery: string;
   };
   category: {
     /** Metadata: `<name> — <titleSuffix> | MIG Flowers`. */
     titleSuffix: string;
     /** The page's h1: `<name> <h1Suffix>` — «Троянди з доставкою по Одесі». */
     h1Suffix: string;
+    /** `{name}`, `{count}` (with its noun), `{range}` (`rangeMany`/`rangeOne`),
+        `{free}` — the free-delivery threshold. */
+    metaDescription: string;
+    /** `{min}`, `{max}` — the category's cheapest and dearest product. */
+    rangeMany: string;
+    /** `{price}` — when every product in the category costs the same. */
+    rangeOne: string;
+    /** The paragraph under the grid; same placeholders as `metaDescription`. */
+    intro: string;
+    deliveryLink: string;
   };
   cart: {
     drawerTitle: string;
@@ -462,10 +480,21 @@ const uk: Dictionary = {
     removeSaved: 'Видалити',
     loading: 'Завантажуємо букет',
     titleSuffix: 'купити в Одесі',
+    singleSuffix: 'поштучно',
+    metaFrom: 'від {price}',
+    metaDelivery: 'Доставка по Одесі в день замовлення.',
   },
   category: {
     titleSuffix: 'купити в Одесі з доставкою',
     h1Suffix: 'з доставкою по Одесі',
+    metaDescription:
+      '{name} в Одесі — {count} {range}. Доставка в день замовлення, безкоштовно від {free}.',
+    rangeMany: 'від {min} до {max}',
+    rangeOne: 'за {price}',
+    intro:
+      'Зараз у розділі «{name}» — {count} {range}. Доставляємо по Одесі в день замовлення, якщо квіти ' +
+      'є в наявності; вартість залежить від району, а від {free} — безкоштовно.',
+    deliveryLink: 'Умови та ціни доставки',
   },
   cart: {
     drawerTitle: 'Ваш кошик',
@@ -822,10 +851,21 @@ const ru: Dictionary = {
     removeSaved: 'Удалить',
     loading: 'Загружаем букет',
     titleSuffix: 'купить в Одессе',
+    singleSuffix: 'поштучно',
+    metaFrom: 'от {price}',
+    metaDelivery: 'Доставка по Одессе в день заказа.',
   },
   category: {
     titleSuffix: 'купить в Одессе с доставкой',
     h1Suffix: 'с доставкой по Одессе',
+    metaDescription:
+      '{name} в Одессе — {count} {range}. Доставка в день заказа, бесплатно от {free}.',
+    rangeMany: 'от {min} до {max}',
+    rangeOne: 'за {price}',
+    intro:
+      'Сейчас в разделе «{name}» — {count} {range}. Доставляем по Одессе в день заказа, если цветы ' +
+      'есть в наличии; стоимость зависит от района, а от {free} — бесплатно.',
+    deliveryLink: 'Условия и цены доставки',
   },
   cart: {
     drawerTitle: 'Ваша корзина',
