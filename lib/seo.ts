@@ -1,5 +1,9 @@
 import type { Metadata } from 'next';
+import type { Category, Product } from '@/types';
+import { priceOf } from './catalog';
+import { FREE_DELIVERY_THRESHOLD } from './constants';
 import { getDictionary, type Dictionary } from './dictionaries';
+import { arrangementCount, fill, uah } from './format';
 import {
   DEFAULT_LOCALE,
   HTML_LANG,
@@ -164,4 +168,86 @@ export async function metadataFor(
 export async function localeOf(params: Promise<{ lang: string }>): Promise<Locale> {
   const { lang } = await params;
   return isLocale(lang) ? lang : DEFAULT_LOCALE;
+}
+
+/* Google cuts a result's snippet at about this many characters. */
+const SNIPPET_MAX = 160;
+
+/** Shortened at a word, never mid-word, and marked as shortened. A text that
+    already fits only gets its closing full stop, so the sentence that follows
+    it in a description doesn't run on. */
+function clip(text: string, max: number): string {
+  const clean = text.trim().replace(/\s+/g, ' ');
+  if (clean.length <= max) return /[.!?…]$/.test(clean) ? clean : `${clean}.`;
+  const cut = clean.slice(0, max - 1);
+  const word = cut.lastIndexOf(' ');
+  return `${(word > 0 ? cut.slice(0, word) : cut).replace(/[\s,;:—–-]+$/, '')}…`;
+}
+
+/**
+ * A product named exactly like one of its categories is the single stem —
+ * «Троянди» at 60 ₴ inside the «Троянди» category. Under the bare name the two
+ * pages carry the same title and h1, and Google keeps neither; «поштучно»
+ * tells them apart. The real fix is renaming the product in the admin, after
+ * which this stops matching on its own.
+ */
+export function productHeading(product: Product, locale: Locale): string {
+  const name = product.name.trim();
+  const same = product.categories.some(
+    (c) => c.name.trim().toLocaleLowerCase() === name.toLocaleLowerCase(),
+  );
+  return same ? `${name} ${getDictionary(locale).product.singleSuffix}` : name;
+}
+
+/**
+ * The API's descriptions say what the flowers are like; the snippet also has
+ * to say what a searcher came for — the price and that it comes to Odesa. Two
+ * products have no description at all, and without one they inherited the
+ * layout's, the same sentence on every such page.
+ */
+export function productDescription(product: Product, locale: Locale): string {
+  const dict = getDictionary(locale).product;
+  /* A size or colour with its own surcharge moves the price, so the quoted
+     one is the lowest a customer can pay, marked as such. */
+  const adjust = (options: { price_adjustment: number }[]) =>
+    Math.min(0, ...options.map((o) => o.price_adjustment));
+  const varies = [...product.sizes, ...product.colors].some((o) => o.price_adjustment !== 0);
+  const lowest = priceOf(product) + adjust(product.sizes) + adjust(product.colors);
+  const price = varies ? fill(dict.metaFrom, { price: uah(lowest) }) : uah(lowest);
+
+  const lead = `${productHeading(product, locale)} — ${price}.`;
+  const room = SNIPPET_MAX - lead.length - dict.metaDelivery.length - 2;
+  /* Too little room left for a note to say anything is worse than none. */
+  const note = product.description.trim() && room >= 40 ? clip(product.description, room) : '';
+  return [lead, note, dict.metaDelivery].filter(Boolean).join(' ');
+}
+
+/** «24 композиції від 500 ₴ до 2 000 ₴» — what a category holds right now,
+    counted from its products rather than written down, so it cannot go stale. */
+function categoryFacts(category: Category, products: Product[], locale: Locale) {
+  const dict = getDictionary(locale).category;
+  const prices = products.map(priceOf);
+  const min = Math.min(...prices);
+  const max = Math.max(...prices);
+  return {
+    name: category.name.trim(),
+    count: arrangementCount(products.length, locale),
+    range:
+      min === max
+        ? fill(dict.rangeOne, { price: uah(min) })
+        : fill(dict.rangeMany, { min: uah(min), max: uah(max) }),
+    free: uah(FREE_DELIVERY_THRESHOLD),
+  };
+}
+
+export function categoryDescription(category: Category, products: Product[], locale: Locale): string {
+  if (products.length === 0) return clip(category.description, SNIPPET_MAX);
+  return fill(getDictionary(locale).category.metaDescription, categoryFacts(category, products, locale));
+}
+
+/** The paragraph under a category's grid. `null` for an empty category — a
+    sentence counting zero bouquets is worse than no sentence. */
+export function categoryIntro(category: Category, products: Product[], locale: Locale): string | null {
+  if (products.length === 0) return null;
+  return fill(getDictionary(locale).category.intro, categoryFacts(category, products, locale));
 }

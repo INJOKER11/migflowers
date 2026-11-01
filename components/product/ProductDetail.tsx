@@ -25,7 +25,9 @@ const TAB_KEYS = ['desc'] as const; // 'care' is behind the commented-out tab.
 
 type TabKey = (typeof TAB_KEYS)[number];
 
-export function ProductDetail({ product }: { product: Product }) {
+/** `heading` is the h1 — the product's name, set apart from a same-named
+    category by the server page (`productHeading`). */
+export function ProductDetail({ product, heading }: { product: Product; heading: string }) {
   const locale = useLocale();
   const t = useDict().product;
   const { add, bump, qtyOf, isSaved, toggleSaved, ready } = useCart();
@@ -127,7 +129,7 @@ export function ProductDetail({ product }: { product: Product }) {
       </div>
 
       <div>
-        <h1 style={{ fontSize: 42, margin: '0 0 8px', lineHeight: 1.1 }}>{product.name}</h1>
+        <h1 style={{ fontSize: 42, margin: '0 0 8px', lineHeight: 1.1 }}>{heading}</h1>
         {/*<div style={{ fontSize: 14, color: 'var(--color-neutral-600)', fontStyle: 'italic' }}>*/}
         {/*  {product.description}*/}
         {/*</div>*/}
