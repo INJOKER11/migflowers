@@ -3,8 +3,10 @@ import { Link } from '@/components/ui/Link';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Accordion } from '@/components/ui/Accordion';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { getFaqs } from '@/lib/faqs';
 import { getDictionary } from '@/lib/dictionaries';
+import { faqSchema } from '@/lib/schema';
 import { localeOf, metadataFor } from '@/lib/seo';
 
 export async function generateMetadata(props: {
@@ -17,6 +19,7 @@ export default async function FaqPage({ params }: { params: Promise<{ lang: stri
   const locale = await localeOf(params);
   const dict = getDictionary(locale);
   const t = dict.faq;
+  const faqs = getFaqs(locale);
 
   return (
     <Section width={800} pt={44} pb={90}>
@@ -26,7 +29,8 @@ export default async function FaqPage({ params }: { params: Promise<{ lang: stri
       />
       <h1 style={{ fontSize: 46, margin: '0 0 34px' }}>{t.h1}</h1>
 
-      <Accordion items={getFaqs(locale)} />
+      <JsonLd data={faqSchema(faqs)} />
+      <Accordion items={faqs} />
 
       <p style={{ margin: '34px 0 0', fontSize: 15, color: 'var(--color-neutral-700)' }}>
         {t.moreBefore} <Link href="/contact">{t.moreLink}</Link> {t.moreAfter}

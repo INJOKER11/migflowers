@@ -4,9 +4,14 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { Link } from '@/components/ui/Link';
+import { Accordion } from '@/components/ui/Accordion';
+import { SectionHeading } from '@/components/ui/SectionHeading';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { ProductGrid } from '@/components/product/ProductGrid';
 import { getCategories, getCategory, getProducts, localizedSlugs, translateSlug } from '@/lib/api';
+import { categoryCopy } from '@/lib/category-copy';
 import { getDictionary } from '@/lib/dictionaries';
+import { faqSchema } from '@/lib/schema';
 import { categoryDescription, categoryIntro, localeOf, pageMetadata, slugPaths } from '@/lib/seo';
 import { DEFAULT_LOCALE, isLocale, localePath } from '@/lib/i18n';
 
@@ -18,6 +23,15 @@ interface Params {
    API's default page is 20, and «Букети» holds more — the rest were linked
    from nowhere on the page meant to list them. 100 is far above any category. */
 const CATEGORY_LIMIT = 100;
+
+/* The running text under the grid — the article, the counted intro. */
+const PROSE = {
+  margin: '0 0 16px',
+  fontSize: 15,
+  lineHeight: 1.8,
+  color: 'var(--color-neutral-700)',
+  maxWidth: '62ch',
+} as const;
 
 /* Runs once per `lang` from the layout's params — each locale has its own
    slugs (`hryzantemy` / `hrizantemy`), so each prerenders its own. */
@@ -65,6 +79,7 @@ export default async function CategoryPage({ params }: Params) {
   const dict = getDictionary(locale);
   const nav = dict.nav;
   const intro = categoryIntro(category, products, locale);
+  const article = categoryCopy(category, products, locale);
 
   return (
     <section>
@@ -105,18 +120,37 @@ export default async function CategoryPage({ params }: Params) {
 
         <ProductGrid products={products} variant="category" />
 
-        {intro && (
-          <p
-            style={{
-              margin: '48px 0 0',
-              fontSize: 15,
-              lineHeight: 1.8,
-              color: 'var(--color-neutral-700)',
-              maxWidth: '62ch',
-            }}
-          >
-            {intro} <Link href="/delivery">{dict.category.deliveryLink}</Link>
-          </p>
+        {(article || intro) && (
+          <div style={{ marginTop: 64, maxWidth: 800 }}>
+            {article && (
+              <>
+                <SectionHeading size={30} marginBottom={20}>
+                  {article.title}
+                </SectionHeading>
+                {article.about.map((p) => (
+                  <p key={p} style={PROSE}>
+                    {p}
+                  </p>
+                ))}
+              </>
+            )}
+            {intro && (
+              <p style={PROSE}>
+                {intro} <Link href="/delivery">{dict.category.deliveryLink}</Link>
+              </p>
+            )}
+            {article && (
+              <>
+                <JsonLd data={faqSchema(article.faq)} />
+                <div style={{ marginTop: 44 }}>
+                  <SectionHeading size={30} marginBottom={6}>
+                    {dict.category.faqTitle}
+                  </SectionHeading>
+                  <Accordion items={article.faq} />
+                </div>
+              </>
+            )}
+          </div>
         )}
       </Section>
     </section>

@@ -24,11 +24,12 @@ export function Accordion({ items }: { items: Faq[] }) {
                 {isOpen ? '−' : '+'}
               </span>
             </button>
-            {isOpen && (
-              <p id={`faq-a-${i}`} className="faq-a">
-                {item.a}
-              </p>
-            )}
+            {/* Closed answers stay in the markup, hidden: rendering them only
+                when open left them out of the server HTML, so search engines
+                saw the questions and none of the answers. */}
+            <p id={`faq-a-${i}`} className="faq-a" hidden={!isOpen}>
+              {item.a}
+            </p>
           </div>
         );
       })}

@@ -1,4 +1,4 @@
-import type { Product } from '@/types';
+import type { Faq, Product } from '@/types';
 import { SHOP_DETAILS, shopLocation } from './content';
 import { SITE_URL, localeUrl, type Locale } from './i18n';
 import { SHARE_CARD } from './seo';
@@ -105,6 +105,21 @@ export function breadcrumbSchema(trail: Crumb[], locale: Locale) {
       /* The last crumb is the current page and carries no href — schema.org
          allows the final item to omit `item`. */
       ...(crumb.href ? { item: localeUrl(locale, crumb.href) } : null),
+    })),
+  };
+}
+
+/** Questions shown on the page, as asked and answered there. Google keeps the
+    FAQ rich result for government and health sites, so this earns no snippet;
+    it is here because it states plainly which text answers which question. */
+export function faqSchema(items: Faq[]) {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: items.map(({ q, a }) => ({
+      '@type': 'Question',
+      name: q,
+      acceptedAnswer: { '@type': 'Answer', text: a },
     })),
   };
 }
