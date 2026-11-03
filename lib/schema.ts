@@ -53,7 +53,7 @@ export function floristSchema(locale: Locale) {
       '@type': 'OpeningHoursSpecification',
       dayOfWeek: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
       opens: '08:00',
-      closes: '21:00',
+      closes: '20:00',
     },
     sameAs: ['https://www.instagram.com/migflowers__/'],
     ...(PRICE_RANGE ? { priceRange: PRICE_RANGE } : null),
