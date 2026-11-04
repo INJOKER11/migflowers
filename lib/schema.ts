@@ -1,4 +1,5 @@
 import type { Faq, Product } from '@/types';
+import { unitPriceOf } from './catalog';
 import { SHOP_DETAILS, shopLocation } from './content';
 import { SITE_URL, localeUrl, type Locale } from './i18n';
 import { SHARE_CARD } from './seo';
@@ -64,6 +65,16 @@ export function productSchema(product: Product, locale: Locale) {
   /* `is_available` alone: the backend dropped its `stock` column, so `stock`
      arrives as null, and reading it marked every bouquet OutOfStock. */
   const inStock = product.is_available;
+  /* The price the page shows on load — with the size and colour preselected
+     as default, the discount only when it is a real one. Google compares this
+     with the visible price and with the Merchant Center feed, which the
+     backend builds by the same rule; the bare `price` disagreed with both
+     wherever a default size carries a surcharge. */
+  const price = unitPriceOf(
+    product,
+    product.sizes.find((s) => s.is_default) ?? null,
+    product.colors.find((c) => c.is_default) ?? null,
+  );
 
   return {
     '@context': 'https://schema.org',
@@ -86,7 +97,7 @@ export function productSchema(product: Product, locale: Locale) {
     offers: {
       '@type': 'Offer',
       url: localeUrl(locale, `/product/${product.slug}`),
-      price: product.discount_price ?? product.price,
+      price,
       priceCurrency: 'UAH',
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
       seller: { '@id': `${SITE_URL}/#florist` },
