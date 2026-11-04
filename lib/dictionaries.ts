@@ -141,6 +141,8 @@ export interface Dictionary {
     /** The paragraph under the grid; same placeholders as `metaDescription`. */
     intro: string;
     deliveryLink: string;
+    /** Heading over the category's questions (`lib/category-copy`). */
+    faqTitle: string;
   };
   cart: {
     drawerTitle: string;
@@ -495,6 +497,7 @@ const uk: Dictionary = {
       'Зараз у розділі «{name}» — {count} {range}. Доставляємо по Одесі в день замовлення, якщо квіти ' +
       'є в наявності; вартість залежить від району, а від {free} — безкоштовно.',
     deliveryLink: 'Умови та ціни доставки',
+    faqTitle: 'Часті питання',
   },
   cart: {
     drawerTitle: 'Ваш кошик',
@@ -866,6 +869,7 @@ const ru: Dictionary = {
       'Сейчас в разделе «{name}» — {count} {range}. Доставляем по Одессе в день заказа, если цветы ' +
       'есть в наличии; стоимость зависит от района, а от {free} — бесплатно.',
     deliveryLink: 'Условия и цены доставки',
+    faqTitle: 'Частые вопросы',
   },
   cart: {
     drawerTitle: 'Ваша корзина',
