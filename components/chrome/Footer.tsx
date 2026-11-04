@@ -37,6 +37,7 @@ export async function Footer({ dict: t, locale }: { dict: Dictionary['footer']; 
     { href: '/reviews', label: t.reviews },
     // { href: '/account', label: … },
     { href: '/contact', label: t.contact },
+    { href: '/tairove', label: t.tairove },
   ];
 
   return (
