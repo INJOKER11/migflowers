@@ -1,5 +1,6 @@
 import type { Faq, Product } from '@/types';
 import { unitPriceOf } from './catalog';
+import { FREE_DELIVERY_THRESHOLD } from './constants';
 import { SHOP_DETAILS, shopLocation } from './content';
 import { SITE_URL, localeUrl, type Locale } from './i18n';
 import { SHARE_CARD } from './seo';
@@ -61,7 +62,13 @@ export function floristSchema(locale: Locale) {
   };
 }
 
-export function productSchema(product: Product, locale: Locale) {
+/**
+ * `deliveryFee` is the dearest priced district — the most a customer can pay
+ * to have this bouquet brought, and what Merchant Center's shipping settings
+ * quote — or `null` when the districts could not be loaded, in which case the
+ * offer says nothing about shipping rather than guess.
+ */
+export function productSchema(product: Product, locale: Locale, deliveryFee: number | null) {
   /* `is_available` alone: the backend dropped its `stock` column, so `stock`
      arrives as null, and reading it marked every bouquet OutOfStock. */
   const inStock = product.is_available;
@@ -84,23 +91,55 @@ export function productSchema(product: Product, locale: Locale) {
     sku: product.id,
     brand: { '@type': 'Brand', name: 'MIG Flowers' },
     ...(product.image_url ? { image: product.image_url } : null),
-    /* schema.org takes one category or a list; a product with none says
-       nothing rather than an empty string. */
-    ...(product.categories.length
-      ? {
-          category:
-            product.categories.length === 1
-              ? product.categories[0].name
-              : product.categories.map((c) => c.name),
-        }
-      : null),
+    /* No `category`: Google reads it as a product-taxonomy value and
+       reported the shop's own names («Букети», «Троянди») as invalid. The
+       taxonomy id goes in the Merchant Center feed instead. */
     offers: {
       '@type': 'Offer',
       url: localeUrl(locale, `/product/${product.slug}`),
       price,
       priceCurrency: 'UAH',
       availability: inStock ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      itemCondition: 'https://schema.org/NewCondition',
       seller: { '@id': `${SITE_URL}/#florist` },
+      ...(deliveryFee !== null
+        ? {
+            shippingDetails: {
+              '@type': 'OfferShippingDetails',
+              shippingRate: {
+                '@type': 'MonetaryAmount',
+                value: price >= FREE_DELIVERY_THRESHOLD ? 0 : deliveryFee,
+                currency: 'UAH',
+              },
+              shippingDestination: { '@type': 'DefinedRegion', addressCountry: 'UA' },
+              /* Same day when the flowers are in, otherwise the next. */
+              deliveryTime: {
+                '@type': 'ShippingDeliveryTime',
+                handlingTime: {
+                  '@type': 'QuantitativeValue',
+                  minValue: 0,
+                  maxValue: 0,
+                  unitCode: 'DAY',
+                },
+                transitTime: {
+                  '@type': 'QuantitativeValue',
+                  minValue: 0,
+                  maxValue: 1,
+                  unitCode: 'DAY',
+                },
+              },
+            },
+          }
+        : null),
+      /* /legal/returns: flowers of proper quality are not taken back — they
+         are perishable. A bouquet that arrives wilted or damaged is replaced
+         or refunded, which is a quality claim, not a return. */
+      hasMerchantReturnPolicy: {
+        '@type': 'MerchantReturnPolicy',
+        applicableCountry: 'UA',
+        returnPolicyCategory: 'https://schema.org/MerchantReturnNotPermitted',
+        merchantReturnLink: localeUrl(locale, '/legal/returns'),
+      },
     },
   };
 }

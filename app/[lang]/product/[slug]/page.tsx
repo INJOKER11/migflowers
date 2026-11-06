@@ -5,7 +5,13 @@ import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { SectionHeading } from '@/components/ui/SectionHeading';
 import { ProductDetail } from '@/components/product/ProductDetail';
 import { ProductGrid } from '@/components/product/ProductGrid';
-import { getProduct, getRelatedProducts, localizedSlugs, translateSlug } from '@/lib/api';
+import {
+  getDistricts,
+  getProduct,
+  getRelatedProducts,
+  localizedSlugs,
+  translateSlug,
+} from '@/lib/api';
 import { JsonLd } from '@/components/seo/JsonLd';
 import { getDictionary } from '@/lib/dictionaries';
 import { productSchema } from '@/lib/schema';
@@ -55,13 +61,22 @@ export default async function ProductPage({ params }: Params) {
     permanentRedirect(localePath(locale, `/product/${product.slug}`));
   }
 
-  const related = await getRelatedProducts(product, locale);
+  const [related, districts] = await Promise.all([
+    getRelatedProducts(product, locale),
+    /* Only feeds the shipping line of the structured data — a backend
+       hiccup should cost that line, not the page. */
+    getDistricts(locale).catch(() => []),
+  ]);
+  const fees = districts.flatMap((d) =>
+    d.price_for_delivery ? [Number(d.price_for_delivery)] : [],
+  );
+  const deliveryFee = fees.length ? Math.max(...fees) : null;
   const dict = getDictionary(locale);
   const nav = dict.nav;
 
   return (
     <Section pt={36} pb={80}>
-      <JsonLd data={productSchema(product, locale)} />
+      <JsonLd data={productSchema(product, locale, deliveryFee)} />
 
       <Breadcrumb
         locale={locale}
