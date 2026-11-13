@@ -29,7 +29,10 @@ interface PageSeo {
   /** The bare app path, without a locale prefix: `/shop`, `/product/x`, `/`. */
   path: string;
   title: string;
-  description?: string;
+  /** Omitted, the page inherits the layout's site-wide description. `null`
+      leaves the tag out entirely — for a page with nothing of its own to say,
+      where the shop's generic line would misdescribe it. */
+  description?: string | null;
   /** Pages that are useful to a customer but pointless in a search result —
       checkout, saved items. Crawlable, never indexed. */
   noindex?: boolean;
@@ -121,7 +124,7 @@ export function pageMetadata({
 
   return {
     title,
-    ...(description ? { description } : null),
+    ...(description || description === null ? { description } : null),
     alternates: {
       canonical: localeUrl(locale, path),
       languages,
@@ -168,6 +171,15 @@ export async function metadataFor(
 export async function localeOf(params: Promise<{ lang: string }>): Promise<Locale> {
   const { lang } = await params;
   return isLocale(lang) ? lang : DEFAULT_LOCALE;
+}
+
+const BRAND = 'MIG Flowers';
+
+/** «<title> | MIG Flowers», unless the title already names the shop — the
+    brand appears once. */
+export function withBrand(title: string): string {
+  const clean = title.trim();
+  return clean.toLowerCase().includes(BRAND.toLowerCase()) ? clean : `${clean} | ${BRAND}`;
 }
 
 /* Google cuts a result's snippet at about this many characters. */
