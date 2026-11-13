@@ -132,6 +132,33 @@ export function stars(rating: number): string {
   return '★'.repeat(rating);
 }
 
+/**
+ * The words a reader sees in a post body, without the markup around them.
+ * The admin's content field is plain text, but nothing stops an editor from
+ * typing Markdown or pasting HTML, and a meta description reading
+ * «## Догляд **стебла** <b>воду</b>» is worse than none. Links keep their
+ * text, images and tags go, and whitespace collapses to single spaces. A
+ * heading gets a full stop, so it does not run into the sentence after it.
+ */
+export function plainText(text: string): string {
+  return text
+    .replace(/<[^>]*>/g, ' ')
+    .replace(/&nbsp;/g, ' ')
+    .replace(/&quot;/g, '"')
+    .replace(/&#0?39;|&apos;/g, "'")
+    .replace(/&lt;/g, '<')
+    .replace(/&gt;/g, '>')
+    .replace(/&amp;/g, '&')
+    .replace(/!\[[^\]]*\]\([^)]*\)/g, ' ')
+    .replace(/\[([^\]]*)\]\([^)]*\)/g, '$1')
+    .replace(/^\s*#{1,6}\s+(.+?)\s*$/gm, (_, h: string) => (/[.!?:…]$/.test(h) ? h : `${h}.`))
+    .replace(/^\s*(?:>|[-*+]|\d+[.)])\s+/gm, '')
+    .replace(/[*`~]+/g, '')
+    .replace(/(^|[\s(])_+|_+(?=[\s).,!?:;]|$)/g, '$1')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
 /** First `maxLength` characters of a post body, cut at a word boundary — for blog cards and `<meta description>`. */
 export function excerpt(text: string, maxLength = 160): string {
   if (text.length <= maxLength) return text;

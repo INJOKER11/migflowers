@@ -5,9 +5,9 @@ import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
 import { getBlogPost, getBlogPosts, localizedSlugs, translateSlug } from '@/lib/api';
-import { excerpt, shortDate } from '@/lib/format';
+import { excerpt, plainText, shortDate } from '@/lib/format';
 import { getDictionary } from '@/lib/dictionaries';
-import { localeOf, pageMetadata, slugPaths } from '@/lib/seo';
+import { localeOf, pageMetadata, slugPaths, withBrand } from '@/lib/seo';
 import { DEFAULT_LOCALE, isLocale, localePath } from '@/lib/i18n';
 
 interface Params {
@@ -30,8 +30,11 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
     locale,
     path: `/blog/${post.slug}`,
     paths: slugPaths('/blog', await localizedSlugs('posts', post.id)),
-    title: `${post.title} — MIG Flowers`,
-    description: excerpt(post.content),
+    /* The editor's SEO fields win when set (`/admin`, per language);
+       otherwise the title and the opening of the text. No text at all
+       (`null`) leaves the tag out rather than inheriting the site's default. */
+    title: post.seo_title?.trim() || withBrand(post.title),
+    description: post.meta_description?.trim() || excerpt(plainText(post.content)) || null,
     image: post.image_url,
   });
 }

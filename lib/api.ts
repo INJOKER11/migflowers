@@ -90,6 +90,10 @@ interface ApiPost {
   image_url: string | null;
   subject: string;
   created_at: string;
+  /** Optional SEO overrides in the requested locale; `null` when unset.
+      Absent from responses of a backend that predates them. */
+  seo_title?: string | null;
+  meta_description?: string | null;
 }
 
 interface ApiList<T> {
@@ -161,7 +165,12 @@ function toReview(raw: ApiReview): Review {
 }
 
 function toPost(raw: ApiPost): Post {
-  return { ...raw, id: String(raw.id) };
+  return {
+    ...raw,
+    id: String(raw.id),
+    seo_title: raw.seo_title ?? null,
+    meta_description: raw.meta_description ?? null,
+  };
 }
 
 export interface ProductQuery {
@@ -606,6 +615,10 @@ export interface Post {
   image_url: string | null;
   subject: string;
   created_at: string;
+  /** Overrides the page's `<title>` when set; see the post page's metadata. */
+  seo_title: string | null;
+  /** Overrides the page's meta description when set. */
+  meta_description: string | null;
 }
 
 export async function getBlogPosts(locale: Locale): Promise<Post[]> {
