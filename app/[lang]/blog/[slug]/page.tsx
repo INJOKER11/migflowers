@@ -56,48 +56,61 @@ export default async function PostPage({ params }: Params) {
   const dict = getDictionary(locale);
   const nav = dict.nav;
 
+  /* The admin's content field is plain text with blank lines between
+     paragraphs; rendered as one <p> they collapsed into a single wall. */
+  const paragraphs = post.content
+    .split(/\n\s*\n/)
+    .map((p) => p.trim())
+    .filter(Boolean);
+
   return (
     <Section width={760} pt={44} pb={90}>
-      <Breadcrumb
-        locale={locale}
-        trail={[
-          { label: nav.home, href: '/' },
-          { label: nav.blog, href: '/blog' },
-          { label: post.title },
-        ]}
-      />
+      {/* The heading block is centred over the centred photo; left-aligned
+          above it, the page read as shifted to one side. */}
+      <header style={{ textAlign: 'center' }}>
+        <Breadcrumb
+          locale={locale}
+          trail={[
+            { label: nav.home, href: '/' },
+            { label: nav.blog, href: '/blog' },
+            { label: post.title },
+          ]}
+        />
 
-      <div
-        style={{
-          fontSize: 11.5,
-          letterSpacing: '.16em',
-          textTransform: 'uppercase',
-          color: 'var(--color-accent-700)',
-        }}
-      >
-        {post.subject}
-      </div>
+        <div
+          style={{
+            fontSize: 11.5,
+            letterSpacing: '.16em',
+            textTransform: 'uppercase',
+            color: 'var(--color-accent-700)',
+          }}
+        >
+          {post.subject}
+        </div>
 
-      <h1
-        style={{
-          fontSize: 'clamp(36px, 4.6vw, 56px)',
-          margin: '16px 0 12px',
-          lineHeight: 1.08,
-        }}
-      >
-        {post.title}
-      </h1>
+        <h1
+          style={{
+            fontSize: 'clamp(34px, 4.4vw, 52px)',
+            margin: '16px auto 14px',
+            lineHeight: 1.1,
+            maxWidth: '24ch',
+            textWrap: 'balance',
+          }}
+        >
+          {post.title}
+        </h1>
 
-      <div
-        style={{
-          fontSize: 12.5,
-          color: 'var(--color-neutral-600)',
-          paddingBottom: 26,
-          borderBottom: '1px solid var(--color-divider)',
-        }}
-      >
-        {shortDate(post.created_at, locale)}
-      </div>
+        <div
+          style={{
+            fontSize: 12.5,
+            color: 'var(--color-neutral-600)',
+            paddingBottom: 26,
+            borderBottom: '1px solid var(--color-divider)',
+          }}
+        >
+          {shortDate(post.created_at, locale)}
+        </div>
+      </header>
 
       <Plate
         src={post.image_url}
@@ -105,22 +118,34 @@ export default async function PostPage({ params }: Params) {
         ratio="3/2"
         sizes="(max-width: 760px) 100vw, 760px"
         priority
-        style={{ margin: '28px 0' }}
+        style={{ margin: '28px 0 32px' }}
       />
 
-      <p
+      {/* Left-aligned: justified Ukrainian at this measure opened wide gaps
+          between words. Single line breaks inside a paragraph are kept. */}
+      {paragraphs.map((p, i) => (
+        <p
+          key={i}
+          style={{
+            margin: '0 0 22px',
+            fontSize: 16.5,
+            lineHeight: 1.85,
+            color: 'var(--color-neutral-800)',
+            whiteSpace: 'pre-line',
+          }}
+        >
+          {p}
+        </p>
+      ))}
+
+      <div
         style={{
-          margin: '0 0 20px',
-          fontSize: 16,
-          lineHeight: 1.9,
-          color: 'var(--color-neutral-800)',
-          textAlign: 'justify',
+          marginTop: 40,
+          paddingTop: 26,
+          borderTop: '1px solid var(--color-divider)',
+          textAlign: 'center',
         }}
       >
-        {post.content}
-      </p>
-
-      <div style={{ marginTop: 40, paddingTop: 26, borderTop: '1px solid var(--color-divider)' }}>
         <Link
           href="/blog"
           style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase' }}
