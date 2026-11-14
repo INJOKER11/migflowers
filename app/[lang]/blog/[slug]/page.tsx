@@ -64,10 +64,12 @@ export default async function PostPage({ params }: Params) {
     .filter(Boolean);
 
   return (
-    <Section width={760} pt={44} pb={90}>
-      {/* The heading block is centred over the centred photo; left-aligned
-          above it, the page read as shifted to one side. */}
-      <header style={{ textAlign: 'center' }}>
+    <>
+      {/* One wide section, so the trail starts under the logo as on the
+          product and category pages; the article is a narrower column inside
+          it. Two stacked sections doubled the gap on phones, where
+          responsive.css forces every section's vertical padding. */}
+      <Section pt={44} pb={90}>
         <Breadcrumb
           locale={locale}
           trail={[
@@ -77,82 +79,89 @@ export default async function PostPage({ params }: Params) {
           ]}
         />
 
-        <div
-          style={{
-            fontSize: 11.5,
-            letterSpacing: '.16em',
-            textTransform: 'uppercase',
-            color: 'var(--color-accent-700)',
-          }}
-        >
-          {post.subject}
-        </div>
+        {/* 696px: the text width of the former 760px section. */}
+        <div style={{ maxWidth: 696, margin: '8px auto 0' }}>
+          {/* The heading block is centred over the centred photo; left-aligned
+              above it, the page read as shifted to one side. */}
+          <header style={{ textAlign: 'center' }}>
+            <div
+              style={{
+                fontSize: 11.5,
+                letterSpacing: '.16em',
+                textTransform: 'uppercase',
+                color: 'var(--color-accent-700)',
+              }}
+            >
+              {post.subject}
+            </div>
 
-        <h1
-          style={{
-            fontSize: 'clamp(34px, 4.4vw, 52px)',
-            margin: '16px auto 14px',
-            lineHeight: 1.1,
-            maxWidth: '24ch',
-            textWrap: 'balance',
-          }}
-        >
-          {post.title}
-        </h1>
+            <h1
+              style={{
+                fontSize: 'clamp(34px, 4.4vw, 52px)',
+                margin: '16px auto 14px',
+                lineHeight: 1.1,
+                maxWidth: '24ch',
+                textWrap: 'balance',
+              }}
+            >
+              {post.title}
+            </h1>
 
-        <div
-          style={{
-            fontSize: 12.5,
-            color: 'var(--color-neutral-600)',
-            paddingBottom: 26,
-            borderBottom: '1px solid var(--color-divider)',
-          }}
-        >
-          {shortDate(post.created_at, locale)}
-        </div>
-      </header>
+            <div
+              style={{
+                fontSize: 12.5,
+                color: 'var(--color-neutral-600)',
+                paddingBottom: 26,
+                borderBottom: '1px solid var(--color-divider)',
+              }}
+            >
+              {shortDate(post.created_at, locale)}
+            </div>
+          </header>
 
-      <Plate
-        src={post.image_url}
-        alt={post.title}
-        ratio="3/2"
-        sizes="(max-width: 760px) 100vw, 760px"
-        priority
-        style={{ margin: '28px 0 32px' }}
-      />
+          <Plate
+            src={post.image_url}
+            alt={post.title}
+            ratio="3/2"
+            sizes="(max-width: 760px) 100vw, 760px"
+            priority
+            style={{ margin: '28px 0 32px' }}
+          />
 
-      {/* Left-aligned: justified Ukrainian at this measure opened wide gaps
+          {/* Left-aligned: justified Ukrainian at this measure opened wide gaps
           between words. Single line breaks inside a paragraph are kept. */}
-      {paragraphs.map((p, i) => (
-        <p
-          key={i}
-          style={{
-            margin: '0 0 22px',
-            fontSize: 16.5,
-            lineHeight: 1.85,
-            color: 'var(--color-neutral-800)',
-            whiteSpace: 'pre-line',
-          }}
-        >
-          {p}
-        </p>
-      ))}
+          {paragraphs.map((p, i) => (
+            <p
+              key={i}
+              style={{
+                margin: '0 0 22px',
+                fontSize: 16.5,
+                lineHeight: 1.85,
+                color: 'var(--color-neutral-800)',
+                whiteSpace: 'pre-line',
+              }}
+            >
+              {p}
+            </p>
+          ))}
 
-      <div
-        style={{
-          marginTop: 40,
-          paddingTop: 26,
-          borderTop: '1px solid var(--color-divider)',
-          textAlign: 'center',
-        }}
-      >
-        <Link
-          href="/blog"
-          style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase' }}
-        >
-          {dict.blog.back}
-        </Link>
-      </div>
-    </Section>
+          <div
+            style={{
+              marginTop: 40,
+              paddingTop: 26,
+              borderTop: '1px solid var(--color-divider)',
+              textAlign: 'center',
+            }}
+          >
+            <Link
+              href="/blog"
+              style={{ fontSize: 12, letterSpacing: '.14em', textTransform: 'uppercase' }}
+            >
+              {dict.blog.back}
+            </Link>
+          </div>
+        </div>
+      </Section>
+    </>
   );
 }
