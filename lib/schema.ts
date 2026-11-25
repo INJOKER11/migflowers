@@ -1,8 +1,9 @@
 import type { Faq, Product } from '@/types';
+import type { Post } from './api';
 import { unitPriceOf } from './catalog';
 import { FREE_DELIVERY_THRESHOLD } from './constants';
 import { SHOP_DETAILS, shopLocation } from './content';
-import { SITE_URL, localeUrl, type Locale } from './i18n';
+import { HTML_LANG, SITE_URL, localeUrl, type Locale } from './i18n';
 import { SHARE_CARD } from './seo';
 import type { Crumb } from '@/components/ui/Breadcrumb';
 
@@ -171,5 +172,27 @@ export function faqSchema(items: Faq[]) {
       name: q,
       acceptedAnswer: { '@type': 'Answer', text: a },
     })),
+  };
+}
+
+/** A journal article, written by the shop. Author and publisher point at the
+    `Florist` node the layout emits, so the article is tied to the business,
+    not to an anonymous page. The API has no separate update date, so only
+    the publication date is given. */
+export function articleSchema(post: Post, locale: Locale, description: string | null) {
+  const url = localeUrl(locale, `/blog/${post.slug}`);
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: post.title,
+    ...(description ? { description } : null),
+    ...(post.image_url ? { image: post.image_url } : null),
+    datePublished: post.created_at,
+    inLanguage: HTML_LANG[locale],
+    url,
+    mainEntityOfPage: url,
+    ...(post.subject ? { articleSection: post.subject } : null),
+    author: { '@id': `${SITE_URL}/#florist` },
+    publisher: { '@id': `${SITE_URL}/#florist` },
   };
 }
