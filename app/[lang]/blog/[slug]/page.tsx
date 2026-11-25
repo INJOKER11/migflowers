@@ -4,9 +4,11 @@ import { notFound, permanentRedirect } from 'next/navigation';
 import { Section } from '@/components/ui/Section';
 import { Breadcrumb } from '@/components/ui/Breadcrumb';
 import { Plate } from '@/components/ui/Plate';
-import { getBlogPost, getBlogPosts, localizedSlugs, translateSlug } from '@/lib/api';
+import { getBlogPost, getBlogPosts, localizedSlugs, translateSlug, type Post } from '@/lib/api';
 import { excerpt, plainText, shortDate } from '@/lib/format';
 import { getDictionary } from '@/lib/dictionaries';
+import { articleSchema } from '@/lib/schema';
+import { JsonLd } from '@/components/seo/JsonLd';
 import { localeOf, pageMetadata, slugPaths, withBrand } from '@/lib/seo';
 import { DEFAULT_LOCALE, isLocale, localePath } from '@/lib/i18n';
 
@@ -18,6 +20,12 @@ interface Params {
 export async function generateStaticParams({ params }: { params: { lang: string } }) {
   const posts = await getBlogPosts(isLocale(params.lang) ? params.lang : DEFAULT_LOCALE);
   return posts.map((post) => ({ slug: post.slug }));
+}
+
+/* The editor's meta description, else the opening of the text; null when
+   there is no text at all. Shared by the meta tag and the article markup. */
+function describe(post: Post): string | null {
+  return post.meta_description?.trim() || excerpt(plainText(post.content)) || null;
 }
 
 export async function generateMetadata({ params }: Params): Promise<Metadata> {
@@ -34,7 +42,7 @@ export async function generateMetadata({ params }: Params): Promise<Metadata> {
        otherwise the title and the opening of the text. No text at all
        (`null`) leaves the tag out rather than inheriting the site's default. */
     title: post.seo_title?.trim() || withBrand(post.title),
-    description: post.meta_description?.trim() || excerpt(plainText(post.content)) || null,
+    description: describe(post),
     image: post.image_url,
   });
 }
@@ -70,6 +78,7 @@ export default async function PostPage({ params }: Params) {
           it. Two stacked sections doubled the gap on phones, where
           responsive.css forces every section's vertical padding. */}
       <Section pt={44} pb={90}>
+        <JsonLd data={articleSchema(post, locale, describe(post))} />
         <Breadcrumb
           locale={locale}
           trail={[
